@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand palette — derived from the Marrakech Maadine logo */
+  --color-gold: #c9a227;
+  --color-gold-deep: #9c7a1a;
+  --color-ink: #1f1b16;
+  --color-sand: #f7f3ea;
+  --color-sand-dark: #efe8d8;
+  --color-stone: #8b8378;
+  --color-henna: #8c2f1b;
+}
+
+@theme inline {
+  --color-gold: var(--color-gold);
+  --color-gold-deep: var(--color-gold-deep);
+  --color-ink: var(--color-ink);
+  --color-sand: var(--color-sand);
+  --color-sand-dark: var(--color-sand-dark);
+  --color-stone: var(--color-stone);
+  --color-henna: var(--color-henna);
+
+  --font-display: var(--font-display-latin), serif;
+  --font-body: var(--font-body-latin), sans-serif;
+  --font-arabic: var(--font-arabic), sans-serif;
+}
+
+body {
+  background: var(--color-sand);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+[dir="rtl"] body {
+  font-family: var(--font-arabic);
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4, [dir="rtl"] .font-display {
+  font-family: var(--font-arabic);
+  font-weight: 700;
+}
+
+/* Signature geometric divider — abstracted zellige line motif */
+.zellige-divider {
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--color-gold) 0px,
+    var(--color-gold) 6px,
+    transparent 6px,
+    transparent 14px
+  );
+  opacity: 0.5;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold-deep);
+  outline-offset: 2px;
+}
