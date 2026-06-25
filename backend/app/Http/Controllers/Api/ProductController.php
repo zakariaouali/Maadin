@@ -12,8 +12,9 @@ class ProductController extends Controller
     {
         $query = Product::query()
             ->active()
-            ->with(['category', 'primaryImage', 'seller:id,store_name,store_slug,level'])
-            ->whereHas('seller', fn($q) => $q->where('status', 'verified'));
+            ->with(['category:id,name', 'primaryImage:id,product_id,image_path', 'seller:id,user_id,store_name,store_slug,logo_path,level'])
+            ->whereHas('seller', fn($q) => $q->where('status', 'verified'))
+            ->select(['id','seller_id','category_id','name','slug','price','rating','stock_quantity','total_sales','created_at']);
 
         if ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);

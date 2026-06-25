@@ -13,7 +13,7 @@ class Product extends Model
     protected $fillable = [
         'seller_id', 'category_id', 'name', 'slug', 'description',
         'short_description', 'price', 'cost', 'stock_quantity', 'sku',
-        'rating', 'total_reviews', 'total_sales', 'is_active',
+        'rating', 'total_reviews', 'total_sales', 'is_active', 'is_approved',
     ];
 
     protected $casts = [
@@ -21,6 +21,7 @@ class Product extends Model
         'cost' => 'decimal:2',
         'rating' => 'decimal:2',
         'is_active' => 'boolean',
+        'is_approved' => 'boolean',
     ];
 
     public function seller()
@@ -60,7 +61,7 @@ class Product extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where('is_active', true)->where('is_approved', true);
     }
 
     public function scopeInStock($query)

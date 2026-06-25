@@ -11,6 +11,10 @@
   --color-henna: #8c2f1b;
 }
 
+@theme {
+  --spacing-18: 4.5rem;
+}
+
 @theme inline {
   --color-gold: var(--color-gold);
   --color-gold-deep: var(--color-gold-deep);
@@ -62,3 +66,14 @@ h1, h2, h3, h4, .font-display {
   outline: 2px solid var(--color-gold-deep);
   outline-offset: 2px;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+/* Subtle scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-stone); border-radius: 3px; opacity: 0.4; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-gold-deep); }

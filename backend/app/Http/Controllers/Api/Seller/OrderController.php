@@ -84,7 +84,7 @@ class OrderController extends Controller
             }
         });
 
-        return response()->json($order->fresh());
+        return response()->json($order->fresh()->load(['items', 'customer:id,name,phone']));
     }
 
     private function reverseStockAndSales(Order $order): void

@@ -41,15 +41,15 @@ class ProductController extends Controller
         $validated = $request->validate([
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
-            'description' => 'required|string|min:50',
-            'short_description' => 'nullable|string|max:500',
+            'description' => 'required|string',
             'price' => 'required|numeric|min:0.01|max:99999.99',
             'stock_quantity' => 'required|integer|min:0',
             'sku' => 'nullable|string|max:100|unique:products,sku',
         ]);
 
-        $validated['seller_id'] = $seller->id;
-        $validated['slug'] = $this->generateUniqueSlug($validated['name']);
+        $validated['seller_id']  = $seller->id;
+        $validated['slug']       = $this->generateUniqueSlug($validated['name']);
+        $validated['is_approved'] = false; // requires admin review before going live
 
         $product = Product::create($validated);
 
@@ -70,8 +70,7 @@ class ProductController extends Controller
         $validated = $request->validate([
             'category_id' => 'sometimes|required|exists:categories,id',
             'name' => 'sometimes|required|string|max:255',
-            'description' => 'sometimes|required|string|min:50',
-            'short_description' => 'nullable|string|max:500',
+            'description' => 'sometimes|required|string',
             'price' => 'sometimes|required|numeric|min:0.01|max:99999.99',
             'stock_quantity' => 'sometimes|required|integer|min:0',
             'sku' => 'nullable|string|max:100|unique:products,sku,' . $product->id,

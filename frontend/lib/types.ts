@@ -4,6 +4,7 @@ export interface User {
   email: string;
   phone: string | null;
   role: 'customer' | 'seller' | 'admin';
+  plan: 'starter' | 'managed' | 'premium';
   status: 'active' | 'suspended' | 'banned';
   avatar_path: string | null;
   email_verified_at: string | null;

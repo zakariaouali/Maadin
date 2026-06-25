@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\SearchController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\StoreController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ReviewController;
@@ -14,6 +16,7 @@ use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Admin\ConversationController as AdminConversationController;
 use App\Http\Controllers\Api\Admin\PenaltyController as AdminPenaltyController;
 use App\Http\Controllers\Api\Admin\AnalyticsController as AdminAnalyticsController;
+use App\Http\Controllers\Api\Admin\ManagedSellerController as AdminManagedSellerController;
 use App\Http\Controllers\Api\Seller\StoreController as SellerStoreController;
 use App\Http\Controllers\Api\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Api\Seller\ProductImageController;
@@ -23,6 +26,10 @@ use App\Http\Controllers\Api\Customer\OrderController as CustomerOrderController
 use App\Http\Controllers\Api\Customer\ReviewController as CustomerReviewController;
 use App\Http\Controllers\Api\Customer\WishlistController;
 use Illuminate\Support\Facades\Route;
+
+// ===== Search (public) =====
+Route::get('/search', [SearchController::class, 'index']);
+Route::get('/search/suggest', [SearchController::class, 'suggest']);
 
 // ===== Auth =====
 Route::post('/register', [AuthController::class, 'register']);
@@ -38,7 +45,30 @@ Route::get('/products/{product}/reviews', [ReviewController::class, 'index']);
 // ===== Authenticated =====
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/me/profile', [AuthController::class, 'updateProfile']);
+    Route::post('/me/password', [AuthController::class, 'changePassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Notifications (unread counts for navbar badges)
+    Route::get('/notifications', function (\Illuminate\Http\Request $request) {
+        $user = $request->user();
+        $unreadMessages = \App\Models\Message::where('receiver_id', $user->id)
+            ->where('is_read', false)->count();
+
+        $data = ['unread_messages' => $unreadMessages];
+
+        if ($user->role === 'admin') {
+            $data['pending_sellers'] = \App\Models\Seller::where('status', 'pending')->count();
+            $data['pending_products'] = \App\Models\Product::where('is_approved', false)->count();
+        }
+
+        return response()->json($data);
+    });
+
+    // --- Notifications ---
+    Route::get('/notifications/list', [NotificationController::class, 'index']);
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead']);
 
     // --- Messages ---
     Route::prefix('messages')->group(function () {
@@ -59,10 +89,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/sellers/{id}', [AdminSellerController::class, 'show']);
         Route::put('/sellers/{id}/verify', [AdminSellerController::class, 'verify']);
         Route::put('/sellers/{id}/suspend', [AdminSellerController::class, 'suspend']);
+        Route::put('/sellers/{id}/reactivate', [AdminSellerController::class, 'reactivate']);
 
         Route::get('/products', [AdminProductController::class, 'index']);
         Route::get('/products/{id}', [AdminProductController::class, 'show']);
         Route::delete('/products/{id}', [AdminProductController::class, 'destroy']);
+        Route::put('/products/{id}/approve', [AdminProductController::class, 'approve']);
+        Route::put('/products/{id}/reject', [AdminProductController::class, 'reject']);
         Route::put('/products/{id}/toggle-active', [AdminProductController::class, 'toggleActive']);
 
         Route::get('/orders', [AdminOrderController::class, 'index']);
@@ -76,6 +109,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/penalties', [AdminPenaltyController::class, 'store']);
 
         Route::get('/analytics/dashboard', [AdminAnalyticsController::class, 'dashboard']);
+
+        // Managed & Premium seller management
+        Route::get('/managed-sellers', [AdminManagedSellerController::class, 'index']);
+        Route::get('/managed-sellers/{userId}', [AdminManagedSellerController::class, 'show']);
+        Route::post('/managed-sellers/{userId}/store', [AdminManagedSellerController::class, 'createStore']);
+        Route::post('/managed-sellers/{userId}/store/update', [AdminManagedSellerController::class, 'updateStore']);
+        Route::post('/managed-sellers/{userId}/products', [AdminManagedSellerController::class, 'createProduct']);
+        Route::put('/managed-sellers/{userId}/subscription', [AdminManagedSellerController::class, 'updateSubscription']);
     });
 
     // --- Seller ---

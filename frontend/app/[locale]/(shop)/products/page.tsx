@@ -1,116 +1,147 @@
-"use client";
+import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
+import { ProductCard, EmptyState } from "@/components/ui";
+import { ProductFilters } from "@/components/shop/ProductFilters";
+import type { Metadata } from "next";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import axios from "axios";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+interface Product {
+  id: number;
+  name: string;
+  slug: string;
+  price: string;
+  rating: string;
+  stock_quantity: number;
+  primary_image?: { image_path: string };
+  seller?: { id: number; store_name: string; store_slug: string; logo_path: string | null };
+  category?: { name: string };
+}
 
 interface Category {
   id: number;
   name: string;
 }
 
-interface ProductListItem {
-  id: number;
-  name: string;
-  slug: string;
-  price: string;
-  rating: string;
-  primary_image?: { image_path: string };
-  category?: { name: string };
-  seller?: { store_name: string };
+async function fetchProducts(p: {
+  category_id?: string;
+  search?: string;
+  sort?: string;
+}): Promise<Product[]> {
+  try {
+    const q = new URLSearchParams();
+    if (p.category_id) q.set("category_id", p.category_id);
+    if (p.search) q.set("search", p.search);
+    if (p.sort) q.set("sort", p.sort);
+    q.set("per_page", "24");
+    const res = await fetch(`${API_URL}/products?${q}`, { next: { revalidate: 30 } });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.data ?? [];
+  } catch {
+    return [];
+  }
 }
 
-const API_URL = "http://localhost:8000/api";
-const STORAGE_URL = "http://localhost:8000/storage";
+async function fetchCategories(): Promise<Category[]> {
+  try {
+    const res = await fetch(`${API_URL}/categories`, { next: { revalidate: 300 } });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+}
 
-export default function ProductsPage() {
-  const [products, setProducts] = useState<ProductListItem[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [categoryId, setCategoryId] = useState("");
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("newest");
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ search?: string; category_id?: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const { search } = await searchParams;
+  const t = await getTranslations({ locale, namespace: "products" });
 
-  const loadCategories = async () => {
-    const { data } = await axios.get(`${API_URL}/categories`);
-    setCategories(data);
+  const title = search ? `"${search}" – ${t("metaTitle")}` : t("metaTitle");
+
+  return {
+    title,
+    description: t("metaDescription"),
+    alternates: {
+      canonical: `${SITE_URL}/${locale}/products`,
+      languages: {
+        en: `${SITE_URL}/en/products`,
+        fr: `${SITE_URL}/fr/products`,
+        ar: `${SITE_URL}/ar/products`,
+      },
+    },
+    openGraph: {
+      title,
+      description: t("metaDescription"),
+      url: `${SITE_URL}/${locale}/products`,
+      siteName: "Marrakech Maadine",
+      type: "website",
+    },
+    robots: { index: !search, follow: true },
   };
+}
 
-  const loadProducts = async () => {
-    setLoading(true);
-    const params: Record<string, string> = { sort };
-    if (categoryId) params.category_id = categoryId;
-    if (search) params.search = search;
+export default async function ProductsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ category_id?: string; search?: string; sort?: string }>;
+}) {
+  const { locale } = await params;
+  const { category_id, search, sort } = await searchParams;
+  const t = await getTranslations({ locale, namespace: "products" });
 
-    const { data } = await axios.get(`${API_URL}/products`, { params });
-    setProducts(data.data);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  useEffect(() => {
-    loadProducts();
-  }, [categoryId, sort]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    loadProducts();
-  };
+  const [products, categories] = await Promise.all([
+    fetchProducts({ category_id, search, sort }),
+    fetchCategories(),
+  ]);
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>Products</h1>
+    <div className="mx-auto max-w-6xl px-6 py-10">
+      <h1 className="font-display text-3xl text-ink mb-8">{t("title")}</h1>
 
-      <form onSubmit={handleSearch} style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <input
-          placeholder="Search products..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+      {/* Filters are client-side but wrapped in Suspense for useSearchParams */}
+      <Suspense>
+        <ProductFilters categories={categories} />
+      </Suspense>
+
+      {products.length === 0 ? (
+        <EmptyState
+          title={t("noProducts")}
+          icon={
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+          }
         />
-        <button type="submit">Search</button>
-
-        <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-          <option value="">All Categories</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-
-        <select value={sort} onChange={(e) => setSort(e.target.value)}>
-          <option value="newest">Newest</option>
-          <option value="price_low">Price: Low to High</option>
-          <option value="price_high">Price: High to Low</option>
-          <option value="rating">Top Rated</option>
-          <option value="popular">Most Popular</option>
-        </select>
-      </form>
-
-      {loading ? (
-        <p>Loading...</p>
-      ) : products.length === 0 ? (
-        <p>No products found.</p>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 16 }}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {products.map((p) => (
-            <Link
+            <ProductCard
               key={p.id}
-              href={`/products/${p.slug}`}
-              style={{ border: "1px solid #ddd", padding: 12, textDecoration: "none", color: "inherit" }}
-            >
-              {p.primary_image && (
-                <img
-                  src={`${STORAGE_URL}/${p.primary_image.image_path}`}
-                  alt={p.name}
-                  style={{ width: "100%", height: 150, objectFit: "cover" }}
-                />
-              )}
-              <h3 style={{ fontSize: 14 }}>{p.name}</h3>
-              <p style={{ fontSize: 12, color: "#666" }}>{p.seller?.store_name}</p>
-              <p style={{ fontWeight: "bold" }}>{p.price} MAD</p>
-            </Link>
+              id={p.id}
+              slug={p.slug}
+              name={p.name}
+              price={p.price}
+              rating={p.rating}
+              storeName={p.seller?.store_name}
+              storeSlug={p.seller?.store_slug}
+              storeLogoPath={p.seller?.logo_path ?? undefined}
+              categoryName={p.category?.name}
+              imagePath={p.primary_image?.image_path}
+              sellerId={p.seller?.id ?? 0}
+              stockQuantity={p.stock_quantity ?? 0}
+            />
           ))}
         </div>
       )}

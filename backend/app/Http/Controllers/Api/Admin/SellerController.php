@@ -11,7 +11,7 @@ class SellerController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Seller::with('user:id,name,email');
+        $query = Seller::with('user:id,name,email,phone,plan,created_at');
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -45,6 +45,16 @@ class SellerController extends Controller
         $seller->update(['status' => 'suspended']);
 
         $this->logAction($request, 'suspend_seller', 'seller', $seller->id, ['status' => 'suspended']);
+
+        return response()->json($seller);
+    }
+
+    public function reactivate(Request $request, string $id)
+    {
+        $seller = Seller::findOrFail($id);
+        $seller->update(['status' => 'verified']);
+
+        $this->logAction($request, 'reactivate_seller', 'seller', $seller->id, ['status' => 'verified']);
 
         return response()->json($seller);
     }

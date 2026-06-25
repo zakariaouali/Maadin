@@ -1,11 +1,16 @@
-"use client";
+import { cache } from "react";
+import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import Image from "next/image";
+import { Link } from "@/i18n/navigation";
+import { Badge } from "@/components/ui";
+import { ProductActions } from "@/components/shop/ProductActions";
+import { ProductImageGallery } from "@/components/shop/ProductImageGallery";
+import { getImageUrl } from "@/lib/image";
+import type { Metadata } from "next";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import axios from "axios";
-import { useCartStore } from "@/store/cartStore";
-import { useAuth } from "@/lib/auth-context";
-import api from "@/lib/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 interface ProductImage {
   id: number;
@@ -18,13 +23,21 @@ interface ProductDetail {
   name: string;
   slug: string;
   description: string;
+  short_description?: string;
   price: string;
   stock_quantity: number;
   rating: string;
   total_reviews: number;
   images: ProductImage[];
-  category?: { name: string };
-  seller?: { id: number; user_id: number; store_name: string; store_slug: string; rating: string };
+  category?: { name: string; slug: string };
+  seller?: {
+    id: number;
+    user_id: number;
+    store_name: string;
+    store_slug: string;
+    rating: string;
+    level: string;
+  };
 }
 
 interface Review {
@@ -36,185 +49,297 @@ interface Review {
   customer: { name: string };
 }
 
-const API_URL = "http://localhost:8000/api";
-const STORAGE_URL = "http://localhost:8000/storage";
+const getProduct = cache(async (slug: string): Promise<ProductDetail | null> => {
+  try {
+    const res = await fetch(`${API_URL}/products/${slug}`, { next: { revalidate: 60 } });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+});
 
-export default function ProductDetailPage() {
-  const params = useParams();
-  const slug = params.slug as string;
-  const addItem = useCartStore((s) => s.addItem);
-  const { isAuthenticated } = useAuth();
-
-  const [product, setProduct] = useState<ProductDetail | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [added, setAdded] = useState(false);
-  const [inWishlist, setInWishlist] = useState(false);
-  const [wishlistLoading, setWishlistLoading] = useState(false);
-
-  const [showMessageBox, setShowMessageBox] = useState(false);
-  const [messageText, setMessageText] = useState("");
-  const [messageSending, setMessageSending] = useState(false);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { data } = await axios.get(`${API_URL}/products/${slug}`);
-        setProduct(data);
-
-        const { data: reviewData } = await axios.get(`${API_URL}/products/${data.id}/reviews`);
-        setReviews(reviewData);
-
-        if (isAuthenticated) {
-          try {
-            const { data: wishlistData } = await api.get("/customer/wishlist");
-            setInWishlist(wishlistData.some((w: any) => w.product_id === data.id));
-          } catch {
-            // ignore wishlist check failure
-          }
-        }
-      } catch {
-        setError("Product not found");
-      }
-      setLoading(false);
-    };
-    load();
-  }, [slug, isAuthenticated]);
-
-  if (loading) return <p style={{ padding: 24 }}>Loading...</p>;
-  if (error || !product) return <p style={{ padding: 24 }}>{error}</p>;
-
-  const primaryImage = product.images.find((i) => i.is_primary) || product.images[0];
-
-  const handleAddToCart = () => {
-    addItem({
-      product_id: product.id,
-      name: product.name,
-      slug: product.slug,
-      price: Number(product.price),
-      image_path: primaryImage?.image_path || null,
-      seller_id: product.seller?.id || 0,
-      seller_name: product.seller?.store_name || "",
-      stock_quantity: product.stock_quantity,
+const getReviews = cache(async (productId: number): Promise<Review[]> => {
+  try {
+    const res = await fetch(`${API_URL}/products/${productId}/reviews`, {
+      next: { revalidate: 60 },
     });
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+});
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const product = await getProduct(slug);
+  if (!product) return { title: "Product not found" };
+
+  const description = (product.short_description || product.description || "")
+    .replace(/<[^>]+>/g, "")
+    .slice(0, 160);
+
+  const primaryImage = product.images.find((i) => i.is_primary) ?? product.images[0];
+  const ogImage = primaryImage ? getImageUrl(primaryImage.image_path)! : undefined;
+
+  return {
+    title: `${product.name} | Marrakech Maadine`,
+    description,
+    alternates: {
+      canonical: `${SITE_URL}/${locale}/products/${slug}`,
+      languages: {
+        en: `${SITE_URL}/en/products/${slug}`,
+        fr: `${SITE_URL}/fr/products/${slug}`,
+        ar: `${SITE_URL}/ar/products/${slug}`,
+      },
+    },
+    openGraph: {
+      title: product.name,
+      description,
+      url: `${SITE_URL}/${locale}/products/${slug}`,
+      siteName: "Marrakech Maadine",
+      type: "website",
+      images: ogImage ? [{ url: ogImage, alt: product.name }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description,
+      images: ogImage ? [ogImage] : [],
+    },
   };
+}
 
-  const toggleWishlist = async () => {
-    if (!isAuthenticated) {
-      window.location.href = "/login";
-      return;
-    }
-    setWishlistLoading(true);
-    try {
-      if (inWishlist) {
-        await api.delete(`/customer/wishlist/${product.id}`);
-        setInWishlist(false);
-      } else {
-        await api.post("/customer/wishlist", { product_id: product.id });
-        setInWishlist(true);
-      }
-    } catch {
-      // ignore
-    }
-    setWishlistLoading(false);
-  };
+export default async function ProductDetailPage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale, slug } = await params;
+  const product = await getProduct(slug);
+  if (!product) notFound();
 
-  const handleSendMessage = async () => {
-    if (!isAuthenticated) {
-      window.location.href = "/login";
-      return;
-    }
-    if (!messageText.trim() || !product.seller) return;
+  const reviews = await getReviews(product.id);
+  const t = await getTranslations({ locale, namespace: "products" });
 
-    setMessageSending(true);
-    try {
-      const { data } = await api.post("/messages/send", {
-        receiver_id: product.seller.user_id,
-        product_id: product.id,
-        content: messageText,
-      });
-      window.location.href = `/messages/${data.conversation_id}`;
-    } catch {
-      // ignore for now
-    }
-    setMessageSending(false);
+  const primaryImage = product.images.find((i) => i.is_primary) ?? product.images[0];
+
+  const inStock = product.stock_quantity > 0;
+
+  // JSON-LD: Product structured data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: product.images.map((img) => getImageUrl(img.image_path)!),
+    sku: product.slug,
+    brand: product.seller
+      ? { "@type": "Brand", name: product.seller.store_name }
+      : undefined,
+    offers: {
+      "@type": "Offer",
+      price: product.price,
+      priceCurrency: "MAD",
+      availability: inStock
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      seller: product.seller
+        ? { "@type": "Organization", name: product.seller.store_name }
+        : undefined,
+    },
+    ...(product.total_reviews > 0 && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: product.rating,
+        reviewCount: product.total_reviews,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
   };
 
   return (
-    <div style={{ padding: 24 }}>
-      <div style={{ display: "flex", gap: 32 }}>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", maxWidth: 400 }}>
-          {product.images.length === 0 && <p>No images</p>}
-          {product.images.map((img) => (
-            <img
-              key={img.id}
-              src={`${STORAGE_URL}/${img.image_path}`}
-              alt={product.name}
-              style={{ width: 120, height: 120, objectFit: "cover" }}
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <div className="mx-auto max-w-6xl px-6 py-10">
+        {/* Breadcrumb */}
+        <nav className="text-xs text-stone mb-8 flex items-center gap-2">
+          <Link href="/" className="hover:text-ink transition-colors">Home</Link>
+          <span>/</span>
+          <Link href="/products" className="hover:text-ink transition-colors">{t("title")}</Link>
+          {product.category && (
+            <>
+              <span>/</span>
+              <Link
+                href={`/products?category_id=${product.category.slug}`}
+                className="hover:text-ink transition-colors"
+              >
+                {product.category.name}
+              </Link>
+            </>
+          )}
+          <span>/</span>
+          <span className="text-ink line-clamp-1">{product.name}</span>
+        </nav>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
+          {/* Images */}
+          <ProductImageGallery images={product.images} productName={product.name} />
+
+          {/* Info */}
+          <div className="flex flex-col gap-5">
+            {/* Category */}
+            {product.category && (
+              <Link
+                href={`/products?category_id=${product.category.slug}`}
+                className="text-xs text-stone uppercase tracking-widest hover:text-gold-deep transition-colors"
+              >
+                {product.category.name}
+              </Link>
+            )}
+
+            <h1 className="font-display text-3xl md:text-4xl text-ink leading-tight">
+              {product.name}
+            </h1>
+
+            {/* Rating */}
+            {product.total_reviews > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="flex">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill={star <= Math.round(Number(product.rating)) ? "#c9a227" : "none"}
+                      stroke="#c9a227"
+                      strokeWidth="1.5"
+                    >
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                  ))}
+                </div>
+                <span className="text-sm text-stone">
+                  {product.rating} ({product.total_reviews} {t("reviews")})
+                </span>
+              </div>
+            )}
+
+            {/* Price */}
+            <p className="text-3xl font-semibold text-ink">{product.price} MAD</p>
+
+            {/* Stock */}
+            <div className="flex items-center gap-2">
+              <Badge variant={inStock ? "success" : "danger"}>
+                {inStock ? `${product.stock_quantity} ${t("stock")}` : t("outOfStock")}
+              </Badge>
+            </div>
+
+            {/* Description */}
+            {product.description && (
+              <p className="text-sm text-stone leading-relaxed">{product.description}</p>
+            )}
+
+            <div className="zellige-divider" />
+
+            {/* Seller */}
+            {product.seller && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-stone">
+                  {t("soldBy")}{" "}
+                  <Link
+                    href={`/stores/${product.seller.store_slug}`}
+                    className="text-ink font-medium hover:text-gold-deep transition-colors"
+                  >
+                    {product.seller.store_name}
+                  </Link>
+                </span>
+                <Link
+                  href={`/stores/${product.seller.store_slug}`}
+                  className="text-xs text-gold-deep hover:underline"
+                >
+                  {t("viewStore")} →
+                </Link>
+              </div>
+            )}
+
+            {/* Actions (client component) */}
+            <ProductActions
+              product={{
+                id: product.id,
+                name: product.name,
+                slug: product.slug,
+                price: product.price,
+                stock_quantity: product.stock_quantity,
+                seller: product.seller,
+                primaryImagePath: primaryImage?.image_path,
+              }}
+              initialInWishlist={false}
             />
-          ))}
+          </div>
         </div>
 
-        <div>
-          <h1>{product.name}</h1>
-          <p style={{ color: "#666" }}>{product.category?.name}</p>
-          <p>
-            Sold by <strong>{product.seller?.store_name}</strong> (rating: {product.seller?.rating})
-          </p>
-          <p style={{ fontSize: 24, fontWeight: "bold" }}>{product.price} MAD</p>
-          <p>Stock: {product.stock_quantity}</p>
-          <p>Rating: {product.rating} ({product.total_reviews} reviews)</p>
-          <p>{product.description}</p>
+        {/* Reviews */}
+        <div className="mt-16">
+          <div className="zellige-divider mb-10" />
+          <h2 className="font-display text-2xl text-ink mb-6">
+            {t("reviews")} ({product.total_reviews})
+          </h2>
 
-          <button onClick={handleAddToCart} disabled={product.stock_quantity === 0}>
-            {product.stock_quantity === 0 ? "Out of Stock" : added ? "Added!" : "Add to Cart"}
-          </button>
-          <button onClick={toggleWishlist} disabled={wishlistLoading} style={{ marginLeft: 8 }}>
-            {inWishlist ? "♥ In Wishlist" : "♡ Add to Wishlist"}
-          </button>
-
-          {!showMessageBox ? (
-            <button onClick={() => setShowMessageBox(true)} style={{ marginLeft: 8 }}>
-              Message Seller
-            </button>
+          {reviews.length === 0 ? (
+            <p className="text-stone text-sm">{t("noReviews")}</p>
           ) : (
-            <div style={{ marginTop: 8 }}>
-              <input
-                value={messageText}
-                onChange={(e) => setMessageText(e.target.value)}
-                placeholder="Ask the seller a question..."
-                style={{ width: 300 }}
-              />
-              <button onClick={handleSendMessage} disabled={messageSending}>
-                Send
-              </button>
+            <div className="flex flex-col divide-y divide-stone/10">
+              {reviews.map((r) => (
+                <div key={r.id} className="py-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-ink">{r.customer.name}</span>
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <svg
+                            key={star}
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill={star <= r.rating ? "#c9a227" : "none"}
+                            stroke="#c9a227"
+                            strokeWidth="1.5"
+                          >
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                          </svg>
+                        ))}
+                      </div>
+                    </div>
+                    <time className="text-xs text-stone">
+                      {new Date(r.created_at).toLocaleDateString(locale, {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </time>
+                  </div>
+                  {r.title && (
+                    <p className="text-sm font-medium text-ink mb-1">{r.title}</p>
+                  )}
+                  <p className="text-sm text-stone leading-relaxed">{r.content}</p>
+                </div>
+              ))}
             </div>
           )}
         </div>
       </div>
-
-      <div style={{ marginTop: 40, maxWidth: 600 }}>
-        <h2>Reviews ({reviews.length})</h2>
-        {reviews.length === 0 ? (
-          <p>No reviews yet.</p>
-        ) : (
-          reviews.map((r) => (
-            <div key={r.id} style={{ borderBottom: "1px solid #eee", padding: "12px 0" }}>
-              <p>
-                <strong>{r.customer.name}</strong> — {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
-              </p>
-              {r.title && <p style={{ fontWeight: "bold" }}>{r.title}</p>}
-              <p>{r.content}</p>
-              <p style={{ fontSize: 12, color: "#999" }}>
-                {new Date(r.created_at).toLocaleDateString()}
-              </p>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
+    </>
   );
 }

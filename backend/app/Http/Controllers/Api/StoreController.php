@@ -18,6 +18,15 @@ class StoreController extends Controller
             ])
             ->firstOrFail();
 
-        return response()->json($seller);
+        $products = $seller->products()
+            ->where('is_active', true)
+            ->with(['images' => fn($q) => $q->where('is_primary', true), 'category:id,name'])
+            ->orderBy('created_at', 'desc')
+            ->get(['id', 'seller_id', 'category_id', 'name', 'slug', 'price', 'stock_quantity', 'rating', 'total_reviews', 'short_description']);
+
+        return response()->json([
+            'store'    => $seller,
+            'products' => $products,
+        ]);
     }
 }

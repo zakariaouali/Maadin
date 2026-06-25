@@ -5,37 +5,38 @@ namespace App\Http\Controllers\Api\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ProductImageController extends Controller
 {
+    public function __construct(private ImageService $images) {}
+
     public function store(Request $request, string $productId)
     {
         $product = $this->ownedProductOrFail($request, $productId);
 
         $request->validate([
-            'images' => 'required|array|max:10',
-            'images.*' => 'required|image|mimes:jpeg,jpg,png,webp|max:5120', // 5MB max
+            'images'   => 'required|array|max:5',
+            'images.*' => 'required|file|mimetypes:image/jpeg,image/png,image/webp|max:5120',
         ]);
 
         $existingCount = $product->images()->count();
 
-        if ($existingCount + count($request->file('images')) > 10) {
-            return response()->json(['message' => 'Maximum 10 images per product.'], 422);
+        if ($existingCount + count($request->file('images')) > 5) {
+            return response()->json(['message' => 'Maximum 5 images per product.'], 422);
         }
 
         $uploaded = [];
 
         foreach ($request->file('images') as $file) {
-            $path = $file->store('products/images', 'public');
+            $url = $this->images->upload($file, 'products');
 
             $image = ProductImage::create([
-                'product_id' => $product->id,
-                'image_path' => $path,
-                'display_order' => $product->images()->count(),
-                'is_primary' => $existingCount === 0 && count($uploaded) === 0,
-                'file_size' => $file->getSize(),
+                'product_id'    => $product->id,
+                'image_path'    => $url,
+                'display_order' => $existingCount + count($uploaded),
+                'is_primary'    => $existingCount === 0 && count($uploaded) === 0,
             ]);
 
             $uploaded[] = $image;
@@ -47,9 +48,8 @@ class ProductImageController extends Controller
     public function setPrimary(Request $request, string $productId, string $imageId)
     {
         $product = $this->ownedProductOrFail($request, $productId);
-        $image = $product->images()->findOrFail($imageId);
+        $image   = $product->images()->findOrFail($imageId);
 
-        // Enforce only one primary image (app-level, since MariaDB can't do partial unique index)
         $product->images()->update(['is_primary' => false]);
         $image->update(['is_primary' => true]);
 
@@ -59,13 +59,13 @@ class ProductImageController extends Controller
     public function destroy(Request $request, string $productId, string $imageId)
     {
         $product = $this->ownedProductOrFail($request, $productId);
-        $image = $product->images()->findOrFail($imageId);
+        $image   = $product->images()->findOrFail($imageId);
 
-        Storage::disk('public')->delete($image->image_path);
+        $this->images->delete($image->image_path);
+
         $wasPrimary = $image->is_primary;
         $image->delete();
 
-        // If we deleted the primary image, promote the next one
         if ($wasPrimary) {
             $next = $product->images()->orderBy('display_order')->first();
             $next?->update(['is_primary' => true]);

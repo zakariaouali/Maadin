@@ -15,6 +15,7 @@ interface AuthContextType {
     password: string;
     phone?: string;
     role?: "customer" | "seller";
+    plan?: "starter" | "managed" | "premium";
   }) => Promise<void>;
   logout: () => Promise<void>;
   refetchUser: () => Promise<void>;
@@ -53,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string;
     phone?: string;
     role?: "customer" | "seller";
+    plan?: "starter" | "managed" | "premium";
   }) => {
     await getCsrfCookie();
     await api.post("/register", data);

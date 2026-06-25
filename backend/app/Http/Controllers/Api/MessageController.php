@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\Notification;
 use App\Models\User;
 use App\Services\ContentFilterService;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class MessageController extends Controller
 
         $conversations = Conversation::where('buyer_id', $userId)
             ->orWhere('seller_id', $userId)
-            ->with(['buyer:id,name', 'seller:id,name', 'product:id,name,slug'])
+            ->with(['buyer:id,name,avatar_path', 'seller:id,name,avatar_path', 'product:id,name,slug'])
             ->withCount(['messages as unread_count' => function ($q) use ($userId) {
                 $q->where('receiver_id', $userId)->where('is_read', false);
             }])
@@ -48,7 +49,7 @@ class MessageController extends Controller
             ->update(['is_read' => true, 'read_at' => now()]);
 
         return response()->json([
-            'conversation' => $conversation->load('buyer:id,name', 'seller:id,name', 'product:id,name,slug'),
+            'conversation' => $conversation->load('buyer:id,name,avatar_path', 'seller:id,name,avatar_path', 'product:id,name,slug'),
             'messages' => $messages,
         ]);
     }
@@ -108,6 +109,16 @@ class MessageController extends Controller
         ]);
 
         $conversation->update(['last_message_at' => now()]);
+
+        // Notify the receiver
+        Notification::create([
+            'user_id' => $receiverId,
+            'type'    => 'message',
+            'title'   => "New message from {$sender->name}",
+            'body'    => mb_substr(strip_tags($filtered['content']), 0, 100),
+            'link'    => "/messages/{$conversation->id}",
+            'data'    => ['conversation_id' => $conversation->id, 'sender_id' => $sender->id],
+        ]);
 
         return response()->json([
             'message' => $message,
