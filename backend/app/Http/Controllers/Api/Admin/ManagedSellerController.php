@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
+use App\Models\Notification;
 use App\Models\Order;
+use App\Models\PlanUpgradeRequest;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Seller;
 use App\Models\User;
 use App\Services\ImageService;
+use App\Support\NotificationMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -82,6 +85,94 @@ class ManagedSellerController extends Controller
         }
 
         return response()->json($user->fresh());
+    }
+
+    // ── Mark seller as paid (move expiry +1 month) ───────────────────────────
+    public function markPaid(Request $request, string $userId)
+    {
+        $user = User::where('role', 'seller')->whereIn('plan', ['managed', 'premium'])->findOrFail($userId);
+
+        $current = $user->subscription_expires_at ? \Carbon\Carbon::parse($user->subscription_expires_at) : now();
+        $newExpiry = ($current->isPast() ? now() : $current)->addMonth();
+
+        $user->update(['subscription_expires_at' => $newExpiry->toDateString()]);
+
+        // Reactivate store if suspended
+        if ($user->seller && $user->seller->status === 'suspended_subscription') {
+            $user->seller->update(['status' => 'verified']);
+        }
+
+        // Notify seller
+        $locale = $user->locale ?? 'en';
+        [$title, $body] = NotificationMessages::get('subscription.renewed', $locale, [
+            'plan' => ucfirst($user->plan),
+            'date' => $newExpiry->format('Y-m-d'),
+        ]);
+        Notification::create([
+            'user_id' => $user->id,
+            'type'    => 'system',
+            'title'   => $title,
+            'body'    => $body,
+            'link'    => '/seller/subscription',
+        ]);
+
+        return response()->json($user->fresh());
+    }
+
+    // ── List pending upgrade requests ─────────────────────────────────────────
+    public function upgradeRequests()
+    {
+        $requests = PlanUpgradeRequest::with(['user:id,name,email,plan'])
+            ->where('status', 'pending')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json($requests);
+    }
+
+    // ── Approve upgrade request ───────────────────────────────────────────────
+    public function approveUpgrade(Request $request, string $requestId)
+    {
+        $req = PlanUpgradeRequest::findOrFail($requestId);
+        $user = $req->user;
+
+        $req->update(['status' => 'approved', 'admin_notes' => $request->input('notes')]);
+        $user->update(['plan' => $req->to_plan]);
+
+        // Reactivate store if it was paused for upgrade
+        if ($user->seller && $user->seller->status === 'upgrade_pending') {
+            $user->seller->update(['status' => 'verified']);
+        }
+
+        $locale = $user->locale ?? 'en';
+        [$title, $body] = NotificationMessages::get('plan.upgrade_approved', $locale, [
+            'to' => ucfirst($req->to_plan),
+        ]);
+        Notification::create(['user_id' => $user->id, 'type' => 'system', 'title' => $title, 'body' => $body, 'link' => '/seller/subscription']);
+
+        return response()->json($req->fresh());
+    }
+
+    // ── Reject upgrade request ────────────────────────────────────────────────
+    public function rejectUpgrade(Request $request, string $requestId)
+    {
+        $req = PlanUpgradeRequest::findOrFail($requestId);
+        $user = $req->user;
+
+        $req->update(['status' => 'rejected', 'admin_notes' => $request->input('notes')]);
+
+        // Reactivate if paused
+        if ($user->seller && $user->seller->status === 'upgrade_pending') {
+            $user->seller->update(['status' => 'verified']);
+        }
+
+        $locale = $user->locale ?? 'en';
+        [$title, $body] = NotificationMessages::get('plan.upgrade_rejected', $locale, [
+            'to' => ucfirst($req->to_plan),
+        ]);
+        Notification::create(['user_id' => $user->id, 'type' => 'system', 'title' => $title, 'body' => $body, 'link' => '/seller/subscription']);
+
+        return response()->json($req->fresh());
     }
 
     // ── Admin creates store for managed/premium seller ───────────────────────

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { getImageUrl } from "@/lib/image";
 import type { Metadata } from "next";
+import ArtisanatSection from "@/components/home/ArtisanatSection";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -15,7 +16,7 @@ interface Product {
   rating: string;
   primary_image?: { image_path: string };
   seller?: { store_name: string; store_slug: string; logo_path: string | null };
-  category?: { name: string };
+  category?: { name: string; localised_name?: string };
 }
 
 interface Category {
@@ -28,9 +29,9 @@ interface Category {
   icon_path: string | null;
 }
 
-async function getFeaturedProducts(): Promise<Product[]> {
+async function getFeaturedProducts(locale: string): Promise<Product[]> {
   try {
-    const res = await fetch(`${API_URL}/products?sort=popular&per_page=8`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API_URL}/products?sort=popular&per_page=8&locale=${locale}`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     const data = await res.json();
     return data.data ?? [];
@@ -180,7 +181,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const t = await getTranslations({ locale, namespace: "home" });
   const tCommon = await getTranslations({ locale, namespace: "common" });
 
-  const [products, categories] = await Promise.all([getFeaturedProducts(), getCategories(locale)]);
+  const [products, categories] = await Promise.all([getFeaturedProducts(locale), getCategories(locale)]);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -192,6 +193,30 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/${locale}/products?search={search_term_string}` },
       "query-input": "required name=search_term_string",
     },
+  };
+
+  // Structured data for the 5 artisanat categories — helps Google understand the page's topical authority
+  const craftNames: Record<string, Record<string, string>> = {
+    en: { zellige: "Zellige Moroccan Mosaic Tilework", pottery: "Moroccan Pottery & Ceramics", leather: "Moroccan Leather Craft — Maroquinerie", carpets: "Moroccan Handwoven Rugs & Carpets", thuya: "Thuya Wood Marquetry — Essaouira" },
+    fr: { zellige: "Zellige — Mosaïque Marocaine", pottery: "Poterie et Céramique Marocaine", leather: "Maroquinerie Marocaine", carpets: "Tapis Marocains Artisanaux", thuya: "Marqueterie en Bois de Thuya" },
+    ar: { zellige: "الزليج المغربي", pottery: "الفخار والسيراميك المغربي", leather: "الجلد والمروكيناري المغربي", carpets: "الزرابي المغربية اليدوية", thuya: "خشب الثويا والنقش من الصويرة" },
+  };
+  const loc = (locale as string) in craftNames ? (locale as string) : "en";
+  const craftJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: t("artisanatTitle"),
+    description: t("artisanatSubtitle"),
+    url: `${SITE_URL}/${locale}#artisanat`,
+    itemListElement: Object.entries(craftNames[loc]).map(([id, name], i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Thing",
+        name,
+        url: `${SITE_URL}/${locale}/products?category=${id}`,
+      },
+    })),
   };
 
   const trustItems = [
@@ -234,6 +259,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(craftJsonLd) }} />
 
       {/* ── HERO ─────────────────────────────────────────── */}
       {/* bg-[#2b1f12] shows while video loads — acts as the fallback */}
@@ -353,7 +379,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
           {/* Category grid — centered flex so partial last rows stay centred */}
           <div className="max-w-6xl mx-auto flex flex-wrap justify-center gap-5">
-            {categories.slice(0, 10).map((cat) => (
+            {categories.slice(0, 5).map((cat) => (
               <Link
                 key={cat.id}
                 href={`/products?category_id=${cat.id}`}
@@ -443,7 +469,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 storeName={p.seller?.store_name}
                 storeSlug={p.seller?.store_slug}
                 storeLogoPath={p.seller?.logo_path}
-                categoryName={p.category?.name}
+                categoryName={p.category?.localised_name ?? p.category?.name}
                 imagePath={p.primary_image?.image_path}
               />
             ))}
@@ -457,6 +483,24 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </Link>
         </div>
       </section>
+
+      {/* ── ARTISANAT HERITAGE ──────────────────────────── */}
+      <div id="artisanat">
+        <ArtisanatSection
+          locale={locale as "en" | "fr" | "ar"}
+          t={{
+            sectionEyebrow: t("artisanatEyebrow"),
+            sectionTitle: t("artisanatTitle"),
+            sectionSubtitle: t("artisanatSubtitle"),
+            stat1Value: 12000,
+            stat1Label: t("artisanatStat1Label"),
+            stat2Value: 1200,
+            stat2Label: t("artisanatStat2Label"),
+            stat3Value: 47,
+            stat3Label: t("artisanatStat3Label"),
+          }}
+        />
+      </div>
 
       {/* ── BECOME A SELLER CTA ──────────────────────────── */}
       <section className="mx-6 mb-16 rounded-sm overflow-hidden relative">

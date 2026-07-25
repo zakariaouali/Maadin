@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { Cormorant_Garamond, Inter, Cairo } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 import { routing } from "@/i18n/routing";
 import { Providers } from "@/components/Providers";
 import "../globals.css";
@@ -76,6 +77,7 @@ export default async function LocaleLayout({
       data-locale={locale}
     >
       <body className="min-h-full flex flex-col bg-sand text-ink">
+        <NextTopLoader color="#c9a227" height={3} showSpinner={false} />
         <NextIntlClientProvider>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>

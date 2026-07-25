@@ -7,16 +7,19 @@ export default function Footer() {
   return (
     <footer className="bg-ink text-white mt-auto">
       <div className="mx-auto max-w-7xl px-6 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
-          <div>
+          <div className="md:col-span-1">
             <p className="font-display text-2xl text-white mb-2">Marrakech Maadine</p>
             <p className="text-sm text-white/50 leading-relaxed max-w-xs">
               {t("tagline")}
             </p>
+            <p className="text-xs text-white/25 mt-4 leading-relaxed">
+              Médina, Marrakech, Maroc
+            </p>
           </div>
 
-          {/* Links */}
+          {/* Explore */}
           <div>
             <p className="text-[11px] uppercase tracking-widest text-white/30 mb-4 font-medium">
               Explore
@@ -28,29 +31,56 @@ export default function Footer() {
               <Link href="/login" className="text-sm text-white/60 hover:text-gold transition-colors">
                 {t("login")}
               </Link>
-              <Link href="/register" className="text-sm text-white/60 hover:text-gold transition-colors">
+              <Link href="/plans" className="text-sm text-white/60 hover:text-gold transition-colors">
                 Sell on Maadine
+              </Link>
+              <Link href="/support" className="text-sm text-white/60 hover:text-gold transition-colors">
+                {t("support")}
               </Link>
             </div>
           </div>
 
-          {/* Location */}
+          {/* Legal */}
           <div>
             <p className="text-[11px] uppercase tracking-widest text-white/30 mb-4 font-medium">
-              Marrakech, Morocco
+              {t("legal")}
             </p>
-            <p className="text-sm text-white/50 leading-relaxed">
-              Connecting buyers worldwide with the finest Moroccan artisans since 2024.
+            <div className="flex flex-col gap-2.5">
+              <Link href="/privacy" className="text-sm text-white/60 hover:text-gold transition-colors">
+                {t("privacy")}
+              </Link>
+              <Link href="/terms" className="text-sm text-white/60 hover:text-gold transition-colors">
+                {t("terms")}
+              </Link>
+            </div>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <p className="text-[11px] uppercase tracking-widest text-white/30 mb-4 font-medium">
+              Contact
             </p>
+            <div className="flex flex-col gap-2.5">
+              <a href="mailto:contact@maadine.ma" className="text-sm text-white/60 hover:text-gold transition-colors">
+                contact@maadine.ma
+              </a>
+              <a href="mailto:legal@maadine.ma" className="text-sm text-white/60 hover:text-gold transition-colors">
+                legal@maadine.ma
+              </a>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Bottom bar */}
       <div className="border-t border-white/10">
-        <div className="mx-auto max-w-7xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-white/30">
+        <div className="mx-auto max-w-7xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-white/30">
           <p>&copy; {new Date().getFullYear()} Marrakech Maadine. All rights reserved.</p>
-          <div className="zellige-divider w-24 opacity-30" />
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-white/60 transition-colors">{t("privacy")}</Link>
+            <span>·</span>
+            <Link href="/terms" className="hover:text-white/60 transition-colors">{t("terms")}</Link>
+          </div>
         </div>
       </div>
     </footer>

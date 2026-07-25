@@ -17,14 +17,19 @@ use App\Http\Controllers\Api\Admin\ConversationController as AdminConversationCo
 use App\Http\Controllers\Api\Admin\PenaltyController as AdminPenaltyController;
 use App\Http\Controllers\Api\Admin\AnalyticsController as AdminAnalyticsController;
 use App\Http\Controllers\Api\Admin\ManagedSellerController as AdminManagedSellerController;
+use App\Http\Controllers\Api\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Api\Seller\StoreController as SellerStoreController;
 use App\Http\Controllers\Api\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Api\Seller\ProductImageController;
 use App\Http\Controllers\Api\Seller\OrderController as SellerOrderController;
+use App\Http\Controllers\Api\Seller\ReviewController as SellerReviewController;
+use App\Http\Controllers\Api\Seller\SubscriptionController as SellerSubscriptionController;
 use App\Http\Controllers\Api\Customer\CheckoutController;
 use App\Http\Controllers\Api\Customer\OrderController as CustomerOrderController;
 use App\Http\Controllers\Api\Customer\ReviewController as CustomerReviewController;
 use App\Http\Controllers\Api\Customer\WishlistController;
+use App\Http\Controllers\Api\SupportTicketController;
+use App\Http\Controllers\Api\Admin\SupportTicketController as AdminSupportTicketController;
 use Illuminate\Support\Facades\Route;
 
 // ===== Search (public) =====
@@ -32,8 +37,15 @@ Route::get('/search', [SearchController::class, 'index']);
 Route::get('/search/suggest', [SearchController::class, 'suggest']);
 
 // ===== Auth =====
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('throttle:10,1')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+});
+
+// ===== Support (public submit, no auth needed) =====
+Route::post('/support', [SupportTicketController::class, 'store']);
 
 // ===== Public =====
 Route::get('/categories', [CategoryController::class, 'index']);
@@ -43,7 +55,7 @@ Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::get('/products/{product}/reviews', [ReviewController::class, 'index']);
 
 // ===== Authenticated =====
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', \App\Http\Middleware\SyncUserLocale::class])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/me/profile', [AuthController::class, 'updateProfile']);
     Route::post('/me/password', [AuthController::class, 'changePassword']);
@@ -58,8 +70,15 @@ Route::middleware('auth:sanctum')->group(function () {
         $data = ['unread_messages' => $unreadMessages];
 
         if ($user->role === 'admin') {
-            $data['pending_sellers'] = \App\Models\Seller::where('status', 'pending')->count();
+            $data['pending_sellers']  = \App\Models\Seller::where('status', 'pending')->count();
             $data['pending_products'] = \App\Models\Product::where('is_approved', false)->count();
+            $data['support_tickets']  = \App\Models\SupportTicket::where('status', 'open')
+                ->whereNull('admin_reply')->count();
+        } else {
+            $data['unread_support'] = \App\Models\SupportTicket::where('user_id', $user->id)
+                ->whereNotNull('admin_reply')
+                ->whereNull('user_read_at')
+                ->count();
         }
 
         return response()->json($data);
@@ -69,6 +88,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications/list', [NotificationController::class, 'index']);
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead']);
+
+    // --- Support tickets (authenticated users) ---
+    Route::prefix('support')->group(function () {
+        Route::get('/unread', [SupportTicketController::class, 'unreadCount']);
+        Route::get('/', [SupportTicketController::class, 'index']);
+        Route::get('/{id}', [SupportTicketController::class, 'show']);
+    });
 
     // --- Messages ---
     Route::prefix('messages')->group(function () {
@@ -93,10 +119,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/products', [AdminProductController::class, 'index']);
         Route::get('/products/{id}', [AdminProductController::class, 'show']);
+        Route::put('/products/{id}', [AdminProductController::class, 'update']);
         Route::delete('/products/{id}', [AdminProductController::class, 'destroy']);
         Route::put('/products/{id}/approve', [AdminProductController::class, 'approve']);
         Route::put('/products/{id}/reject', [AdminProductController::class, 'reject']);
         Route::put('/products/{id}/toggle-active', [AdminProductController::class, 'toggleActive']);
+        Route::post('/products/{id}/images', [AdminProductController::class, 'storeImage']);
+        Route::put('/products/{id}/images/{imageId}/primary', [AdminProductController::class, 'setPrimaryImage']);
+        Route::delete('/products/{id}/images/{imageId}', [AdminProductController::class, 'destroyImage']);
 
         Route::get('/orders', [AdminOrderController::class, 'index']);
         Route::get('/orders/{id}', [AdminOrderController::class, 'show']);
@@ -110,6 +140,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/analytics/dashboard', [AdminAnalyticsController::class, 'dashboard']);
 
+        Route::get('/reviews', [AdminReviewController::class, 'index']);
+        Route::put('/reviews/{review}/approve', [AdminReviewController::class, 'approve']);
+        Route::put('/reviews/{review}/reject', [AdminReviewController::class, 'reject']);
+        Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy']);
+
         // Managed & Premium seller management
         Route::get('/managed-sellers', [AdminManagedSellerController::class, 'index']);
         Route::get('/managed-sellers/{userId}', [AdminManagedSellerController::class, 'show']);
@@ -117,6 +152,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/managed-sellers/{userId}/store/update', [AdminManagedSellerController::class, 'updateStore']);
         Route::post('/managed-sellers/{userId}/products', [AdminManagedSellerController::class, 'createProduct']);
         Route::put('/managed-sellers/{userId}/subscription', [AdminManagedSellerController::class, 'updateSubscription']);
+        Route::post('/managed-sellers/{userId}/mark-paid', [AdminManagedSellerController::class, 'markPaid']);
+
+        // Upgrade requests
+        Route::get('/upgrade-requests', [AdminManagedSellerController::class, 'upgradeRequests']);
+        Route::put('/upgrade-requests/{requestId}/approve', [AdminManagedSellerController::class, 'approveUpgrade']);
+        Route::put('/upgrade-requests/{requestId}/reject', [AdminManagedSellerController::class, 'rejectUpgrade']);
+
+        // Support tickets
+        Route::get('/support', [AdminSupportTicketController::class, 'index']);
+        Route::get('/support/stats', [AdminSupportTicketController::class, 'stats']);
+        Route::get('/support/{id}', [AdminSupportTicketController::class, 'show']);
+        Route::put('/support/{id}', [AdminSupportTicketController::class, 'update']);
     });
 
     // --- Seller ---
@@ -133,6 +180,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/products/{product}/images/{image}/primary', [ProductImageController::class, 'setPrimary']);
         Route::delete('/products/{product}/images/{image}', [ProductImageController::class, 'destroy']);
 
+        Route::get('/reviews', [SellerReviewController::class, 'index']);
+
+        Route::get('/subscription', [SellerSubscriptionController::class, 'status']);
+        Route::post('/subscription/upgrade', [SellerSubscriptionController::class, 'requestUpgrade']);
+
+        Route::get('/orders/pending-count', [SellerOrderController::class, 'pending']);
         Route::get('/orders', [SellerOrderController::class, 'index']);
         Route::get('/orders/{id}', [SellerOrderController::class, 'show']);
         Route::put('/orders/{id}/status', [SellerOrderController::class, 'updateStatus']);

@@ -103,7 +103,7 @@ export default function AdminSellersPage() {
       <form onSubmit={(e) => { e.preventDefault(); load(tab, search); }} className="flex gap-2">
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("searchSellers")}
           className="border border-stone/30 rounded-sm px-3 py-2 text-sm outline-none focus:border-gold-deep flex-1 max-w-xs" />
-        <Button type="submit" variant="secondary" size="sm">Search</Button>
+        <Button type="submit" variant="secondary" size="sm">{t("search")}</Button>
       </form>
 
       {loading ? (
@@ -130,7 +130,7 @@ export default function AdminSellersPage() {
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
-                  <Badge variant={STATUS_VARIANT[s.status] ?? "default"}>{s.status}</Badge>
+                  <Badge variant={STATUS_VARIANT[s.status] ?? "default"}>{t(s.status as "pending" | "verified" | "suspended")}</Badge>
                   <span className="text-xs text-stone hidden md:block">{new Date(s.created_at).toLocaleDateString()}</span>
                 </div>
 
@@ -251,7 +251,7 @@ function SellerReviewPanel({
         </div>
         {/* Status badge */}
         <div className="absolute top-3 end-4">
-          <Badge variant={STATUS_VARIANT[s.status] ?? "default"} className="capitalize">{s.status}</Badge>
+          <Badge variant={STATUS_VARIANT[s.status] ?? "default"}>{t(s.status as "pending" | "verified" | "suspended")}</Badge>
         </div>
       </div>
 
@@ -392,7 +392,7 @@ function SellerReviewPanel({
         {s.status === "pending" && (
           <div className="border-t border-stone/15 pt-4 flex gap-3">
             <Button variant="primary" className="flex-1" loading={acting === s.id} onClick={() => onAct(s.id, "verify", t("sellerVerified"))}>
-              ✓ {t("verify")} — Approve this seller
+              ✓ {t("verify")}
             </Button>
             <Button variant="danger" loading={acting === s.id} onClick={() => onAct(s.id, "suspend", t("sellerSuspended"))}>
               {t("reject")}

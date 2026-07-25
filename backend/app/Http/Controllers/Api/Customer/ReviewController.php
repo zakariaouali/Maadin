@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Api\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Review;
+use App\Models\Seller;
+use App\Support\NotificationMessages;
 use Illuminate\Http\Request;
 
 class ReviewController extends Controller
@@ -59,6 +62,18 @@ class ReviewController extends Controller
 
         $this->recalculateProductRating($validated['product_id']);
         $this->recalculateSellerRating($order->seller_id);
+
+        // Notify the seller in their preferred language
+        $seller = Seller::with('user')->find($order->seller_id);
+        if ($seller) {
+            $locale = $seller->user->locale ?? 'en';
+            $productName = $review->product->name ?? 'product';
+            [$title, $body] = NotificationMessages::get('review.received', $locale, [
+                'product' => $productName,
+                'rating'  => $validated['rating'],
+            ]);
+            Notification::send($seller->user_id, 'product', $title, $body, '/seller/products', ['review_id' => $review->id]);
+        }
 
         return response()->json($review, 201);
     }

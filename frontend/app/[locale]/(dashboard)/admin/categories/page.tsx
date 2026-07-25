@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import api from "@/lib/api";
 import { getImageUrl, normalizeImageFile } from "@/lib/image";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { Badge, Button, Modal, PageHeader, Spinner, Alert } from "@/components/ui";
 
 interface Category {
@@ -112,26 +113,28 @@ export default function AdminCategoriesPage() {
     setSubmitting(true);
     setError(null);
     try {
-      const fd = new FormData();
-      fd.append("name", form.name);
-      if (form.name_fr) fd.append("name_fr", form.name_fr);
-      if (form.name_ar) fd.append("name_ar", form.name_ar);
-      if (form.description) fd.append("description", form.description);
-      if (form.parent_id) fd.append("parent_id", form.parent_id);
-      fd.append("display_order", form.display_order);
-      fd.append("is_active", form.is_active ? "1" : "0");
-      if (imageFile) fd.append("image", imageFile);
+      let iconUrl: string | undefined;
+      if (imageFile) {
+        const result = await uploadToCloudinary(imageFile, "categories");
+        iconUrl = result.secure_url;
+      }
+
+      const payload: Record<string, string | boolean> = {
+        name: form.name,
+        display_order: form.display_order,
+        is_active: form.is_active ? "1" : "0",
+      };
+      if (form.name_fr) payload.name_fr = form.name_fr;
+      if (form.name_ar) payload.name_ar = form.name_ar;
+      if (form.description) payload.description = form.description;
+      if (form.parent_id) payload.parent_id = form.parent_id;
+      if (iconUrl) payload.icon_url = iconUrl;
 
       if (editTarget) {
-        fd.append("_method", "PUT");
-        await api.post(`/admin/categories/${editTarget.id}`, fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await api.put(`/admin/categories/${editTarget.id}`, payload);
         setSuccess(t("categoryUpdated"));
       } else {
-        await api.post("/admin/categories", fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await api.post("/admin/categories", payload);
         setSuccess(t("categoryCreated"));
       }
       setModalOpen(false);
@@ -184,83 +187,57 @@ export default function AdminCategoriesPage() {
         ) : rows.length === 0 ? (
           <p className="text-center text-stone py-16 text-sm">{t("noCategories")}</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-stone/20 bg-sand">
-                <th className="text-left px-4 py-3 text-stone font-medium w-12"></th>
-                <th className="text-left px-4 py-3 text-stone font-medium">{t("name")}</th>
-                <th className="text-left px-4 py-3 text-stone font-medium hidden md:table-cell">{t("description")}</th>
-                <th className="text-left px-4 py-3 text-stone font-medium hidden sm:table-cell">{t("subcategories")}</th>
-                <th className="text-left px-4 py-3 text-stone font-medium hidden sm:table-cell">{t("displayOrder")}</th>
-                <th className="text-left px-4 py-3 text-stone font-medium">{t("status")}</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-stone/10">
-              {rows.map(({ cat, depth }) => {
-                const imgUrl = getImageUrl(cat.icon_path);
-                return (
-                  <tr key={cat.id} className="hover:bg-sand/50 transition-colors">
-                    {/* Thumbnail */}
-                    <td className="px-4 py-3">
-                      <div className="w-10 h-10 rounded-sm overflow-hidden bg-sand border border-stone/20 shrink-0 flex items-center justify-center">
-                        {imgUrl ? (
-                          <Image src={imgUrl} alt={cat.name} width={40} height={40} className="object-cover w-full h-full" />
-                        ) : (
-                          <span className="text-stone/30 text-lg">◈</span>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Name */}
-                    <td className="px-4 py-3 text-ink font-medium">
-                      <span style={{ paddingLeft: depth * 16 }} className="flex items-center gap-1.5">
+          <div className="divide-y divide-stone/10">
+            {rows.map(({ cat, depth }) => {
+              const imgUrl = getImageUrl(cat.icon_path);
+              return (
+                <div key={cat.id} className="px-4 py-3 hover:bg-sand/40 transition-colors">
+                  {/* Top row: image + name + status */}
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-10 h-10 rounded-sm overflow-hidden bg-sand border border-stone/20 shrink-0 flex items-center justify-center"
+                      style={{ marginInlineStart: depth * 16 }}
+                    >
+                      {imgUrl ? (
+                        <Image src={imgUrl} alt={cat.name} width={40} height={40} className="object-cover w-full h-full" />
+                      ) : (
+                        <span className="text-stone/30 text-lg">◈</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         {depth > 0 && <span className="text-stone/40 text-xs">↳</span>}
-                        <span>
-                          {cat.name}
-                          {(cat.name_fr || cat.name_ar) && (
-                            <span className="block text-[10px] text-stone font-normal mt-0.5">
-                              {cat.name_fr && <span>{cat.name_fr}</span>}
-                              {cat.name_fr && cat.name_ar && <span className="mx-1">·</span>}
-                              {cat.name_ar && <span dir="rtl">{cat.name_ar}</span>}
-                            </span>
-                          )}
-                        </span>
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-3 text-stone max-w-xs truncate hidden md:table-cell">
-                      {cat.description ?? "—"}
-                    </td>
-                    <td className="px-4 py-3 text-stone text-center hidden sm:table-cell">
-                      {cat.subcategories_count ?? 0}
-                    </td>
-                    <td className="px-4 py-3 text-stone text-center hidden sm:table-cell">
-                      {cat.display_order}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant={cat.is_active ? "success" : "default"}>
-                        {cat.is_active ? t("active") : t("inactive")}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2 justify-end">
-                        <Button variant="ghost" size="sm" onClick={() => handleToggleActive(cat)}>
-                          {cat.is_active ? t("deactivate") : t("activate")}
-                        </Button>
-                        <Button variant="secondary" size="sm" onClick={() => openModal(cat)}>
-                          {t("edit")}
-                        </Button>
-                        <Button variant="danger" size="sm" onClick={() => { setDeleteId(cat.id); setDeleteError(null); }}>
-                          {t("delete")}
-                        </Button>
+                        <span className="text-sm font-medium text-ink">{cat.name}</span>
+                        {(cat.name_fr || cat.name_ar) && (
+                          <span className="text-[10px] text-stone">
+                            {cat.name_fr}{cat.name_fr && cat.name_ar && " · "}<span dir="rtl">{cat.name_ar}</span>
+                          </span>
+                        )}
+                        <Badge variant={cat.is_active ? "success" : "default"}>
+                          {cat.is_active ? t("active") : t("inactive")}
+                        </Badge>
                       </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      {cat.description && (
+                        <p className="text-xs text-stone truncate mt-0.5">{cat.description}</p>
+                      )}
+                    </div>
+                  </div>
+                  {/* Actions */}
+                  <div className="flex flex-wrap gap-2 mt-2 ms-[52px]">
+                    <Button variant="ghost" size="sm" onClick={() => handleToggleActive(cat)}>
+                      {cat.is_active ? t("deactivate") : t("activate")}
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={() => openModal(cat)}>
+                      {t("edit")}
+                    </Button>
+                    <Button variant="danger" size="sm" onClick={() => { setDeleteId(cat.id); setDeleteError(null); }}>
+                      {t("delete")}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
 

@@ -15,12 +15,15 @@ interface AppNotification {
   created_at: string;
 }
 
-function timeAgo(dateStr: string) {
+function timeAgo(dateStr: string, locale: string) {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
+  if (diff < 60) return locale === "ar" ? "الآن" : locale === "fr" ? "à l'instant" : "just now";
+  const m = Math.floor(diff / 60);
+  if (diff < 3600) return locale === "ar" ? `منذ ${m}د` : locale === "fr" ? `il y a ${m}m` : `${m}m ago`;
+  const h = Math.floor(diff / 3600);
+  if (diff < 86400) return locale === "ar" ? `منذ ${h}س` : locale === "fr" ? `il y a ${h}h` : `${h}h ago`;
+  const d = Math.floor(diff / 86400);
+  return locale === "ar" ? `منذ ${d}ي` : locale === "fr" ? `il y a ${d}j` : `${d}d ago`;
 }
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
@@ -73,7 +76,7 @@ export default function NotificationBell() {
   // Poll every 30s
   useEffect(() => {
     fetchNotifications();
-    const id = setInterval(fetchNotifications, 30000);
+    const id = setInterval(fetchNotifications, 10000);
     return () => clearInterval(id);
   }, [fetchNotifications]);
 
@@ -120,7 +123,7 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute end-0 mt-2 w-80 bg-white border border-stone/15 rounded-xl shadow-xl z-50 overflow-hidden">
+        <div className="fixed top-[72px] end-2 w-[calc(100vw-1rem)] max-w-80 sm:absolute sm:top-auto sm:end-0 sm:mt-2 sm:w-80 bg-white border border-stone/15 rounded-xl shadow-xl z-50 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-stone/10">
             <h3 className="text-sm font-semibold text-ink">
@@ -153,7 +156,7 @@ export default function NotificationBell() {
                 <div className="flex-1 min-w-0">
                   <p className={`text-xs leading-snug ${!n.read_at ? "font-semibold text-ink" : "text-stone"}`}>{n.title}</p>
                   {n.body && <p className="text-[11px] text-stone mt-0.5 line-clamp-2">{n.body}</p>}
-                  <p className="text-[10px] text-stone/60 mt-1">{timeAgo(n.created_at)}</p>
+                  <p className="text-[10px] text-stone/60 mt-1">{timeAgo(n.created_at, locale)}</p>
                 </div>
                 {!n.read_at && <div className="w-2 h-2 rounded-full bg-henna shrink-0 mt-1.5" />}
               </button>

@@ -63,7 +63,7 @@ class SearchController extends Controller
         if ($type !== 'stores') {
             $pq = Product::active()
                 ->whereHas('seller', fn($sq) => $sq->where('status', 'verified'))
-                ->with(['primaryImage:id,product_id,image_path', 'seller:id,store_name,store_slug,logo_path', 'category:id,name'])
+                ->with(['primaryImage:id,product_id,image_path', 'seller:id,store_name,store_slug,logo_path', 'category:id,name,name_fr,name_ar'])
                 ->where(fn($sq) => $sq
                     ->where('name', 'LIKE', $like)
                     ->orWhere('short_description', 'LIKE', $like)
@@ -90,7 +90,17 @@ class SearchController extends Controller
                 default      => $pq->orderByRaw("CASE WHEN name LIKE ? THEN 0 ELSE 1 END, total_sales DESC", [$like]),
             };
 
-            $paginated    = $pq->paginate(20);
+            $locale = in_array($request->query('locale'), ['fr', 'ar']) ? $request->query('locale') : 'en';
+            $paginated = $pq->paginate(20);
+            $paginated->getCollection()->each(function ($product) use ($locale) {
+                if ($product->category) {
+                    $product->category->localised_name = match($locale) {
+                        'fr' => $product->category->name_fr ?? $product->category->name,
+                        'ar' => $product->category->name_ar ?? $product->category->name,
+                        default => $product->category->name,
+                    };
+                }
+            });
             $products     = $paginated;
             $totalProducts = $paginated->total();
         }

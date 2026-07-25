@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, Link, usePathname } from "@/i18n/navigation";
 import { Spinner, UserAvatar } from "@/components/ui";
 import Navbar from "@/components/layout/Navbar";
+import SupportFab from "@/components/support/SupportFab";
 import api from "@/lib/api";
 
 const PLAN_COLORS: Record<string, string> = {
@@ -14,7 +15,7 @@ const PLAN_COLORS: Record<string, string> = {
   premium: "bg-[#1f1b16]/10 text-[#1f1b16]",
 };
 
-interface Badges { pending_sellers?: number; pending_products?: number; unread_messages?: number }
+interface Badges { pending_sellers?: number; pending_products?: number; unread_messages?: number; pending_orders?: number; support_tickets?: number; unread_support?: number }
 interface ManagedAccount { id: number; name: string; plan: "managed" | "premium"; seller: { store_name: string; store_slug: string } | null }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -30,13 +31,69 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [managedOpen, setManagedOpen] = useState(false);
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [managedSubOpen, setManagedSubOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const prevBadges = useRef<Badges>({});
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 5000);
+  };
 
   useEffect(() => {
-    if (user?.role === "admin") {
-      api.get("/notifications").then(r => setBadges(r.data)).catch(() => {});
+    if (!user) return;
+
+    const fetchBadges = () =>
+      api.get("/notifications").then(r => {
+        const next: Badges = r.data;
+        const prev = prevBadges.current;
+
+        // Toast when admin gets new support ticket
+        if (user.role === "admin") {
+          const newTickets = (next.support_tickets ?? 0) - (prev.support_tickets ?? 0);
+          if (newTickets > 0 && Object.keys(prev).length > 0) {
+            showToast(newTickets === 1 ? "New support ticket received" : `${newTickets} new support tickets`);
+          }
+        }
+
+        // Toast when user gets a reply
+        if (user.role !== "admin") {
+          const newReplies = (next.unread_support ?? 0) - (prev.unread_support ?? 0);
+          if (newReplies > 0 && Object.keys(prev).length > 0) {
+            showToast("Your support ticket received a reply");
+          }
+        }
+
+        prevBadges.current = next;
+        setBadges(next);
+      }).catch(() => {});
+
+    fetchBadges();
+
+    if (user.role === "admin") {
       api.get("/admin/managed-sellers").then(r => setManagedAccounts(r.data)).catch(() => {});
     }
+
+    const pollInterval = setInterval(fetchBadges, 30000);
+
+    if (user.role === "seller") {
+      const fetchPending = () =>
+        api.get("/seller/orders/pending-count").then(r => {
+          setBadges(b => ({ ...b, pending_orders: r.data.count ?? 0 }));
+        }).catch(() => {});
+      fetchPending();
+      const orderId = setInterval(fetchPending, 15000);
+      return () => { clearInterval(pollInterval); clearInterval(orderId); };
+    }
+
+    return () => clearInterval(pollInterval);
   }, [user?.role]);
+
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
 
   // Auto-expand the managed section when on a managed-sellers page
   useEffect(() => {
@@ -91,8 +148,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Navbar />
 
       <div className="flex flex-1">
-      {/* Sidebar */}
-      <aside className="w-56 shrink-0 border-e border-stone/20 bg-white flex flex-col sticky top-16 self-start h-[calc(100vh-4rem)]">
+      {/* Mobile hamburger button */}
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className="md:hidden fixed bottom-5 start-5 z-40 bg-gold text-ink rounded-full w-12 h-12 flex items-center justify-center shadow-lg"
+        aria-label="Open menu"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div className="md:hidden fixed inset-0 z-40" onClick={() => setSidebarOpen(false)}>
+          <div className="absolute inset-0 bg-black/40" />
+        </div>
+      )}
+
+      {/* Desktop sidebar — always visible, sticky */}
+      <aside className="hidden md:flex w-56 shrink-0 border-e border-stone/20 bg-white flex-col sticky top-16 self-start h-[calc(100vh-4rem)] overflow-y-auto">
         {/* User info */}
         <div className="px-4 py-4 border-b border-stone/10 flex items-center gap-3">
           <UserAvatar name={user?.name} avatarPath={user?.avatar_path} size={40} />
@@ -206,8 +281,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {navLink("/admin/products", tAdmin("products"), badges.pending_products)}
               {navLink("/admin/orders", tAdmin("orders"))}
               {navLink("/admin/categories", tAdmin("categories"))}
+              {navLink("/admin/reviews", "Reviews")}
+              {navLink("/admin/subscriptions", "Subscriptions")}
               {navLink("/admin/conversations", tAdmin("conversations"), badges.unread_messages)}
               {navLink("/admin/penalties", tAdmin("penalties"))}
+              {navLink("/admin/support", tAdmin("support"), badges.support_tickets)}
             </>
           )}
 
@@ -222,8 +300,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               )}
               {/* only starter handles their own orders */}
               {user.plan === "starter" && (
-                navLink("/seller/orders", tSeller("incomingOrders"))
+                navLink("/seller/orders", tSeller("incomingOrders"), badges.pending_orders)
               )}
+              {navLink("/seller/reviews", tSeller("myReviews"))}
+              {navLink("/seller/subscription", "Subscription")}
             </>
           )}
 
@@ -231,7 +311,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {navLink("/profile", "My Profile")}
           {navLink("/customer/orders", t("myOrders"))}
           {navLink("/customer/wishlist", t("myWishlist"))}
-          {navLink("/messages", t("messages"))}
+          {navLink("/messages", t("messages"), badges.unread_messages)}
+          {navLink("/support/tickets", t("support"), badges.unread_support)}
         </nav>
 
         {/* Logout */}
@@ -245,8 +326,65 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
+      {/* Mobile sidebar — fixed overlay, slides in */}
+      <aside className={`md:hidden fixed inset-y-0 start-0 z-50 w-72 bg-white border-e border-stone/20 flex flex-col overflow-y-auto transition-transform duration-200 ${sidebarOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
+        {/* Close button */}
+        <div className="flex justify-end px-3 pt-3 shrink-0">
+          <button onClick={() => setSidebarOpen(false)} className="text-stone hover:text-ink p-1">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        {/* User info */}
+        <div className="px-4 py-3 border-b border-stone/10 flex items-center gap-3">
+          <UserAvatar name={user?.name} avatarPath={user?.avatar_path} size={40} />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-ink truncate">{user?.name}</p>
+            <p className="text-xs text-stone capitalize mt-0.5">{user?.role}</p>
+          </div>
+        </div>
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
+          {user?.role === "seller" && (
+            <>
+              <p className="text-[10px] uppercase tracking-widest text-stone px-3 mb-1">Store</p>
+              {user.plan === "starter" && navLink("/seller/store", tSeller("myStore"))}
+              {(user.plan === "starter" || user.plan === "managed") && navLink("/seller/products", tSeller("myProducts"))}
+              {user.plan === "starter" && navLink("/seller/orders", tSeller("incomingOrders"), badges.pending_orders)}
+              {navLink("/seller/reviews", tSeller("myReviews"))}
+              {navLink("/seller/subscription", "Subscription")}
+            </>
+          )}
+          {user?.role === "admin" && (
+            <>
+              {navLink("/admin/analytics", tAdmin("analytics"))}
+              {navLink("/admin/users", tAdmin("users"))}
+              {navLink("/admin/sellers", tAdmin("sellers"), badges.pending_sellers)}
+              {navLink("/admin/products", tAdmin("products"), badges.pending_products)}
+              {navLink("/admin/orders", tAdmin("orders"))}
+              {navLink("/admin/categories", tAdmin("categories"))}
+              {navLink("/admin/reviews", "Reviews")}
+              {navLink("/admin/subscriptions", "Subscriptions")}
+              {navLink("/admin/support", tAdmin("support"), badges.support_tickets)}
+            </>
+          )}
+          <p className="text-[10px] uppercase tracking-widest text-stone px-3 mt-3 mb-1">Account</p>
+          {navLink("/profile", "My Profile")}
+          {navLink("/customer/orders", t("myOrders"))}
+          {navLink("/customer/wishlist", t("myWishlist"))}
+          {navLink("/messages", t("messages"), badges.unread_messages)}
+          {navLink("/support/tickets", t("support"), badges.unread_support)}
+        </nav>
+        <div className="px-4 py-4 border-t border-stone/10 shrink-0">
+          <button onClick={handleLogout} className="text-sm text-stone hover:text-henna transition-colors w-full text-start">
+            {t("logout")}
+          </button>
+        </div>
+      </aside>
+
         {/* Main content */}
-        <main className="flex-1 min-w-0 p-6 md:p-8">
+        <main className="flex-1 min-w-0 p-4 md:p-8">
           {/* Plan banner for managed / premium sellers */}
           {user?.role === "seller" && user?.plan !== "starter" && (
             <div className={`mb-6 rounded-xl border px-5 py-4 flex items-start gap-4 ${
@@ -296,6 +434,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {children}
         </main>
       </div>
+      <SupportFab />
+
+      {/* Support notification toast */}
+      {toast && (
+        <div
+          className="fixed top-5 end-5 z-50 flex items-center gap-3 bg-[#1f1b16] text-white px-4 py-3 rounded-2xl shadow-xl text-sm font-medium animate-in slide-in-from-top-2 duration-300 max-w-xs"
+          onClick={() => setToast(null)}
+        >
+          <span className="w-8 h-8 rounded-full bg-amber-400/20 border border-amber-400/30 flex items-center justify-center shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </span>
+          <span className="flex-1">{toast}</span>
+          <button className="text-white/40 hover:text-white shrink-0" onClick={() => setToast(null)}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,19 +3,29 @@
 namespace App\Http\Controllers\Api\Seller;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
+use App\Support\NotificationMessages;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
+    public function pending(Request $request)
+    {
+        $seller = $request->user()->seller;
+        abort_if(!$seller, 404);
+        $count = Order::where('seller_id', $seller->id)->where('status', 'pending')->count();
+        return response()->json(['count' => $count]);
+    }
+
     public function index(Request $request)
     {
         $seller = $request->user()->seller;
         abort_if(!$seller, 404, 'No store found for this account.');
 
         $orders = $seller->orders()
-            ->with(['items', 'customer:id,name,phone'])
+            ->with(['items.product:id,slug', 'items.product.primaryImage:id,product_id,image_path', 'customer:id,name,phone'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -28,7 +38,7 @@ class OrderController extends Controller
         abort_if(!$seller, 404, 'No store found for this account.');
 
         $order = $seller->orders()
-            ->with(['items', 'customer:id,name,phone'])
+            ->with(['items.product:id,slug', 'items.product.primaryImage:id,product_id,image_path', 'customer:id,name,phone'])
             ->findOrFail($id);
 
         return response()->json($order);
@@ -82,9 +92,32 @@ class OrderController extends Controller
             if ($validated['status'] === 'delivered') {
                 $seller->increment('total_orders');
             }
+
+            // Notify the customer in their preferred language
+            $customer = $order->customer()->first();
+            $locale   = $customer?->locale ?? 'en';
+            $event    = 'order.' . $validated['status'];
+
+            $trackingSuffix = '';
+            if ($validated['status'] === 'shipped' && !empty($validated['tracking_number'])) {
+                $trackingSuffix = match ($locale) {
+                    'fr' => " Suivi : {$validated['tracking_number']}",
+                    'ar' => " رقم التتبع: {$validated['tracking_number']}",
+                    default => " Tracking: {$validated['tracking_number']}",
+                };
+            }
+
+            $events = ['order.confirmed', 'order.shipped', 'order.delivered', 'order.cancelled'];
+            if (in_array($event, $events)) {
+                [$title, $body] = NotificationMessages::get($event, $locale, [
+                    'number'   => $order->order_number,
+                    'tracking' => $trackingSuffix,
+                ]);
+                Notification::send($order->customer_id, 'order', $title, $body, '/customer/orders/' . $order->id, ['order_id' => $order->id]);
+            }
         });
 
-        return response()->json($order->fresh()->load(['items', 'customer:id,name,phone']));
+        return response()->json($order->fresh()->load(['items.product:id,slug', 'items.product.primaryImage:id,product_id,image_path', 'customer:id,name,phone']));
     }
 
     private function reverseStockAndSales(Order $order): void

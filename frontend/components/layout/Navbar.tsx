@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -10,6 +10,7 @@ import { UserAvatar } from "@/components/ui";
 import api from "@/lib/api";
 import SearchBar from "@/components/layout/SearchBar";
 import NotificationBell from "@/components/layout/NotificationBell";
+import MessagesBell from "@/components/layout/MessagesBell";
 
 const locales = [
   { code: "en", label: "EN" },
@@ -18,7 +19,6 @@ const locales = [
 ];
 
 function useNotifications(enabled: boolean) {
-  const [unreadMessages, setUnreadMessages] = useState(0);
   const [pendingSellers, setPendingSellers] = useState(0);
   const [pendingProducts, setPendingProducts] = useState(0);
 
@@ -27,7 +27,6 @@ function useNotifications(enabled: boolean) {
     const poll = async () => {
       try {
         const { data } = await api.get("/notifications");
-        setUnreadMessages(data.unread_messages ?? 0);
         setPendingSellers(data.pending_sellers ?? 0);
         setPendingProducts(data.pending_products ?? 0);
       } catch {}
@@ -37,7 +36,7 @@ function useNotifications(enabled: boolean) {
     return () => clearInterval(id);
   }, [enabled]);
 
-  return { unreadMessages, pendingSellers, pendingProducts };
+  return { pendingSellers, pendingProducts };
 }
 
 export default function Navbar() {
@@ -49,9 +48,11 @@ export default function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const { unreadMessages, pendingSellers, pendingProducts } = useNotifications(isAuthenticated);
+  const { pendingSellers, pendingProducts } = useNotifications(isAuthenticated);
   const urgentAdmin = pendingSellers + pendingProducts;
 
   const handleLogout = async () => {
@@ -83,7 +84,7 @@ export default function Navbar() {
       : []),
   ];
 
-  const menuItems = [
+  const menuItems: { href: string; label: string; icon: React.ReactNode; badge?: number }[] = [
     {
       href: "/profile",
       label: locale === "ar" ? "ملفي" : locale === "fr" ? "Mon profil" : "My Profile",
@@ -103,7 +104,6 @@ export default function Navbar() {
       href: "/messages",
       label: locale === "ar" ? "الرسائل" : locale === "fr" ? "Messages" : "Messages",
       icon: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
-      badge: unreadMessages,
     },
   ];
 
@@ -154,7 +154,7 @@ export default function Navbar() {
           </nav>
 
           {/* Right actions */}
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-0.5 sm:gap-2">
 
             {/* Locale switcher */}
             <div className="hidden sm:flex items-center rounded-sm border border-stone/20 divide-x divide-stone/20 overflow-hidden text-[11px]">
@@ -173,11 +173,11 @@ export default function Navbar() {
               ))}
             </div>
 
-            {/* Wishlist */}
+            {/* Wishlist — hidden on mobile, accessible from user menu */}
             {isAuthenticated && (
               <Link
                 href="/customer/wishlist"
-                className="relative p-2 text-stone hover:text-henna transition-colors rounded-sm hover:bg-sand"
+                className="relative hidden sm:inline-flex p-2 text-stone hover:text-henna transition-colors rounded-sm hover:bg-sand"
                 aria-label="Wishlist"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -187,22 +187,7 @@ export default function Navbar() {
             )}
 
             {/* Messages */}
-            {isAuthenticated && (
-              <Link
-                href="/messages"
-                className="relative p-2 text-stone hover:text-gold-deep transition-colors rounded-sm hover:bg-sand"
-                aria-label="Messages"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                </svg>
-                {unreadMessages > 0 && (
-                  <span className="absolute top-0.5 right-0.5 bg-henna text-white text-[9px] rounded-full min-w-[15px] h-[15px] px-0.5 flex items-center justify-center font-bold">
-                    {unreadMessages > 9 ? "9+" : unreadMessages}
-                  </span>
-                )}
-              </Link>
-            )}
+            {isAuthenticated && <MessagesBell />}
 
             {/* Notification bell */}
             {isAuthenticated && <NotificationBell />}
@@ -218,7 +203,7 @@ export default function Navbar() {
                 <circle cx="20" cy="21" r="1" />
                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
               </svg>
-              {totalItems > 0 && (
+              {mounted && totalItems > 0 && (
                 <span className="absolute top-0.5 right-0.5 bg-gold text-ink text-[9px] rounded-full min-w-[15px] h-[15px] px-0.5 flex items-center justify-center font-bold">
                   {totalItems}
                 </span>
@@ -230,7 +215,7 @@ export default function Navbar() {
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 ps-2 pe-1 py-1.5 rounded-sm hover:bg-sand transition-colors"
+                  className="flex items-center gap-1 sm:gap-2 p-1 sm:ps-2 sm:pe-1 sm:py-1.5 rounded-sm hover:bg-sand transition-colors"
                 >
                   <UserAvatar name={user?.name} avatarPath={user?.avatar_path} size={28} />
                   <span className="hidden sm:block text-sm text-ink font-medium">{user?.name?.split(" ")[0]}</span>
@@ -382,9 +367,8 @@ export default function Navbar() {
                 <Link href="/customer/wishlist" onClick={() => setMenuOpen(false)} className="px-3 py-2.5 text-sm text-ink rounded-sm hover:bg-sand">
                   {locale === "ar" ? "المفضلة" : locale === "fr" ? "Favoris" : "Wishlist"}
                 </Link>
-                <Link href="/messages" onClick={() => setMenuOpen(false)} className="px-3 py-2.5 text-sm text-ink rounded-sm hover:bg-sand flex items-center gap-2">
+                <Link href="/messages" onClick={() => setMenuOpen(false)} className="px-3 py-2.5 text-sm text-ink rounded-sm hover:bg-sand">
                   {locale === "ar" ? "الرسائل" : locale === "fr" ? "Messages" : "Messages"}
-                  {unreadMessages > 0 && <span className="bg-henna text-white text-[10px] rounded-full px-1.5 py-0.5">{unreadMessages}</span>}
                 </Link>
                 <div className="my-1 border-t border-stone/10" />
                 <button onClick={handleLogout} className="px-3 py-2.5 text-sm text-henna rounded-sm hover:bg-red-50 text-start">

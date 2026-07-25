@@ -1,4 +1,4 @@
-import { cache } from "react";
+import { cache, Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui";
 import { ProductActions } from "@/components/shop/ProductActions";
 import { ProductImageGallery } from "@/components/shop/ProductImageGallery";
 import { getImageUrl } from "@/lib/image";
+import { ProductReviews, ReviewsSkeleton } from "./ProductReviews";
 import type { Metadata } from "next";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
@@ -29,7 +30,7 @@ interface ProductDetail {
   rating: string;
   total_reviews: number;
   images: ProductImage[];
-  category?: { name: string; slug: string };
+  category?: { name: string; name_fr?: string; name_ar?: string; localised_name?: string; slug: string };
   seller?: {
     id: number;
     user_id: number;
@@ -40,18 +41,9 @@ interface ProductDetail {
   };
 }
 
-interface Review {
-  id: number;
-  rating: number;
-  title: string | null;
-  content: string;
-  created_at: string;
-  customer: { name: string };
-}
-
-const getProduct = cache(async (slug: string): Promise<ProductDetail | null> => {
+const getProduct = cache(async (slug: string, locale: string): Promise<ProductDetail | null> => {
   try {
-    const res = await fetch(`${API_URL}/products/${slug}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API_URL}/products/${slug}?locale=${locale}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     return res.json();
   } catch {
@@ -59,17 +51,6 @@ const getProduct = cache(async (slug: string): Promise<ProductDetail | null> => 
   }
 });
 
-const getReviews = cache(async (productId: number): Promise<Review[]> => {
-  try {
-    const res = await fetch(`${API_URL}/products/${productId}/reviews`, {
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
-    return [];
-  }
-});
 
 export async function generateMetadata({
   params,
@@ -77,7 +58,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const product = await getProduct(slug);
+  const product = await getProduct(slug, locale);
   if (!product) return { title: "Product not found" };
 
   const description = (product.short_description || product.description || "")
@@ -121,10 +102,9 @@ export default async function ProductDetailPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
-  const product = await getProduct(slug);
+  const product = await getProduct(slug, locale);
   if (!product) notFound();
 
-  const reviews = await getReviews(product.id);
   const t = await getTranslations({ locale, namespace: "products" });
 
   const primaryImage = product.images.find((i) => i.is_primary) ?? product.images[0];
@@ -171,7 +151,7 @@ export default async function ProductDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="mx-auto max-w-6xl px-6 py-10">
+      <div className="mx-auto max-w-6xl px-4 md:px-6 py-6 md:py-10">
         {/* Breadcrumb */}
         <nav className="text-xs text-stone mb-8 flex items-center gap-2">
           <Link href="/" className="hover:text-ink transition-colors">Home</Link>
@@ -184,7 +164,7 @@ export default async function ProductDetailPage({
                 href={`/products?category_id=${product.category.slug}`}
                 className="hover:text-ink transition-colors"
               >
-                {product.category.name}
+                {product.category.localised_name ?? product.category.name}
               </Link>
             </>
           )}
@@ -192,7 +172,7 @@ export default async function ProductDetailPage({
           <span className="text-ink line-clamp-1">{product.name}</span>
         </nav>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 lg:gap-16">
           {/* Images */}
           <ProductImageGallery images={product.images} productName={product.name} />
 
@@ -204,7 +184,7 @@ export default async function ProductDetailPage({
                 href={`/products?category_id=${product.category.slug}`}
                 className="text-xs text-stone uppercase tracking-widest hover:text-gold-deep transition-colors"
               >
-                {product.category.name}
+                {product.category.localised_name ?? product.category.name}
               </Link>
             )}
 
@@ -290,55 +270,10 @@ export default async function ProductDetailPage({
           </div>
         </div>
 
-        {/* Reviews */}
-        <div className="mt-16">
-          <div className="zellige-divider mb-10" />
-          <h2 className="font-display text-2xl text-ink mb-6">
-            {t("reviews")} ({product.total_reviews})
-          </h2>
-
-          {reviews.length === 0 ? (
-            <p className="text-stone text-sm">{t("noReviews")}</p>
-          ) : (
-            <div className="flex flex-col divide-y divide-stone/10">
-              {reviews.map((r) => (
-                <div key={r.id} className="py-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-ink">{r.customer.name}</span>
-                      <div className="flex">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <svg
-                            key={star}
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill={star <= r.rating ? "#c9a227" : "none"}
-                            stroke="#c9a227"
-                            strokeWidth="1.5"
-                          >
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                          </svg>
-                        ))}
-                      </div>
-                    </div>
-                    <time className="text-xs text-stone">
-                      {new Date(r.created_at).toLocaleDateString(locale, {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </time>
-                  </div>
-                  {r.title && (
-                    <p className="text-sm font-medium text-ink mb-1">{r.title}</p>
-                  )}
-                  <p className="text-sm text-stone leading-relaxed">{r.content}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Reviews — streamed separately so product renders first */}
+        <Suspense fallback={<ReviewsSkeleton />}>
+          <ProductReviews productId={product.id} totalReviews={product.total_reviews} locale={locale} />
+        </Suspense>
       </div>
     </>
   );

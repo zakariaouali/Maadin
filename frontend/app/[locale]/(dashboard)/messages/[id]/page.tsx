@@ -14,6 +14,7 @@ interface Message {
   sender_id: number;
   content: string;
   has_blocked_content: boolean;
+  is_read: boolean;
   created_at: string;
 }
 
@@ -50,6 +51,7 @@ function formatTime(dateStr: string) {
 }
 
 export default function ConversationPage() {
+  const t = useTranslations("messages");
   const params = useParams();
   const conversationId = params.id as string;
   const { user } = useAuth();
@@ -137,7 +139,7 @@ export default function ConversationPage() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto flex flex-col gap-3 pb-2 pr-1">
         {messages.length === 0 && (
-          <p className="text-stone text-sm text-center py-8">No messages yet. Say hi!</p>
+          <p className="text-stone text-sm text-center py-8">{t("noMessagesYet")}</p>
         )}
 
         {messages.map((m) => {
@@ -147,9 +149,9 @@ export default function ConversationPage() {
           return (
             <div key={m.id} className={`flex items-end gap-2 ${isMine ? "flex-row-reverse" : "flex-row"}`}>
               <Avatar name={senderName} avatarPath={senderAvatar} size={28} />
-              <div className={`flex flex-col gap-0.5 max-w-[72%] ${isMine ? "items-end" : "items-start"}`}>
+              <div className={`flex flex-col gap-0.5 max-w-[72%] min-w-0 overflow-hidden ${isMine ? "items-end" : "items-start"}`}>
                 <div
-                  className={`px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+                  className={`px-3 py-2 rounded-2xl text-sm leading-relaxed break-all min-w-0 w-full ${
                     isMine
                       ? "bg-gold text-ink rounded-br-sm"
                       : "bg-white border border-stone/20 text-ink rounded-bl-sm"
@@ -159,11 +161,25 @@ export default function ConversationPage() {
                   {m.has_blocked_content && (
                     <p className="text-[11px] text-henna mt-1 flex items-center gap-1">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                      Contact info was hidden
+                      {t("contactHidden")}
                     </p>
                   )}
                 </div>
-                <span className="text-[10px] text-stone px-1">{formatTime(m.created_at)}</span>
+                <div className={`flex items-center gap-1 px-1 ${isMine ? "flex-row-reverse" : ""}`}>
+                  <span className="text-[10px] text-stone">{formatTime(m.created_at)}</span>
+                  {isMine && (
+                    m.is_read ? (
+                      <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className="text-gold-deep" aria-label="Seen">
+                        <path d="M1 5l3 3 5-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M5 5l3 3 5-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    ) : (
+                      <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className="text-stone/40" aria-label="Sent">
+                        <path d="M3 5l3 3 5-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )
+                  )}
+                </div>
               </div>
             </div>
           );
@@ -183,7 +199,7 @@ export default function ConversationPage() {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Write a message… (Enter to send, Shift+Enter for new line)"
+          placeholder={t("placeholder")}
           rows={1}
           className="flex-1 resize-none border border-stone/30 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-gold-deep transition-colors leading-relaxed"
           style={{ maxHeight: 120, overflowY: "auto" }}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { Spinner } from "@/components/ui";
 import Image from "next/image";
@@ -20,6 +21,7 @@ function daysUntil(date: string | null) {
 }
 
 export default function ManagedSellersPage() {
+  const t = useTranslations("admin");
   const [accounts, setAccounts] = useState<ManagedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "managed" | "premium">("all");
@@ -41,13 +43,13 @@ export default function ManagedSellersPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="font-display text-2xl text-ink">Managed &amp; Premium Accounts</h1>
-          <p className="text-sm text-stone mt-0.5">{accounts.length} account{accounts.length !== 1 ? "s" : ""} you manage directly</p>
+          <h1 className="font-display text-2xl text-ink">{t("managedPremiumTitle")}</h1>
+          <p className="text-sm text-stone mt-0.5">{t("managedAccountsCount", { count: accounts.length })}</p>
         </div>
         {(expiredCount > 0 || urgentCount > 0) && (
           <div className="flex gap-2 flex-wrap">
-            {expiredCount > 0 && <span className="bg-henna/10 text-henna text-xs font-bold px-3 py-1.5 rounded-full">{expiredCount} expired</span>}
-            {urgentCount > 0  && <span className="bg-amber-50 text-amber-700 text-xs font-bold px-3 py-1.5 rounded-full animate-pulse">{urgentCount} expiring soon</span>}
+            {expiredCount > 0 && <span className="bg-henna/10 text-henna text-xs font-bold px-3 py-1.5 rounded-full">{t("expiredBadge", { count: expiredCount })}</span>}
+            {urgentCount > 0  && <span className="bg-amber-50 text-amber-700 text-xs font-bold px-3 py-1.5 rounded-full animate-pulse">{t("expiringSoonBadge", { count: urgentCount })}</span>}
           </div>
         )}
       </div>
@@ -55,10 +57,10 @@ export default function ManagedSellersPage() {
       {/* Stats strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { v: accounts.length, l: "Total",   c: "bg-white" },
-          { v: premiumCount,    l: "Premium", c: "bg-ink/5" },
-          { v: managedCount,    l: "Managed", c: "bg-gold/5" },
-          { v: accounts.filter(a => !a.seller).length, l: "No store yet", c: "bg-henna/5" },
+          { v: accounts.length, l: t("total"),      c: "bg-white" },
+          { v: premiumCount,    l: t("premium"),    c: "bg-ink/5" },
+          { v: managedCount,    l: t("managed"),    c: "bg-gold/5" },
+          { v: accounts.filter(a => !a.seller).length, l: t("noStoreYet"), c: "bg-henna/5" },
         ].map(s => (
           <div key={s.l} className={`${s.c} rounded-2xl border border-stone/10 p-4 text-center`}>
             <p className="text-2xl font-bold text-ink">{s.v}</p>
@@ -72,7 +74,7 @@ export default function ManagedSellersPage() {
         {(["all", "premium", "managed"] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)}
             className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${filter === f ? "bg-gold text-ink" : "text-stone hover:text-ink"}`}>
-            {f === "all" ? `All (${accounts.length})` : f === "premium" ? `Premium (${premiumCount})` : `Managed (${managedCount})`}
+            {f === "all" ? `${t("all")} (${accounts.length})` : f === "premium" ? `${t("premium")} (${premiumCount})` : `${t("managed")} (${managedCount})`}
           </button>
         ))}
       </div>
@@ -80,8 +82,8 @@ export default function ManagedSellersPage() {
       {/* Account cards */}
       {filtered.length === 0 ? (
         <div className="text-center py-20 text-stone">
-          <p className="text-lg font-medium">No accounts</p>
-          <p className="text-sm mt-1">Sellers who choose Managed or Premium plans will appear here.</p>
+          <p className="text-lg font-medium">{t("noAccounts")}</p>
+          <p className="text-sm mt-1">{t("noAccountsDesc")}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -105,24 +107,24 @@ export default function ManagedSellersPage() {
                     <p className="text-sm font-semibold text-ink">{a.seller?.store_name ?? a.name}</p>
                     <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${a.plan === "premium" ? "bg-ink/10 text-ink" : "bg-gold/15 text-gold-deep"}`}>{a.plan}</span>
                     {a.seller && (
-                      <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${a.seller.status === "verified" ? "bg-green-50 text-green-700" : "bg-henna/10 text-henna"}`}>{a.seller.status}</span>
+                      <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${a.seller.status === "verified" ? "bg-green-50 text-green-700" : "bg-henna/10 text-henna"}`}>{t(a.seller.status as "pending" | "verified" | "suspended")}</span>
                     )}
                   </div>
                   <p className="text-xs text-stone truncate">{a.email}</p>
-                  {!a.seller && <p className="text-[10px] text-henna mt-0.5 font-medium">No store created yet</p>}
+                  {!a.seller && <p className="text-[10px] text-henna mt-0.5 font-medium">{t("noStoreCreated")}</p>}
                 </div>
 
                 {/* Subscription */}
                 <div className="text-right shrink-0 hidden sm:block">
                   {a.monthly_fee && <p className="text-sm font-bold text-ink">{Number(a.monthly_fee).toLocaleString()} MAD/mo</p>}
                   {days === null ? (
-                    <p className="text-xs text-stone/50">No expiry set</p>
+                    <p className="text-xs text-stone/50">{t("noExpirySet")}</p>
                   ) : expired ? (
-                    <p className="text-xs text-henna font-semibold">Expired {Math.abs(days)}d ago</p>
+                    <p className="text-xs text-henna font-semibold">{t("expiredDaysAgo", { days: Math.abs(days) })}</p>
                   ) : urgent ? (
-                    <p className="text-xs text-amber-600 font-semibold animate-pulse">Expires in {days}d</p>
+                    <p className="text-xs text-amber-600 font-semibold animate-pulse">{t("expiresInDays", { days })}</p>
                   ) : (
-                    <p className="text-xs text-green-700 font-semibold">{days}d remaining</p>
+                    <p className="text-xs text-green-700 font-semibold">{t("daysRemainingShort", { days })}</p>
                   )}
                 </div>
 

@@ -12,7 +12,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $orders = $request->user()->orders()
-            ->with(['items', 'seller:id,store_name,store_slug'])
+            ->with(['items.product:id,slug', 'items.product.primaryImage:id,product_id,image_path', 'seller:id,store_name,store_slug'])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -22,7 +22,7 @@ class OrderController extends Controller
     public function show(Request $request, string $id)
     {
         $order = $request->user()->orders()
-            ->with(['items.product:id,slug', 'seller:id,store_name,store_slug'])
+            ->with(['items.product:id,slug', 'items.product.primaryImage:id,product_id,image_path', 'seller:id,store_name,store_slug'])
             ->findOrFail($id);
 
         return response()->json($order);

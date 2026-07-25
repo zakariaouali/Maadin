@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
+import { Link } from "@/i18n/navigation";
+import Image from "next/image";
+import { getImageUrl } from "@/lib/image";
 import { Alert, Button, EmptyState, OrderStatusBadge, PageHeader, Spinner } from "@/components/ui";
 
 interface OrderItem {
@@ -10,6 +13,7 @@ interface OrderItem {
   product_name: string;
   quantity: number;
   price_at_purchase: string;
+  product?: { slug: string; primary_image?: { image_path: string } | null } | null;
 }
 
 interface Order {
@@ -76,9 +80,28 @@ export default function SellerOrdersPage() {
 
   if (loading) return <div className="flex justify-center py-24"><Spinner size="lg" /></div>;
 
+  const pendingOrders = orders.filter((o) => o.status === "pending");
+
   return (
     <div className="max-w-3xl">
       <PageHeader title={t("incomingOrders")} />
+
+      {/* Urgent banner for pending orders */}
+      {pendingOrders.length > 0 && (
+        <div className="mb-6 flex items-center gap-3 bg-amber-50 border border-amber-300 rounded-sm px-5 py-4">
+          <span className="text-xl">🔔</span>
+          <div>
+            <p className="font-semibold text-amber-800 text-sm">
+              {pendingOrders.length === 1
+                ? "You have 1 new order waiting for confirmation!"
+                : `You have ${pendingOrders.length} new orders waiting for confirmation!`}
+            </p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              Confirm them below so customers know their order is being processed.
+            </p>
+          </div>
+        </div>
+      )}
 
       {successMsg && <Alert type="success" className="mb-6">{successMsg}</Alert>}
       {errorMsg && <Alert type="error" className="mb-6">{errorMsg}</Alert>}
@@ -92,11 +115,11 @@ export default function SellerOrdersPage() {
             const isUpdating = updating === order.id;
 
             return (
-              <div key={order.id} className="bg-white border border-stone/20 rounded-sm overflow-hidden">
+              <div key={order.id} className={`bg-white rounded-sm overflow-hidden ${order.status === "pending" ? "border-2 border-amber-300 shadow-sm shadow-amber-100" : "border border-stone/20"}`}>
                 {/* Header */}
-                <div className="flex items-center justify-between px-5 py-3 bg-sand border-b border-stone/10">
+                <div className={`flex items-center justify-between px-5 py-3 border-b ${order.status === "pending" ? "bg-amber-50 border-amber-200" : "bg-sand border-stone/10"}`}>
                   <div>
-                    <span className="font-mono text-sm font-medium text-ink">{order.order_number}</span>
+                    <Link href={`/seller/orders/${order.id}`} className="font-mono text-sm font-medium text-ink hover:text-gold-deep transition-colors">{order.order_number}</Link>
                     <span className="text-xs text-stone ms-3">
                       {new Date(order.created_at).toLocaleDateString()}
                     </span>
@@ -122,11 +145,18 @@ export default function SellerOrdersPage() {
                   {/* Items */}
                   <div className="divide-y divide-stone/10 border border-stone/15 rounded-sm">
                     {(order.items ?? []).map((item) => (
-                      <div key={item.id} className="flex justify-between items-center px-3 py-2 text-sm">
-                        <span className="text-ink">
+                      <div key={item.id} className="flex items-center gap-3 px-3 py-2 text-sm">
+                        <div className="w-10 h-10 rounded-md overflow-hidden bg-sand border border-stone/10 shrink-0 flex items-center justify-center">
+                          {item.product?.primary_image ? (
+                            <Image src={getImageUrl(item.product.primary_image.image_path) ?? ""} alt={item.product_name} width={40} height={40} className="object-cover w-full h-full" />
+                          ) : (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-stone/30"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                          )}
+                        </div>
+                        <span className="flex-1 text-ink">
                           {item.product_name} <span className="text-stone">×{item.quantity}</span>
                         </span>
-                        <span className="text-stone">{item.price_at_purchase} MAD</span>
+                        <span className="text-stone shrink-0">{item.price_at_purchase} MAD</span>
                       </div>
                     ))}
                   </div>

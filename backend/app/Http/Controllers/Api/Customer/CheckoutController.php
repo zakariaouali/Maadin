@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Api\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\IdempotencyKey;
+use App\Models\Notification;
+use App\Support\NotificationMessages;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Seller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -102,6 +105,17 @@ class CheckoutController extends Controller
                 }
 
                 $createdOrders[] = $order->load('items');
+
+                // Notify the seller about the new order
+                $store = Seller::with('user')->find($sellerId);
+                if ($store) {
+                    $locale = $store->user->locale ?? 'en';
+                    [$title, $body] = NotificationMessages::get('order.placed', $locale, [
+                        'number' => $order->order_number,
+                        'amount' => number_format($total, 2),
+                    ]);
+                    Notification::send($store->user_id, 'order', $title, $body, '/seller/orders/' . $order->id, ['order_id' => $order->id]);
+                }
             }
 
             // Record the idempotency key with the response, inside the same transaction

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\Seller;
 use Illuminate\Database\Seeder;
@@ -11,98 +12,139 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        // Map seller store names to categories + products
         $catalog = [
             'Layla Pottery' => [
                 'category' => 'Pottery',
                 'products' => [
-                    ['name' => 'Zellige Mosaic Tagine',        'price' => 380,  'stock' => 15, 'desc' => 'Hand-painted geometric zellige tagine from Fès, oven-safe. Each piece is unique.'],
-                    ['name' => 'Terracotta Serving Bowl',       'price' => 120,  'stock' => 30, 'desc' => 'Classic terracotta bowl, perfect for serving salads or fruit. Food-safe glaze.'],
-                    ['name' => 'Hand-painted Espresso Cup Set', 'price' => 210,  'stock' => 20, 'desc' => 'Set of 4 hand-painted ceramic espresso cups with traditional Moroccan motifs.'],
-                    ['name' => 'Decorative Wall Plate',         'price' => 95,   'stock' => 25, 'desc' => 'Painted blue and white wall plate, 30cm diameter. Ideal decorative piece.'],
+                    [
+                        'name'              => 'طاجين فخاري مزخرف بالزليج',
+                        'short_description' => 'طاجين مصنوع يدوياً من الفخار الأصيل، مزيّن بنقوش الزليج التقليدية.',
+                        'description'       => 'طاجين مراكشي أصيل مصنوع يدوياً من الفخار الطبيعي المستخرج من تربة المغرب. مزيّن بنقوش زليج هندسية دقيقة تعكس الحرفة العريقة. مناسب للطهي على النار المتوسطة وللتقديم على المائدة. كل قطعة فريدة لا تشبه الأخرى.',
+                        'price'             => 420,
+                        'stock'             => 12,
+                    ],
+                    [
+                        'name'              => 'طقم كيزان شاي مرقوم',
+                        'short_description' => 'طقم من 6 كيزان شاي مرقومة بالنقوش الأمازيغية، مصنوعة يدوياً.',
+                        'description'       => 'طقم كيزان الشاي الأمازيغية مصنوع يدوياً من الخزف الأبيض الناصع. كل كوب منقوش بزخارف أمازيغية تقليدية باللونين الأزرق والذهبي. الطقم يحتوي على 6 كيزان مع صينية خشبية مزينة. مثالي للضيافة المغربية الأصيلة.',
+                        'price'             => 280,
+                        'stock'             => 18,
+                    ],
                 ],
             ],
             'Tazi Leather' => [
                 'category' => 'Leather Goods',
                 'products' => [
-                    ['name' => 'Yellow Babouche Slippers',     'price' => 150,  'stock' => 40, 'desc' => 'Classic Marrakchi babouche in natural yellow leather. Handstitched by artisans.'],
-                    ['name' => 'Leather Shoulder Bag',          'price' => 450,  'stock' => 12, 'desc' => 'Soft genuine goat leather bag with Moroccan embossed pattern. Adjustable strap.'],
-                    ['name' => 'Embossed Leather Wallet',       'price' => 180,  'stock' => 35, 'desc' => 'Slim bifold wallet in hand-embossed camel leather with multiple card slots.'],
+                    [
+                        'name'              => 'بلغة مراكشية جلد طبيعي',
+                        'short_description' => 'بلغة تقليدية مصنوعة من الجلد الطبيعي الأصفر المدبوغ بمراكش.',
+                        'description'       => 'البلغة المراكشية التقليدية مصنوعة يدوياً من الجلد الطبيعي المدبوغ بالطريقة التقليدية في دور الدباغة العريقة. تتميز بخياطة يدوية دقيقة ونعل مريح. متوفرة بألوان متعددة: الأصفر الكلاسيكي، العسلي، والبني الداكن. تعكس أصالة الصنعة المراكشية.',
+                        'price'             => 180,
+                        'stock'             => 35,
+                    ],
+                    [
+                        'name'              => 'حقيبة كتف جلدية مطرزة',
+                        'short_description' => 'حقيبة كتف من الجلد الطبيعي مزينة بتطريز يدوي تقليدي.',
+                        'description'       => 'حقيبة كتف نسائية فاخرة مصنوعة من الجلد الطبيعي الأصيل. مزينة بتطريز يدوي بالخيوط الحريرية الملونة بأنماط مغربية تقليدية. تحتوي على جيب داخلي للهاتف وحقيبة خارجية صغيرة. قابل للحمل على الكتف أو باليد.',
+                        'price'             => 550,
+                        'stock'             => 10,
+                    ],
                 ],
             ],
             'Ouazzani Textiles' => [
                 'category' => 'Textiles',
                 'products' => [
-                    ['name' => 'Beni Ourain Wool Rug 120×180', 'price' => 1200, 'stock' => 5,  'desc' => 'Authentic Beni Ourain rug, hand-knotted by Berber women. Natural undyed wool.'],
-                    ['name' => 'Pompom Throw Blanket',          'price' => 280,  'stock' => 18, 'desc' => 'Cotton and wool blend blanket with colourful pompom trim. Machine washable.'],
-                    ['name' => 'Berber Cushion Cover',          'price' => 95,   'stock' => 50, 'desc' => 'Flat-weave cushion cover with traditional geometric diamond pattern. 45×45cm.'],
+                    [
+                        'name'              => 'زربية بني وراين صوف طبيعي',
+                        'short_description' => 'زربية بني وراين أصيلة منسوجة يدوياً من الصوف الطبيعي غير المصبوغ.',
+                        'description'       => 'زربية بني وراين الأمازيغية الأصيلة، منسوجة يدوياً على النول التقليدي من صوف الأغنام الطبيعي غير المصبوغ. تتميز بنقوشها الهندسية المميزة باللونين الأبيض الكريمي والأسود. حجمها 120×180 سم، مثالية للصالون والغرف. كل زربية تحمل روح الأطلس المغربي.',
+                        'price'             => 1400,
+                        'stock'             => 4,
+                    ],
+                    [
+                        'name'              => 'غطاء وسادة تطريز رباطي',
+                        'short_description' => 'غطاء وسادة مطرز بالتطريز الرباطي الأصيل بخيوط حريرية.',
+                        'description'       => 'غطاء وسادة فاخر مصنوع من القماش الأبيض الناصع ومطرز يدوياً بأنماط التطريز الرباطي العريق. يستخدم خيوطاً حريرية ذهبية وملونة بزخارف نباتية وهندسية متقنة. المقاس 45×45 سم. يمنح المكان طابعاً أندلسياً راقياً.',
+                        'price'             => 120,
+                        'stock'             => 40,
+                    ],
                 ],
             ],
             'Tahiri Lamps' => [
                 'category' => 'Metalwork',
                 'products' => [
-                    ['name' => 'Brass Star Lantern Large',      'price' => 650,  'stock' => 8,  'desc' => 'Hand-pierced brass lantern with 8-point star pattern. 40cm height. Includes E27 fitting.'],
-                    ['name' => 'Copper Pendant Lamp',           'price' => 420,  'stock' => 14, 'desc' => 'Hammered copper ceiling pendant with intricate floral cutouts. 30cm diameter.'],
-                    ['name' => 'Table Lantern Trio Set',        'price' => 380,  'stock' => 10, 'desc' => 'Set of 3 small brass table lanterns in varying heights. Perfect as a centrepiece.'],
-                    ['name' => 'Moroccan Floor Lamp',           'price' => 900,  'stock' => 6,  'desc' => 'Standing floor lamp in wrought iron with coloured glass mosaic panels. 150cm.'],
+                    [
+                        'name'              => 'فانوس نحاسي كبير نجمة ثمانية',
+                        'short_description' => 'فانوس نحاسي منقوش يدوياً بنقش نجمة الثمانية المغربية الأصيلة.',
+                        'description'       => 'فانوس نحاسي فاخر مصنوع يدوياً من النحاس الأصفر الخالص. منقوش بنقش نجمة الثمانية المغربية بتفاصيل دقيقة جداً تسمح للضوء بالعبور وخلق أجواء ساحرة. الارتفاع 45 سم. مناسب للمداخل والصالونات والفنادق.',
+                        'price'             => 750,
+                        'stock'             => 7,
+                    ],
+                    [
+                        'name'              => 'مصباح معلق نحاسي بزخارف هندسية',
+                        'short_description' => 'مصباح سقف معلق من النحاس المطرق بزخارف هندسية مغربية.',
+                        'description'       => 'مصباح سقف معلق مصنوع يدوياً من النحاس الأصفر المطروق. يتميز بزخارف هندسية مغربية دقيقة محفورة باليد على سطح القبة. القطر 35 سم. يُعطي المكان إضاءة دافئة وأجواء مغربية أصيلة. يأتي مع سلك تعليق بطول مترين.',
+                        'price'             => 480,
+                        'stock'             => 11,
+                    ],
                 ],
             ],
             'Idrissi Jewels' => [
                 'category' => 'Jewelry',
                 'products' => [
-                    ['name' => 'Berber Silver Cuff Bracelet',   'price' => 320,  'stock' => 20, 'desc' => 'Wide sterling silver cuff with hand-stamped Tifinagh script. Adjustable size.'],
-                    ['name' => 'Fatima Hand Pendant Necklace',  'price' => 185,  'stock' => 30, 'desc' => 'Delicate Khamsa pendant on an 18" oxidised silver chain. 925 silver.'],
-                    ['name' => 'Amber Resin Earrings',          'price' => 140,  'stock' => 25, 'desc' => 'Oval amber resin drop earrings set in silver filigree. Lightweight and elegant.'],
+                    [
+                        'name'              => 'أسورة فضية أمازيغية منقوشة',
+                        'short_description' => 'أسورة فضة خالصة منقوشة بالكتابة التيفيناغ الأمازيغية يدوياً.',
+                        'description'       => 'أسورة واسعة مصنوعة من الفضة الخالصة عيار 925. منقوشة يدوياً بحروف التيفيناغ الأمازيغية ورموز البركة والحماية التقليدية. قابلة للتعديل لتناسب جميع المقاسات. تحمل روح الموروث الأمازيغي المغربي الأصيل.',
+                        'price'             => 380,
+                        'stock'             => 15,
+                    ],
+                    [
+                        'name'              => 'قلادة خمسة فضة مع كهرمان',
+                        'short_description' => 'قلادة يد فاطمة من الفضة مرصعة بحبات الكهرمان الطبيعي.',
+                        'description'       => 'قلادة يد فاطمة (الخمسة) الرمز الأشهر للحماية في الثقافة المغربية. مصنوعة يدوياً من الفضة الخالصة عيار 925 ومرصعة بحبات الكهرمان البرتقالي الطبيعي. على سلسلة فضية طولها 45 سم. تجمع بين الجمال التقليدي والمعنى الروحي.',
+                        'price'             => 220,
+                        'stock'             => 22,
+                    ],
                 ],
             ],
         ];
 
         foreach ($catalog as $storeName => $data) {
             $seller = Seller::where('store_name', $storeName)->first();
-            if (! $seller) continue;
+            if (!$seller) continue;
 
-            $category = \App\Models\Category::where('name', $data['category'])->first();
-            if (! $category) continue;
+            $category = Category::where('name', $data['category'])->first();
 
-            foreach ($data['products'] as $i => $p) {
+            foreach ($data['products'] as $p) {
                 Product::create([
-                    'seller_id'      => $seller->id,
-                    'category_id'    => $category->id,
-                    'name'           => $p['name'],
-                    'slug'           => $this->uniqueSlug($p['name']),
-                    'description'    => $p['desc'],
-                    'price'          => $p['price'],
-                    'stock_quantity' => $p['stock'],
-                    'is_active'      => true,
-                    'is_approved'    => true,
+                    'seller_id'         => $seller->id,
+                    'category_id'       => $category?->id,
+                    'name'              => $p['name'],
+                    'slug'              => $this->uniqueSlug($p['name']),
+                    'short_description' => $p['short_description'],
+                    'description'       => $p['description'],
+                    'price'             => $p['price'],
+                    'stock_quantity'    => $p['stock'],
+                    'is_approved'       => true,
+                    'is_active'         => true,
                 ]);
             }
-        }
-
-        // Add one pending product (not yet approved) for Layla
-        $layla = Seller::where('store_name', 'Layla Pottery')->first();
-        $cat   = \App\Models\Category::where('name', 'Pottery')->first();
-        if ($layla && $cat) {
-            Product::create([
-                'seller_id'      => $layla->id,
-                'category_id'    => $cat->id,
-                'name'           => 'Blue Glazed Tajine Lid',
-                'slug'           => 'blue-glazed-tajine-lid',
-                'description'    => 'Replacement tajine lid in blue celadon glaze. Fits standard 28cm base.',
-                'price'          => 75,
-                'stock_quantity' => 20,
-                'is_active'      => true,
-                'is_approved'    => false, // pending admin approval
-            ]);
         }
     }
 
     private function uniqueSlug(string $name): string
     {
-        $slug = Str::slug($name); $orig = $slug; $i = 1;
+        $slug     = Str::slug($name);
+        if (!$slug) $slug = 'product-' . uniqid();
+        $original = $slug;
+        $i        = 1;
+
         while (Product::where('slug', $slug)->exists()) {
-            $slug = "{$orig}-{$i}"; $i++;
+            $slug = "{$original}-{$i}";
+            $i++;
         }
+
         return $slug;
     }
 }

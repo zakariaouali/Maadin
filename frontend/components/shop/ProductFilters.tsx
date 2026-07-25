@@ -8,6 +8,7 @@ import { useCallback } from "react";
 interface Category {
   id: number;
   name: string;
+  localised_name: string;
 }
 
 interface ProductFiltersProps {
@@ -71,7 +72,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
         <option value="">{t("allCategories")}</option>
         {categories.map((c) => (
           <option key={c.id} value={c.id}>
-            {c.name}
+            {c.localised_name}
           </option>
         ))}
       </select>

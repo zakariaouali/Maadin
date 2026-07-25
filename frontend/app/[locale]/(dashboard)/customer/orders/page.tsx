@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
+import { Link } from "@/i18n/navigation";
+import Image from "next/image";
+import { getImageUrl } from "@/lib/image";
 import { Alert, Badge, Button, EmptyState, OrderStatusBadge, PageHeader, Spinner } from "@/components/ui";
 
 interface OrderItem {
@@ -12,6 +15,7 @@ interface OrderItem {
   product_name: string;
   quantity: number;
   price_at_purchase: string;
+  product?: { slug: string; primary_image?: { image_path: string } | null } | null;
 }
 
 interface Order {
@@ -137,6 +141,13 @@ export default function CustomerOrdersPage() {
                   return (
                     <div key={item.id} className="py-3 first:pt-0 last:pb-0">
                       <div className="flex items-start justify-between gap-4">
+                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-sand border border-stone/10 shrink-0 flex items-center justify-center">
+                          {item.product?.primary_image ? (
+                            <Image src={getImageUrl(item.product.primary_image.image_path) ?? ""} alt={item.product_name} width={48} height={48} className="object-cover w-full h-full" />
+                          ) : (
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-stone/30"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                          )}
+                        </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-ink">{item.product_name}</p>
                           <p className="text-xs text-stone mt-0.5">
@@ -221,7 +232,9 @@ export default function CustomerOrdersPage() {
 
               {/* Order footer */}
               <div className="px-5 py-3 border-t border-stone/10 flex justify-between items-center">
-                <span className="text-xs text-stone">{order.shipping_city}</span>
+                <Link href={`/customer/orders/${order.id}`} className="text-xs text-gold-deep hover:underline">
+                  {t("orderDetail")}
+                </Link>
                 <span className="text-sm font-semibold text-ink">{order.total_price} MAD</span>
               </div>
             </div>

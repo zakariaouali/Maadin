@@ -71,20 +71,22 @@ export default function AdminUsersPage() {
       : (
         <div className="bg-white border border-stone/20 rounded-sm divide-y divide-stone/10">
           {users.map(u => (
-            <div key={u.id} className="flex items-center gap-4 px-5 py-3.5">
-              <div className="w-9 h-9 rounded-full bg-sand-dark flex items-center justify-center text-stone font-semibold text-sm shrink-0">
-                {u.name.charAt(0).toUpperCase()}
+            <div key={u.id} className="px-4 py-3.5">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-full bg-sand-dark flex items-center justify-center text-stone font-semibold text-sm shrink-0 mt-0.5">
+                  {u.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <p className="text-sm font-medium text-ink">{u.name}</p>
+                    <Badge variant={u.role==="seller"?"gold":"default"} className="capitalize">{u.role}</Badge>
+                    <Badge variant={SV[u.status]??"default"}>{u.status}</Badge>
+                  </div>
+                  <p className="text-xs text-stone truncate mt-0.5">{u.email}</p>
+                  {u.last_login_at && <p className="text-xs text-stone/60 mt-0.5">{t("lastLogin")}: {new Date(u.last_login_at).toLocaleDateString()}</p>}
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-ink">{u.name}</p>
-                <p className="text-xs text-stone truncate">{u.email}</p>
-                {u.last_login_at && <p className="text-xs text-stone/60">{t("lastLogin")}: {new Date(u.last_login_at).toLocaleDateString()}</p>}
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <Badge variant={u.role==="seller"?"gold":"default"} className="capitalize">{u.role}</Badge>
-                <Badge variant={SV[u.status]??"default"}>{u.status}</Badge>
-              </div>
-              <div className="flex gap-1.5 shrink-0">
+              <div className="flex flex-wrap gap-1.5 mt-2 ms-12">
                 {u.status!=="active" && <Button size="sm" variant="primary" loading={acting===u.id} onClick={() => updateStatus(u.id,"active")}>{t("activate")}</Button>}
                 {u.status==="active" && <Button size="sm" variant="secondary" loading={acting===u.id} onClick={() => updateStatus(u.id,"suspended")}>{t("suspend")}</Button>}
                 {u.status!=="banned" && <Button size="sm" variant="danger" loading={acting===u.id} onClick={() => { if(window.confirm("Ban this user?")) updateStatus(u.id,"banned"); }}>{t("ban")}</Button>}

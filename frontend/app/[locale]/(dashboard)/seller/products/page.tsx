@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { getImageUrl, normalizeImageFile } from "@/lib/image";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { Alert, Badge, Button, EmptyState, Input, Modal, PageHeader, Spinner } from "@/components/ui";
 
 const MAX_IMAGES = 5;
@@ -132,10 +133,11 @@ export default function SellerProductsPage() {
       } else {
         const { data: newProduct } = await api.post("/seller/products", payload);
         if (formFiles.length > 0) {
-          const fd = new FormData();
-          formFiles.forEach((f) => fd.append("images[]", normalizeImageFile(f)));
-          await api.post(`/seller/products/${newProduct.id}/images`, fd, {
-            headers: { "Content-Type": "multipart/form-data" },
+          const uploaded = await Promise.all(
+            formFiles.map((f) => uploadToCloudinary(normalizeImageFile(f), "products"))
+          );
+          await api.post(`/seller/products/${newProduct.id}/images`, {
+            image_urls: uploaded.map((r) => r.secure_url),
           });
         }
         setSuccess(t("productCreated"));
@@ -175,11 +177,12 @@ export default function SellerProductsPage() {
     const toUpload = Array.from(files).slice(0, remaining);
     if (toUpload.length === 0) return;
     setUploadingImages(true);
-    const fd = new FormData();
-    toUpload.forEach((f) => fd.append("images[]", normalizeImageFile(f)));
     try {
-      await api.post(`/seller/products/${imagesProductId}/images`, fd, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const uploaded = await Promise.all(
+        toUpload.map((f) => uploadToCloudinary(normalizeImageFile(f), "products"))
+      );
+      await api.post(`/seller/products/${imagesProductId}/images`, {
+        image_urls: uploaded.map((r) => r.secure_url),
       });
       await loadImages(imagesProductId);
     } catch (err: any) {
@@ -257,42 +260,41 @@ export default function SellerProductsPage() {
             const imageUrl = getImageUrl(primaryImage?.image_path);
 
             return (
-              <div key={p.id} className="bg-white border border-stone/20 rounded-sm flex items-center gap-4 p-4">
-                <div className="relative w-14 h-14 shrink-0 bg-sand-dark rounded-sm overflow-hidden">
-                  {imageUrl ? (
-                    <Image src={imageUrl} alt={p.name} fill className="object-cover" sizes="56px" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-stone/30">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" />
-                      </svg>
+              <div key={p.id} className="bg-white border border-stone/20 rounded-sm p-4">
+                {/* Image + info + badges */}
+                <div className="flex items-start gap-3">
+                  <div className="relative w-14 h-14 shrink-0 bg-sand-dark rounded-sm overflow-hidden">
+                    {imageUrl ? (
+                      <Image src={imageUrl} alt={p.name} fill className="object-cover" sizes="56px" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-stone/30">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-ink truncate">{p.name}</p>
+                    <p className="text-xs text-stone mt-0.5">
+                      {p.category?.name} · {p.price} MAD · Stock: {p.stock_quantity}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                      {p.is_approved ? (
+                        <Badge variant="success">Approved</Badge>
+                      ) : (
+                        <Badge variant="warning">Pending review</Badge>
+                      )}
+                      {p.is_approved && (
+                        <Badge variant="default" className={p.is_active ? "text-stone" : "opacity-50"}>
+                          {p.is_active ? t("active") : t("hidden")}
+                        </Badge>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-ink truncate">{p.name}</p>
-                  <p className="text-xs text-stone mt-0.5">
-                    {p.category?.name} · {p.price} MAD · Stock: {p.stock_quantity}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {/* Approval status */}
-                  {p.is_approved ? (
-                    <Badge variant="success">Approved</Badge>
-                  ) : (
-                    <Badge variant="warning">Pending review</Badge>
-                  )}
-                  {/* Visibility — only relevant once approved */}
-                  {p.is_approved && (
-                    <Badge variant={p.is_active ? "default" : "default"} className={p.is_active ? "text-stone" : "opacity-50"}>
-                      {p.is_active ? t("active") : t("hidden")}
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
+                {/* Actions */}
+                <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-stone/10">
                   <Button size="sm" variant="secondary" onClick={() => openImages(p.id)}>
                     {t("images")} {p.images ? `(${p.images.length}/${MAX_IMAGES})` : ""}
                   </Button>

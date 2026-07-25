@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useAuth } from "@/lib/auth-context";
 import api from "@/lib/api";
 import { getImageUrl, normalizeImageFile } from "@/lib/image";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { Alert, Button, PageHeader, Spinner } from "@/components/ui";
 
 export default function ProfilePage() {
@@ -48,11 +49,12 @@ export default function ProfilePage() {
     e.preventDefault();
     setSaving(true); setError(""); setSuccess("");
     try {
-      const fd = new FormData();
-      fd.append("name", name);
-      fd.append("phone", phone);
-      if (avatarFile) fd.append("avatar", avatarFile);
-      await api.post("/me/profile", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      const payload: Record<string, string> = { name, phone };
+      if (avatarFile) {
+        const result = await uploadToCloudinary(avatarFile, "avatars");
+        payload.avatar_url = result.secure_url;
+      }
+      await api.post("/me/profile", payload);
       await refetchUser();
       setAvatarFile(null);
       setPreview(null);

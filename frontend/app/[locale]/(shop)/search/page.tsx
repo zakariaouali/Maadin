@@ -16,7 +16,7 @@ interface Product {
   seller_id: number; stock_quantity: number;
   primary_image?: { image_path: string } | null;
   seller?: { store_name: string; store_slug: string; logo_path: string | null } | null;
-  category?: { name: string } | null;
+  category?: { name: string; localised_name?: string } | null;
 }
 interface Store {
   id: number; store_name: string; store_slug: string; logo_path: string | null;
@@ -62,7 +62,7 @@ function SearchPageInner() {
     if (!q.trim()) return;
     setLoading(true);
     try {
-      const params = new URLSearchParams({ q, sort, page: String(page) });
+      const params = new URLSearchParams({ q, sort, page: String(page), locale });
       if (tab === "products") params.set("type", "products");
       if (tab === "stores")   params.set("type", "stores");
       const res = await fetch(`${API_URL}/search?${params}`);
@@ -156,6 +156,7 @@ function SearchPageInner() {
                     price={Number(p.price)}
                     rating={Number(p.rating)}
                     imagePath={p.primary_image?.image_path}
+                    categoryName={p.category?.localised_name ?? p.category?.name}
                     storeName={p.seller?.store_name}
                     storeSlug={p.seller?.store_slug}
                     storeLogoPath={p.seller?.logo_path ?? undefined}

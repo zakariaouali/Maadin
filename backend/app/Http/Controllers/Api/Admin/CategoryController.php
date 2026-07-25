@@ -31,16 +31,19 @@ class CategoryController extends Controller
             'parent_id'     => 'nullable|exists:categories,id',
             'display_order' => 'nullable|integer',
             'is_active'     => 'nullable|boolean',
+            'icon_url'      => 'nullable|string|url|max:1000',
             'image'         => 'nullable|file|mimetypes:image/jpeg,image/png,image/webp|max:2048',
         ]);
 
         $validated['slug'] = $this->generateUniqueSlug($validated['name']);
 
-        if ($request->hasFile('image')) {
+        if ($request->filled('icon_url')) {
+            $validated['icon_path'] = $validated['icon_url'];
+        } elseif ($request->hasFile('image')) {
             $validated['icon_path'] = $this->images->upload($request->file('image'), 'categories');
         }
 
-        unset($validated['image']);
+        unset($validated['image'], $validated['icon_url']);
 
         $category = Category::create($validated);
 
@@ -64,6 +67,7 @@ class CategoryController extends Controller
             'parent_id'     => 'nullable|exists:categories,id',
             'display_order' => 'nullable|integer',
             'is_active'     => 'nullable|boolean',
+            'icon_url'      => 'nullable|string|url|max:1000',
             'image'         => 'nullable|file|mimetypes:image/jpeg,image/png,image/webp|max:2048',
         ]);
 
@@ -71,14 +75,16 @@ class CategoryController extends Controller
             $validated['slug'] = $this->generateUniqueSlug($validated['name'], $category->id);
         }
 
-        if ($request->hasFile('image')) {
+        if ($request->filled('icon_url')) {
+            $validated['icon_path'] = $validated['icon_url'];
+        } elseif ($request->hasFile('image')) {
             if ($category->icon_path) {
                 $this->images->delete($category->icon_path);
             }
             $validated['icon_path'] = $this->images->upload($request->file('image'), 'categories');
         }
 
-        unset($validated['image']);
+        unset($validated['image'], $validated['icon_url']);
 
         $category->update($validated);
 

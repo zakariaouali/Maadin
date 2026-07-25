@@ -16,24 +16,27 @@ interface Product {
   stock_quantity: number;
   primary_image?: { image_path: string };
   seller?: { id: number; store_name: string; store_slug: string; logo_path: string | null };
-  category?: { name: string };
+  category?: { name: string; localised_name?: string };
 }
 
 interface Category {
   id: number;
   name: string;
+  localised_name: string;
 }
 
 async function fetchProducts(p: {
   category_id?: string;
   search?: string;
   sort?: string;
+  locale?: string;
 }): Promise<Product[]> {
   try {
     const q = new URLSearchParams();
     if (p.category_id) q.set("category_id", p.category_id);
     if (p.search) q.set("search", p.search);
     if (p.sort) q.set("sort", p.sort);
+    if (p.locale) q.set("locale", p.locale);
     q.set("per_page", "24");
     const res = await fetch(`${API_URL}/products?${q}`, { next: { revalidate: 30 } });
     if (!res.ok) return [];
@@ -44,9 +47,9 @@ async function fetchProducts(p: {
   }
 }
 
-async function fetchCategories(): Promise<Category[]> {
+async function fetchCategories(locale: string): Promise<Category[]> {
   try {
-    const res = await fetch(`${API_URL}/categories`, { next: { revalidate: 300 } });
+    const res = await fetch(`${API_URL}/categories?locale=${locale}`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
     return res.json();
   } catch {
@@ -101,12 +104,12 @@ export default async function ProductsPage({
   const t = await getTranslations({ locale, namespace: "products" });
 
   const [products, categories] = await Promise.all([
-    fetchProducts({ category_id, search, sort }),
-    fetchCategories(),
+    fetchProducts({ category_id, search, sort, locale }),
+    fetchCategories(locale),
   ]);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto max-w-6xl px-4 md:px-6 py-6 md:py-10">
       <h1 className="font-display text-3xl text-ink mb-8">{t("title")}</h1>
 
       {/* Filters are client-side but wrapped in Suspense for useSearchParams */}
@@ -137,7 +140,7 @@ export default async function ProductsPage({
               storeName={p.seller?.store_name}
               storeSlug={p.seller?.store_slug}
               storeLogoPath={p.seller?.logo_path ?? undefined}
-              categoryName={p.category?.name}
+              categoryName={p.category?.localised_name ?? p.category?.name}
               imagePath={p.primary_image?.image_path}
               sellerId={p.seller?.id ?? 0}
               stockQuantity={p.stock_quantity ?? 0}

@@ -8,6 +8,7 @@ use App\Models\Message;
 use App\Models\Notification;
 use App\Models\User;
 use App\Services\ContentFilterService;
+use App\Support\NotificationMessages;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
@@ -21,12 +22,21 @@ class MessageController extends Controller
 
         $conversations = Conversation::where('buyer_id', $userId)
             ->orWhere('seller_id', $userId)
-            ->with(['buyer:id,name,avatar_path', 'seller:id,name,avatar_path', 'product:id,name,slug'])
+            ->with([
+                'buyer:id,name,avatar_path',
+                'seller:id,name,avatar_path',
+                'product:id,name,slug',
+                'messages' => fn($q) => $q->latest()->limit(1),
+            ])
             ->withCount(['messages as unread_count' => function ($q) use ($userId) {
                 $q->where('receiver_id', $userId)->where('is_read', false);
             }])
             ->orderBy('last_message_at', 'desc')
-            ->get();
+            ->get()
+            ->each(function ($c) {
+                $c->last_message = $c->messages->first();
+                unset($c->messages);
+            });
 
         return response()->json($conversations);
     }
@@ -110,12 +120,19 @@ class MessageController extends Controller
 
         $conversation->update(['last_message_at' => now()]);
 
-        // Notify the receiver
+        // Notify the receiver in their preferred language
+        $receiver = User::find($receiverId);
+        $locale   = $receiver?->locale ?? 'en';
+        $preview  = mb_substr(strip_tags($filtered['content']), 0, 100);
+        [$title, $body] = NotificationMessages::get('message.received', $locale, [
+            'sender'  => $sender->name,
+            'preview' => $preview,
+        ]);
         Notification::create([
             'user_id' => $receiverId,
             'type'    => 'message',
-            'title'   => "New message from {$sender->name}",
-            'body'    => mb_substr(strip_tags($filtered['content']), 0, 100),
+            'title'   => $title,
+            'body'    => $body,
             'link'    => "/messages/{$conversation->id}",
             'data'    => ['conversation_id' => $conversation->id, 'sender_id' => $sender->id],
         ]);

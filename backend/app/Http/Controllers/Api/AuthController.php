@@ -7,7 +7,11 @@ use App\Models\User;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Mail\PasswordResetMail;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
@@ -27,6 +31,9 @@ class AuthController extends Controller
 
         $role = $request->role ?? 'customer';
 
+        $locale = $request->header('X-Locale');
+        $locale = in_array($locale, ['en', 'fr', 'ar']) ? $locale : 'en';
+
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
@@ -35,6 +42,7 @@ class AuthController extends Controller
             'role'     => $role,
             'plan'     => $role === 'seller' ? ($request->plan ?? 'starter') : 'starter',
             'status'   => 'active',
+            'locale'   => $locale,
         ]);
 
         Auth::login($user);
@@ -70,15 +78,20 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
-        $user->update(['last_login_at' => now()]);
+        $updateData = ['last_login_at' => now()];
+        $locale = $request->header('X-Locale') ?? $request->input('locale');
+        if ($locale && in_array($locale, ['en', 'fr', 'ar'])) {
+            $updateData['locale'] = $locale;
+        }
+        $user->update($updateData);
 
         return response()->json(['user' => $user]);
     }
 
-    // ME (TEST AUTH)
+    // ME
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        return response()->json($request->user()->fresh());
     }
 
     // UPDATE PROFILE (name, phone, avatar)
@@ -87,14 +100,17 @@ class AuthController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'name'   => 'sometimes|required|string|max:255',
-            'phone'  => 'nullable|string|max:20',
-            'avatar' => 'sometimes|nullable|file|mimetypes:image/jpeg,image/png,image/webp,image/gif|max:2048',
+            'name'       => 'sometimes|required|string|max:255',
+            'phone'      => 'nullable|string|max:20',
+            'avatar_url' => 'nullable|string|url|max:1000',
+            'avatar'     => 'sometimes|nullable|file|mimetypes:image/jpeg,image/png,image/webp,image/gif|max:2048',
         ]);
 
-        $data = collect($validated)->except('avatar')->toArray();
+        $data = collect($validated)->except(['avatar', 'avatar_url'])->toArray();
 
-        if ($request->hasFile('avatar')) {
+        if ($request->filled('avatar_url')) {
+            $data['avatar_path'] = $validated['avatar_url'];
+        } elseif ($request->hasFile('avatar')) {
             if ($user->avatar_path) {
                 $this->images->delete($user->avatar_path);
             }
@@ -123,6 +139,65 @@ class AuthController extends Controller
         $user->update(['password' => \Hash::make($request->password)]);
 
         return response()->json(['message' => 'Password updated.']);
+    }
+
+    // FORGOT PASSWORD — sends reset link via email
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'No account found with this email address.'], 404);
+        }
+
+        $token = Str::random(64);
+        DB::table('password_reset_tokens')->upsert(
+            ['email' => $user->email, 'token' => Hash::make($token), 'created_at' => now()],
+            ['email'],
+            ['token', 'created_at']
+        );
+
+        $resetUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000'))
+            . '/reset-password?token=' . $token . '&email=' . urlencode($user->email);
+
+        Mail::to($user->email)->send(new PasswordResetMail($user->name, $resetUrl, $user->locale ?? 'en'));
+
+        return response()->json(['message' => 'If an account exists, a reset link has been sent.']);
+    }
+
+    // RESET PASSWORD
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token'                 => 'required|string',
+            'email'                 => 'required|email',
+            'password'              => ['required', 'string', Password::min(8), 'confirmed'],
+        ]);
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$record || !Hash::check($request->token, $record->token)) {
+            return response()->json(['message' => 'Invalid or expired reset token.'], 422);
+        }
+
+        if (now()->diffInMinutes($record->created_at) > 60) {
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+            return response()->json(['message' => 'Reset token has expired.'], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        $user->update(['password' => Hash::make($request->password)]);
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        return response()->json(['message' => 'Password reset successfully.']);
     }
 
     // LOGOUT

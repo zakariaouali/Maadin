@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import api from "@/lib/api";
@@ -26,8 +27,20 @@ const STATUS_COLORS: Record<string, string> = {
   delivered: "#22c55e", cancelled: "#8c2f1b",
 };
 
-function timeAgo(dateStr: string) {
+function timeAgo(dateStr: string, locale: string) {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (locale === "ar") {
+    if (diff < 60) return "الآن";
+    if (diff < 3600) return `منذ ${Math.floor(diff / 60)} د`;
+    if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} س`;
+    return `منذ ${Math.floor(diff / 86400)} ي`;
+  }
+  if (locale === "fr") {
+    if (diff < 60) return "à l'instant";
+    if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`;
+    if (diff < 86400) return `il y a ${Math.floor(diff / 3600)} h`;
+    return `il y a ${Math.floor(diff / 86400)} j`;
+  }
   if (diff < 60) return "just now";
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
@@ -35,6 +48,8 @@ function timeAgo(dateStr: string) {
 }
 
 export default function AdminDashboard() {
+  const t = useTranslations("admin");
+  const locale = useLocale();
   const [data, setData] = useState<Dashboard | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -48,16 +63,16 @@ export default function AdminDashboard() {
   if (!data) return null;
 
   const urgentItems = [
-    { count: data.pending_sellers, label: "Sellers to verify", sub: "Waiting for review", href: "/admin/sellers", color: "amber", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
-    { count: data.pending_products, label: "Products to approve", sub: "Waiting for review", href: "/admin/products", color: "amber", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg> },
-    { count: data.processing_orders, label: "Orders to handle", sub: "Pending + confirmed", href: "/admin/orders", color: "blue", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> },
-    { count: data.unread_messages, label: "Unread messages", sub: "Across all conversations", href: "/admin/conversations", color: "purple", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
+    { count: data.pending_sellers,   label: t("sellersToVerify"),   sub: t("waitingForReview"),    href: "/admin/sellers",       color: "amber", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
+    { count: data.pending_products,  label: t("productsToApprove"), sub: t("waitingForReview"),    href: "/admin/products",      color: "amber", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg> },
+    { count: data.processing_orders, label: t("ordersToHandle"),    sub: t("pendingConfirmed"),    href: "/admin/orders",        color: "blue",  icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg> },
+    { count: data.unread_messages,   label: t("unreadMessages"),    sub: t("acrossConversations"), href: "/admin/conversations", color: "purple", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
   ];
 
   const colorMap: Record<string, { bg: string; border: string; text: string; num: string; dot: string }> = {
-    amber: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", num: "text-amber-800", dot: "bg-amber-400" },
-    blue:  { bg: "bg-blue-50",  border: "border-blue-200",  text: "text-blue-700",  num: "text-blue-800",  dot: "bg-blue-400"  },
-    purple:{ bg: "bg-violet-50",border: "border-violet-200",text: "text-violet-700",num: "text-violet-800",dot: "bg-violet-400"},
+    amber:  { bg: "bg-amber-50",  border: "border-amber-200",  text: "text-amber-700",  num: "text-amber-800",  dot: "bg-amber-400"  },
+    blue:   { bg: "bg-blue-50",   border: "border-blue-200",   text: "text-blue-700",   num: "text-blue-800",   dot: "bg-blue-400"   },
+    purple: { bg: "bg-violet-50", border: "border-violet-200", text: "text-violet-700", num: "text-violet-800", dot: "bg-violet-400" },
   };
 
   const revenueData = data.revenue_by_month.map(r => ({ month: r.month.slice(5), revenue: parseFloat(r.total) }));
@@ -67,23 +82,23 @@ export default function AdminDashboard() {
   return (
     <div className="max-w-5xl space-y-6">
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl text-ink">Operations Dashboard</h1>
+          <h1 className="font-display text-2xl text-ink">{t("operationsDashboard")}</h1>
           <p className="text-sm text-stone mt-0.5">
             {totalUrgent > 0
-              ? <span className="text-amber-600 font-medium">{totalUrgent} items need your attention</span>
-              : <span className="text-green-600 font-medium">All clear — nothing urgent right now</span>}
+              ? <span className="text-amber-600 font-medium">{t("itemsNeedAttention", { count: totalUrgent })}</span>
+              : <span className="text-green-600 font-medium">{t("allClear")}</span>}
           </p>
         </div>
         <div className="text-right">
           <p className="text-2xl font-semibold text-ink">{Number(data.total_revenue).toLocaleString()} <span className="text-sm font-normal text-stone">MAD</span></p>
-          <p className="text-xs text-stone">total revenue</p>
+          <p className="text-xs text-stone">{t("totalRevenueStat")}</p>
         </div>
       </div>
 
-      {/* ── Urgent action cards ── */}
+      {/* Urgent action cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {urgentItems.map(item => {
           const c = colorMap[item.color] ?? colorMap.amber;
@@ -94,9 +109,7 @@ export default function AdminDashboard() {
                 hasItems ? `${c.bg} ${c.border}` : "bg-white border-stone/10 hover:border-stone/20"
               }`}
             >
-              {hasItems && (
-                <span className={`absolute top-3 right-3 w-2 h-2 rounded-full ${c.dot} animate-pulse`} />
-              )}
+              {hasItems && <span className={`absolute top-3 right-3 w-2 h-2 rounded-full ${c.dot} animate-pulse`} />}
               <div className={hasItems ? c.text : "text-stone"}>{item.icon}</div>
               <div>
                 <p className={`text-3xl font-bold ${hasItems ? c.num : "text-ink"}`}>{item.count}</p>
@@ -104,20 +117,20 @@ export default function AdminDashboard() {
                 <p className="text-[10px] text-stone mt-0.5">{item.sub}</p>
               </div>
               <p className={`text-[10px] font-medium mt-auto ${hasItems ? c.text : "text-stone/60"}`}>
-                {hasItems ? "Review →" : "All done ✓"}
+                {hasItems ? t("reviewArrow") : t("allDone")}
               </p>
             </Link>
           );
         })}
       </div>
 
-      {/* ── KPI strip ── */}
+      {/* KPI strip */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: "Total users", value: data.total_users, sub: `${data.total_customers} customers · ${data.total_sellers} sellers` },
-          { label: "Active products", value: data.active_products, sub: `${data.total_products} total` },
-          { label: "Total orders", value: data.total_orders, sub: `${data.delivered_orders} delivered` },
-          { label: "Verified sellers", value: data.verified_sellers, sub: `${data.pending_sellers} pending` },
+          { label: t("totalUsers"),      value: data.total_users,      sub: `${data.total_customers} ${t("customersLower")} · ${data.total_sellers} ${t("sellersLower")}` },
+          { label: t("activeProducts"),  value: data.active_products,  sub: `${data.total_products} ${t("kpiProducts").toLowerCase()}` },
+          { label: t("totalOrders"),     value: data.total_orders,     sub: `${data.delivered_orders} ${t("delivered")}` },
+          { label: t("verifiedSellers"), value: data.verified_sellers, sub: `${data.pending_sellers} ${t("pendingLower")}` },
         ].map(k => (
           <div key={k.label} className="bg-white border border-stone/10 rounded-xl p-4">
             <p className="text-xs text-stone uppercase tracking-wide">{k.label}</p>
@@ -127,14 +140,12 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* ── Main content: 2 column ── */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-        {/* Revenue chart */}
         <div className="lg:col-span-2 bg-white border border-stone/10 rounded-xl p-5">
-          <h3 className="font-semibold text-sm text-ink mb-4">Revenue — last 6 months</h3>
+          <h3 className="font-semibold text-sm text-ink mb-4">{t("revenueChart")}</h3>
           {revenueData.length === 0
-            ? <p className="text-sm text-stone text-center py-10">No revenue data yet.</p>
+            ? <p className="text-sm text-stone text-center py-10">{t("noRevenue")}</p>
             : <ResponsiveContainer width="100%" height={200}>
                 <AreaChart data={revenueData}>
                   <defs>
@@ -146,18 +157,17 @@ export default function AdminDashboard() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0ebe0" />
                   <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#8b8378" }} />
                   <YAxis tick={{ fontSize: 11, fill: "#8b8378" }} />
-                  <Tooltip formatter={(v) => [`${Number(v).toLocaleString()} MAD`, "Revenue"]} />
+                  <Tooltip formatter={(v) => [`${Number(v).toLocaleString()} MAD`, t("revenueLabel")]} />
                   <Area type="monotone" dataKey="revenue" stroke="#c9a227" strokeWidth={2} fill="url(#goldGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
           }
         </div>
 
-        {/* Orders by status */}
         <div className="bg-white border border-stone/10 rounded-xl p-5">
-          <h3 className="font-semibold text-sm text-ink mb-4">Orders by status</h3>
+          <h3 className="font-semibold text-sm text-ink mb-4">{t("ordersByStatus")}</h3>
           {pieData.length === 0
-            ? <p className="text-sm text-stone text-center py-10">No orders yet.</p>
+            ? <p className="text-sm text-stone text-center py-10">{t("noOrdersChart")}</p>
             : <>
                 <ResponsiveContainer width="100%" height={130}>
                   <PieChart>
@@ -183,17 +193,15 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── Bottom: recent orders + messages ── */}
+      {/* Recent orders + conversations */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-        {/* Recent orders */}
         <div className="bg-white border border-stone/10 rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-sm text-ink">Recent orders</h3>
-            <Link href="/admin/orders" className="text-xs text-gold-deep hover:underline">View all →</Link>
+            <h3 className="font-semibold text-sm text-ink">{t("recentOrders")}</h3>
+            <Link href="/admin/orders" className="text-xs text-gold-deep hover:underline">{t("viewAll")} →</Link>
           </div>
           {data.recent_orders.length === 0
-            ? <p className="text-sm text-stone text-center py-6">No orders yet.</p>
+            ? <p className="text-sm text-stone text-center py-6">{t("noOrdersYet")}</p>
             : <div className="divide-y divide-stone/10">
                 {data.recent_orders.map(o => (
                   <div key={o.id} className="py-2.5 flex items-center gap-3">
@@ -209,14 +217,13 @@ export default function AdminDashboard() {
           }
         </div>
 
-        {/* Recent conversations */}
         <div className="bg-white border border-stone/10 rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-sm text-ink">Recent conversations</h3>
-            <Link href="/admin/conversations" className="text-xs text-gold-deep hover:underline">View all →</Link>
+            <h3 className="font-semibold text-sm text-ink">{t("recentConversations")}</h3>
+            <Link href="/admin/conversations" className="text-xs text-gold-deep hover:underline">{t("viewAll")} →</Link>
           </div>
           {data.recent_conversations.length === 0
-            ? <p className="text-sm text-stone text-center py-6">No conversations yet.</p>
+            ? <p className="text-sm text-stone text-center py-6">{t("noConversationsYet")}</p>
             : <div className="divide-y divide-stone/10">
                 {data.recent_conversations.map(c => {
                   const avatarUrl = getImageUrl(c.buyer?.avatar_path ?? undefined);
@@ -237,7 +244,7 @@ export default function AdminDashboard() {
                             {c.unread_count}
                           </span>
                         )}
-                        <span className="text-[10px] text-stone">{timeAgo(c.last_message_at)}</span>
+                        <span className="text-[10px] text-stone">{timeAgo(c.last_message_at, locale)}</span>
                       </div>
                     </Link>
                   );
@@ -247,14 +254,14 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── Top sellers ── */}
+      {/* Top sellers */}
       <div className="bg-white border border-stone/10 rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-sm text-ink">Top sellers by revenue</h3>
-          <Link href="/admin/sellers" className="text-xs text-gold-deep hover:underline">View all →</Link>
+          <h3 className="font-semibold text-sm text-ink">{t("topSellersByRevenue")}</h3>
+          <Link href="/admin/sellers" className="text-xs text-gold-deep hover:underline">{t("viewAll")} →</Link>
         </div>
         {data.top_sellers.length === 0
-          ? <p className="text-sm text-stone text-center py-4">No sellers yet.</p>
+          ? <p className="text-sm text-stone text-center py-4">{t("noSellersYet")}</p>
           : <div className="grid grid-cols-5 gap-3">
               {data.top_sellers.map((s, i) => (
                 <div key={s.id} className="flex flex-col items-center text-center gap-1 p-3 rounded-xl border border-stone/10 hover:border-gold/30 transition-colors">
@@ -263,7 +270,7 @@ export default function AdminDashboard() {
                     <span className="text-xs font-bold text-gold-deep">{s.store_name.charAt(0).toUpperCase()}</span>
                   </div>
                   <p className="text-xs font-semibold text-ink line-clamp-1">{s.store_name}</p>
-                  <p className="text-[10px] text-stone">{s.orders_count} orders</p>
+                  <p className="text-[10px] text-stone">{t("ordersCount", { count: s.orders_count })}</p>
                   <p className="text-xs font-semibold text-gold-deep">
                     {s.orders_sum_total_price ? `${Number(s.orders_sum_total_price).toLocaleString()}` : "—"} MAD
                   </p>

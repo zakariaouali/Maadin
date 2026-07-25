@@ -17,21 +17,31 @@ class ProductImageController extends Controller
         $product = $this->ownedProductOrFail($request, $productId);
 
         $request->validate([
-            'images'   => 'required|array|max:5',
-            'images.*' => 'required|file|mimetypes:image/jpeg,image/png,image/webp|max:5120',
+            'image_urls'   => 'nullable|array|max:5',
+            'image_urls.*' => 'required|string|url|max:1000',
+            'images'       => 'nullable|array|max:5',
+            'images.*'     => 'required|file|mimetypes:image/jpeg,image/png,image/webp|max:5120',
         ]);
+
+        $urls = [];
+
+        if ($request->filled('image_urls')) {
+            $urls = $request->input('image_urls');
+        } elseif ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $urls[] = $this->images->upload($file, 'products');
+            }
+        }
 
         $existingCount = $product->images()->count();
 
-        if ($existingCount + count($request->file('images')) > 5) {
-            return response()->json(['message' => 'Maximum 5 images per product.'], 422);
+        if ($existingCount + count($urls) > 10) {
+            return response()->json(['message' => 'Maximum 10 images per product.'], 422);
         }
 
         $uploaded = [];
 
-        foreach ($request->file('images') as $file) {
-            $url = $this->images->upload($file, 'products');
-
+        foreach ($urls as $url) {
             $image = ProductImage::create([
                 'product_id'    => $product->id,
                 'image_path'    => $url,

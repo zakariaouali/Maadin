@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { getImageUrl, normalizeImageFile } from "@/lib/image";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import { Alert, Button, Input, PageHeader, Spinner } from "@/components/ui";
 
 const MAX_PORTFOLIO = 4;
@@ -81,26 +82,33 @@ export default function SellerStorePage() {
     setError("");
     setSuccess("");
 
-    const fd = new FormData();
-    fd.append("store_name", storeName);
-    fd.append("store_description", storeDesc);
-    fd.append("seller_bio", sellerBio);
-    fd.append("phone_number", phone);
-    fd.append("bank_account_number", bankAccount);
-    fd.append("bank_name", bankName);
-    if (logoFile) fd.append("logo", normalizeImageFile(logoFile));
-    if (bannerFile) fd.append("banner", normalizeImageFile(bannerFile));
-    if (shopPhotoFile) fd.append("shop_photo", normalizeImageFile(shopPhotoFile));
-    portfolioFiles.forEach((f) => fd.append("portfolio[]", normalizeImageFile(f)));
-
     try {
+      const [logoResult, bannerResult, shopResult, ...portfolioResults] = await Promise.all([
+        logoFile ? uploadToCloudinary(normalizeImageFile(logoFile), "stores/logos") : null,
+        bannerFile ? uploadToCloudinary(normalizeImageFile(bannerFile), "stores/banners") : null,
+        shopPhotoFile ? uploadToCloudinary(normalizeImageFile(shopPhotoFile), "stores/shop_photos") : null,
+        ...portfolioFiles.map((f) => uploadToCloudinary(normalizeImageFile(f), "stores/portfolio")),
+      ]);
+
+      const payload: Record<string, unknown> = {
+        store_name: storeName,
+        store_description: storeDesc,
+        seller_bio: sellerBio,
+        phone_number: phone,
+        bank_account_number: bankAccount,
+        bank_name: bankName,
+      };
+      if (logoResult) payload.logo_url = logoResult.secure_url;
+      if (bannerResult) payload.banner_url = bannerResult.secure_url;
+      if (shopResult) payload.shop_photo_url = shopResult.secure_url;
+      if (portfolioResults.length > 0) payload.portfolio_urls = portfolioResults.map((r) => r!.secure_url);
+
       let res;
       if (store) {
-        fd.append("_method", "PUT");
-        res = await api.post("/seller/store", fd, { headers: { "Content-Type": "multipart/form-data" } });
+        res = await api.put("/seller/store", payload);
         setSuccess(t("storeUpdated"));
       } else {
-        res = await api.post("/seller/store", fd, { headers: { "Content-Type": "multipart/form-data" } });
+        res = await api.post("/seller/store", payload);
         setSuccess(t("storeCreated"));
       }
       setStore(res.data);

@@ -6,6 +6,8 @@ import { useRouter, Link } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useCartStore } from "@/store/cartStore";
 import api from "@/lib/api";
+import Image from "next/image";
+import { getImageUrl } from "@/lib/image";
 import { Button, Input, Alert, PageHeader } from "@/components/ui";
 
 export default function CheckoutPage() {
@@ -72,7 +74,9 @@ export default function CheckoutPage() {
       });
 
       clearCart();
-      router.push(`/customer/orders?confirmed=${data.length}`);
+      const firstOrder = Array.isArray(data) ? data[0] : data;
+      const orderNum = firstOrder?.order_number ?? "";
+      router.push(`/checkout/success${orderNum ? `?order=${orderNum}` : ""}`);
     } catch (err: any) {
       setError(
         err.response?.data?.errors?.items?.[0] ||
@@ -93,7 +97,7 @@ export default function CheckoutPage() {
   }, {});
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-5xl px-4 md:px-6 py-6 md:py-10">
       <PageHeader title={t("title")} />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
@@ -170,16 +174,25 @@ export default function CheckoutPage() {
                 <div key={sellerName}>
                   <p className="text-xs text-stone uppercase tracking-wide mb-3">{sellerName}</p>
                   <div className="flex flex-col gap-2">
-                    {sellerItems.map((item) => (
-                      <div key={item.product_id} className="flex justify-between text-sm">
-                        <span className="text-stone line-clamp-1 flex-1 me-2">
-                          {item.name} <span className="text-stone/60">×{item.quantity}</span>
-                        </span>
-                        <span className="text-ink shrink-0 font-medium">
-                          {(item.price * item.quantity).toFixed(2)} MAD
-                        </span>
-                      </div>
-                    ))}
+                    {sellerItems.map((item) => {
+                      const img = getImageUrl(item.image_path ?? undefined);
+                      return (
+                        <div key={item.product_id} className="flex items-center gap-3 text-sm">
+                          <div className="w-10 h-10 rounded-lg overflow-hidden bg-sand border border-stone/10 shrink-0 flex items-center justify-center">
+                            {img
+                              ? <Image src={img} alt={item.name} width={40} height={40} className="object-cover w-full h-full" />
+                              : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-stone/30"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                            }
+                          </div>
+                          <span className="text-stone line-clamp-1 flex-1 me-2">
+                            {item.name} <span className="text-stone/60">×{item.quantity}</span>
+                          </span>
+                          <span className="text-ink shrink-0 font-medium">
+                            {(item.price * item.quantity).toFixed(2)} MAD
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ))}

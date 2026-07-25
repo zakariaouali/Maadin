@@ -42,6 +42,11 @@ class StoreController extends Controller
             'phone_number'        => 'required|string|max:20',
             'bank_account_number' => 'nullable|string',
             'bank_name'           => 'nullable|string',
+            'logo_url'            => 'nullable|string|url|max:1000',
+            'banner_url'          => 'nullable|string|url|max:1000',
+            'shop_photo_url'      => 'nullable|string|url|max:1000',
+            'portfolio_urls'      => 'nullable|array|max:4',
+            'portfolio_urls.*'    => 'string|url|max:1000',
             'logo'                => 'nullable|file|mimetypes:image/jpeg,image/png,image/webp|max:2048',
             'banner'              => 'nullable|file|mimetypes:image/jpeg,image/png,image/webp|max:5120',
             'shop_photo'          => 'nullable|file|mimetypes:image/jpeg,image/png,image/webp|max:5120',
@@ -60,19 +65,18 @@ class StoreController extends Controller
             'store_slug'          => $this->generateUniqueSlug($validated['store_name']),
         ];
 
-        if ($request->hasFile('logo')) {
-            $data['logo_path'] = $this->images->upload($request->file('logo'), 'stores/logos');
-        }
+        if ($request->filled('logo_url'))       $data['logo_path']       = $validated['logo_url'];
+        elseif ($request->hasFile('logo'))       $data['logo_path']       = $this->images->upload($request->file('logo'), 'stores/logos');
 
-        if ($request->hasFile('banner')) {
-            $data['banner_path'] = $this->images->upload($request->file('banner'), 'stores/banners');
-        }
+        if ($request->filled('banner_url'))      $data['banner_path']     = $validated['banner_url'];
+        elseif ($request->hasFile('banner'))     $data['banner_path']     = $this->images->upload($request->file('banner'), 'stores/banners');
 
-        if ($request->hasFile('shop_photo')) {
-            $data['shop_photo_path'] = $this->images->upload($request->file('shop_photo'), 'stores/shop_photos');
-        }
+        if ($request->filled('shop_photo_url'))  $data['shop_photo_path'] = $validated['shop_photo_url'];
+        elseif ($request->hasFile('shop_photo')) $data['shop_photo_path'] = $this->images->upload($request->file('shop_photo'), 'stores/shop_photos');
 
-        if ($request->hasFile('portfolio')) {
+        if (!empty($validated['portfolio_urls'])) {
+            $data['portfolio_paths'] = $validated['portfolio_urls'];
+        } elseif ($request->hasFile('portfolio')) {
             $data['portfolio_paths'] = collect($request->file('portfolio'))
                 ->map(fn ($f) => $this->images->upload($f, 'stores/portfolio'))
                 ->values()->toArray();
@@ -98,6 +102,11 @@ class StoreController extends Controller
             'phone_number'        => 'sometimes|required|string|max:20',
             'bank_account_number' => 'nullable|string',
             'bank_name'           => 'nullable|string',
+            'logo_url'            => 'nullable|string|url|max:1000',
+            'banner_url'          => 'nullable|string|url|max:1000',
+            'shop_photo_url'      => 'nullable|string|url|max:1000',
+            'portfolio_urls'      => 'nullable|array|max:4',
+            'portfolio_urls.*'    => 'string|url|max:1000',
             'logo'                => 'nullable|file|mimetypes:image/jpeg,image/png,image/webp|max:2048',
             'banner'              => 'nullable|file|mimetypes:image/jpeg,image/png,image/webp|max:5120',
             'shop_photo'          => 'nullable|file|mimetypes:image/jpeg,image/png,image/webp|max:5120',
@@ -105,31 +114,25 @@ class StoreController extends Controller
             'portfolio.*'         => 'file|mimetypes:image/jpeg,image/png,image/webp|max:5120',
         ]);
 
-        $data = collect($validated)->except(['logo', 'banner', 'shop_photo', 'portfolio'])->toArray();
+        $data = collect($validated)->except(['logo', 'banner', 'shop_photo', 'portfolio', 'logo_url', 'banner_url', 'shop_photo_url', 'portfolio_urls'])->toArray();
 
         if (isset($data['store_name']) && $data['store_name'] !== $seller->store_name) {
             $data['store_slug'] = $this->generateUniqueSlug($data['store_name'], $seller->id);
         }
 
-        if ($request->hasFile('logo')) {
-            $this->images->delete($seller->logo_path);
-            $data['logo_path'] = $this->images->upload($request->file('logo'), 'stores/logos');
-        }
+        if ($request->filled('logo_url'))       $data['logo_path']       = $validated['logo_url'];
+        elseif ($request->hasFile('logo'))       { $this->images->delete($seller->logo_path); $data['logo_path'] = $this->images->upload($request->file('logo'), 'stores/logos'); }
 
-        if ($request->hasFile('banner')) {
-            $this->images->delete($seller->banner_path);
-            $data['banner_path'] = $this->images->upload($request->file('banner'), 'stores/banners');
-        }
+        if ($request->filled('banner_url'))      $data['banner_path']     = $validated['banner_url'];
+        elseif ($request->hasFile('banner'))     { $this->images->delete($seller->banner_path); $data['banner_path'] = $this->images->upload($request->file('banner'), 'stores/banners'); }
 
-        if ($request->hasFile('shop_photo')) {
-            $this->images->delete($seller->shop_photo_path);
-            $data['shop_photo_path'] = $this->images->upload($request->file('shop_photo'), 'stores/shop_photos');
-        }
+        if ($request->filled('shop_photo_url'))  $data['shop_photo_path'] = $validated['shop_photo_url'];
+        elseif ($request->hasFile('shop_photo')) { $this->images->delete($seller->shop_photo_path); $data['shop_photo_path'] = $this->images->upload($request->file('shop_photo'), 'stores/shop_photos'); }
 
-        if ($request->hasFile('portfolio')) {
-            foreach ((array) ($seller->portfolio_paths ?? []) as $old) {
-                $this->images->delete($old);
-            }
+        if (!empty($validated['portfolio_urls'])) {
+            $data['portfolio_paths'] = $validated['portfolio_urls'];
+        } elseif ($request->hasFile('portfolio')) {
+            foreach ((array) ($seller->portfolio_paths ?? []) as $old) { $this->images->delete($old); }
             $data['portfolio_paths'] = collect($request->file('portfolio'))
                 ->map(fn ($f) => $this->images->upload($f, 'stores/portfolio'))
                 ->values()->toArray();

@@ -8,6 +8,14 @@ import api from "@/lib/api";
 import { getImageUrl } from "@/lib/image";
 import { EmptyState, PageHeader, Spinner } from "@/components/ui";
 
+interface LastMessage {
+  id: number;
+  sender_id: number;
+  content: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 interface Conversation {
   id: number;
   buyer_id: number;
@@ -17,6 +25,7 @@ interface Conversation {
   buyer: { id: number; name: string; avatar_path?: string };
   seller: { id: number; name: string; avatar_path?: string };
   product?: { name: string; slug: string };
+  last_message?: LastMessage;
 }
 
 function Avatar({ name, avatarPath, size = 40 }: { name: string; avatarPath?: string; size?: number }) {
@@ -47,6 +56,7 @@ function timeAgo(dateStr: string) {
 }
 
 export default function ConversationsPage() {
+  const t = useTranslations("messages");
   const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,12 +77,12 @@ export default function ConversationsPage() {
 
   return (
     <div className="max-w-2xl">
-      <PageHeader title="Messages" />
+      <PageHeader title={t("title")} />
 
       {conversations.length === 0 ? (
         <EmptyState
-          title="No conversations yet"
-          description="Start a conversation from any product page by contacting the seller."
+          title={t("noConversationsTitle")}
+          description={t("noConversationsDesc")}
           icon={
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -102,17 +112,42 @@ export default function ConversationsPage() {
                     <p className={`text-sm truncate ${hasUnread ? "font-semibold text-ink" : "font-medium text-ink"}`}>
                       {other.name}
                     </p>
-                    <span className="text-xs text-stone shrink-0">{timeAgo(c.last_message_at)}</span>
+                    <span className="text-xs text-stone/60 shrink-0">{timeAgo(c.last_message_at)}</span>
                   </div>
-                  {c.product && (
-                    <p className="text-xs text-stone truncate mt-0.5">re: {c.product.name}</p>
-                  )}
-                  {hasUnread && (
-                    <span className="inline-flex items-center mt-1 bg-henna text-white text-[10px] font-medium px-2 py-0.5 rounded-full">
-                      {c.unread_count} unread
-                    </span>
-                  )}
+
+                  {/* Last message preview */}
+                  {c.last_message ? (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      {/* Sent by me — show seen/unseen tick */}
+                      {c.last_message.sender_id === user?.id && (
+                        c.last_message.is_read ? (
+                          /* Double tick — seen */
+                          <svg width="14" height="10" viewBox="0 0 16 10" fill="none" className="shrink-0 text-gold-deep">
+                            <path d="M1 5l3 3 5-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            <path d="M5 5l3 3 5-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        ) : (
+                          /* Single tick — sent, not seen */
+                          <svg width="14" height="10" viewBox="0 0 16 10" fill="none" className="shrink-0 text-stone/50">
+                            <path d="M3 5l3 3 5-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )
+                      )}
+                      <p className={`text-xs truncate ${hasUnread ? "text-ink font-medium" : "text-stone"}`}>
+                        {c.last_message.content}
+                      </p>
+                    </div>
+                  ) : c.product ? (
+                    <p className="text-xs text-stone truncate mt-0.5">{t("re")} {c.product.name}</p>
+                  ) : null}
                 </div>
+
+                {/* Unread badge */}
+                {hasUnread && (
+                  <span className="shrink-0 bg-henna text-white text-[10px] rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center font-bold">
+                    {c.unread_count}
+                  </span>
+                )}
               </Link>
             );
           })}
