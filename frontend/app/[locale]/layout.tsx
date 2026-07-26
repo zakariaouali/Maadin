@@ -78,6 +78,7 @@ export async function generateMetadata({
       images: ["/logo.png"],
     },
     robots: { index: true, follow: true },
+    verification: { google: "4vU8Ysy3uFbvG-5_AoCiVBq4DAncuR1y5GA5CKZlTo8" },
   };
 }
 
