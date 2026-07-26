@@ -44,13 +44,40 @@ export async function generateMetadata({
     fr: "Découvrez des produits artisanaux marocains authentiques directement auprès des créateurs à Marrakech.",
     ar: "اكتشف منتجات حرفية مغربية أصيلة مباشرة من الحرفيين في مراكش.",
   };
+  const keywords: Record<string, string[]> = {
+    en: ["Moroccan artisan marketplace", "Moroccan handmade crafts", "Marrakech artisans", "buy Moroccan crafts online", "handmade Morocco", "Moroccan pottery", "Berber rugs", "Moroccan leather goods"],
+    fr: ["marché artisanal marocain", "artisanat marocain fait main", "artisans de Marrakech", "acheter artisanat marocain en ligne", "produits faits main Maroc"],
+    ar: ["سوق الحرفيين المغاربة", "منتجات مغربية يدوية", "حرفيو مراكش", "شراء منتجات مغربية"],
+  };
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const title = titles[locale] ?? titles.en;
+  const description = descriptions[locale] ?? descriptions.en;
 
   return {
-    title: titles[locale] ?? titles.en,
-    description: descriptions[locale] ?? descriptions.en,
+    metadataBase: new URL(siteUrl),
+    title,
+    description,
+    keywords: keywords[locale] ?? keywords.en,
+    applicationName: "Marrakech Maadine",
     alternates: {
+      canonical: `/${locale}`,
       languages: { en: "/en", fr: "/fr", ar: "/ar" },
     },
+    openGraph: {
+      type: "website",
+      siteName: "Marrakech Maadine",
+      title,
+      description,
+      url: `${siteUrl}/${locale}`,
+      images: [{ url: "/logo.png", width: 1991, height: 1163, alt: "Marrakech Maadine" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/logo.png"],
+    },
+    robots: { index: true, follow: true },
   };
 }
 
