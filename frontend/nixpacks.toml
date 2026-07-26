@@ -1,0 +1,6 @@
+# Use `npm install` instead of the default strict `npm ci`.
+# `npm ci` fails when the lockfile resolves transitive deps differently
+# across npm versions (build server npm 10 vs local npm 11); `npm install`
+# reconciles the lockfile instead of erroring out.
+[phases.install]
+cmds = ["npm install --no-audit --no-fund"]
