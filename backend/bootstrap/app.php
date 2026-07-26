@@ -14,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Behind Coolify/Traefik reverse proxy: trust forwarded headers so
+        // Laravel generates correct https:// URLs and detects the real scheme.
+        $middleware->trustProxies(at: '*');
+
         $middleware->statefulApi();
 
         $middleware->validateCsrfTokens(except: [
