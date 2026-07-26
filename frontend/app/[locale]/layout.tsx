@@ -97,6 +97,38 @@ export default async function LocaleLayout({
 
   const dir = locale === "ar" ? "rtl" : "ltr";
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        name: "Marrakech Maadine",
+        url: siteUrl,
+        logo: `${siteUrl}/logo.png`,
+        description:
+          "Authentic Moroccan artisan marketplace connecting Marrakesh craftspeople with customers worldwide.",
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        url: siteUrl,
+        name: "Marrakech Maadine",
+        publisher: { "@id": `${siteUrl}/#organization` },
+        inLanguage: locale,
+        potentialAction: {
+          "@type": "SearchAction",
+          target: {
+            "@type": "EntryPoint",
+            urlTemplate: `${siteUrl}/${locale}/products?search={search_term_string}`,
+          },
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  };
+
   return (
     <html
       lang={locale}
@@ -105,6 +137,10 @@ export default async function LocaleLayout({
       data-locale={locale}
     >
       <body className="min-h-full flex flex-col bg-sand text-ink">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <NextTopLoader color="#c9a227" height={3} showSpinner={false} />
         <NextIntlClientProvider>
           <Providers>{children}</Providers>

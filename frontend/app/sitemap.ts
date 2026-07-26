@@ -34,7 +34,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getCategorySlugs(),
   ]);
 
-  const staticRoutes = ["", "/products"];
+  const staticRoutes: {
+    path: string;
+    changeFrequency: "daily" | "hourly" | "monthly" | "yearly";
+    priority: number;
+  }[] = [
+    { path: "", changeFrequency: "daily", priority: 1.0 },
+    { path: "/products", changeFrequency: "hourly", priority: 0.8 },
+    { path: "/plans", changeFrequency: "monthly", priority: 0.5 },
+    { path: "/support", changeFrequency: "monthly", priority: 0.4 },
+    { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
+    { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
+  ];
 
   const entries: MetadataRoute.Sitemap = [];
 
@@ -42,13 +53,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const locale of LOCALES) {
     for (const route of staticRoutes) {
       entries.push({
-        url: `${SITE_URL}/${locale}${route}`,
+        url: `${SITE_URL}/${locale}${route.path}`,
         lastModified: new Date(),
-        changeFrequency: route === "" ? "daily" : "hourly",
-        priority: route === "" ? 1.0 : 0.8,
+        changeFrequency: route.changeFrequency,
+        priority: route.priority,
         alternates: {
           languages: Object.fromEntries(
-            LOCALES.map((l) => [l, `${SITE_URL}/${l}${route}`])
+            LOCALES.map((l) => [l, `${SITE_URL}/${l}${route.path}`])
           ),
         },
       });
