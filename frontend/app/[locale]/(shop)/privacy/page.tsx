@@ -36,7 +36,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
     sections: [
       {
         heading: "1. Data Controller",
-        body: "The data controller responsible for your personal data is Marrakech Maadine, a marketplace platform registered in Morocco. For any privacy-related enquiries, please contact us at privacy@maadine.ma.",
+        body: "The data controller responsible for your personal data is Marrakech Maadine, a marketplace platform registered in Morocco. For any privacy-related enquiries, please contact us at maadinemarrakech@gmail.com.",
       },
       {
         heading: "2. Data We Collect",
@@ -66,7 +66,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "7. Your Rights",
         body:
-          "Under Law 09-08 and GDPR (where applicable), you have the right to:\n\n• **Access**: request a copy of the personal data we hold about you.\n• **Rectification**: correct inaccurate or incomplete data.\n• **Erasure**: request deletion of your data, subject to legal retention obligations.\n• **Portability**: receive your data in a structured, machine-readable format.\n• **Restriction**: request we limit how we process your data in certain circumstances.\n• **Objection**: object to processing based on legitimate interests.\n• **Withdraw consent**: for any processing based on consent, at any time.\n\nTo exercise any right, contact us at privacy@maadine.ma. We will respond within 30 days.",
+          "Under Law 09-08 and GDPR (where applicable), you have the right to:\n\n• **Access**: request a copy of the personal data we hold about you.\n• **Rectification**: correct inaccurate or incomplete data.\n• **Erasure**: request deletion of your data, subject to legal retention obligations.\n• **Portability**: receive your data in a structured, machine-readable format.\n• **Restriction**: request we limit how we process your data in certain circumstances.\n• **Objection**: object to processing based on legitimate interests.\n• **Withdraw consent**: for any processing based on consent, at any time.\n\nTo exercise any right, contact us at maadinemarrakech@gmail.com. We will respond within 30 days.",
       },
       {
         heading: "8. Cookies",
@@ -76,7 +76,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "9. Security",
         body:
-          "We implement industry-standard security measures including HTTPS/TLS encryption for all data in transit, bcrypt password hashing, HTTP-only authentication cookies, access controls limiting staff access to personal data, and regular security audits. Despite these measures, no system is completely secure. We encourage you to use a strong, unique password and to contact us immediately at security@maadine.ma if you suspect unauthorised access.",
+          "We implement industry-standard security measures including HTTPS/TLS encryption for all data in transit, bcrypt password hashing, HTTP-only authentication cookies, access controls limiting staff access to personal data, and regular security audits. Despite these measures, no system is completely secure. We encourage you to use a strong, unique password and to contact us immediately at maadinemarrakech@gmail.com if you suspect unauthorised access.",
       },
       {
         heading: "10. International Transfers",
@@ -91,7 +91,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "12. Contact & Complaints",
         body:
-          "For any privacy questions, contact us at privacy@maadine.ma.\n\nIf you believe we have not handled your data appropriately, you have the right to lodge a complaint with the Moroccan Commission Nationale de Contrôle de la Protection des Données à Caractère Personnel (CNDP) at www.cndp.ma.",
+          "For any privacy questions, contact us at maadinemarrakech@gmail.com.\n\nIf you believe we have not handled your data appropriately, you have the right to lodge a complaint with the Moroccan Commission Nationale de Contrôle de la Protection des Données à Caractère Personnel (CNDP) at www.cndp.ma.",
       },
     ],
   },
@@ -104,7 +104,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
     sections: [
       {
         heading: "1. Responsable du Traitement",
-        body: "Le responsable du traitement de vos données personnelles est Marrakech Maadine, une plateforme marketplace enregistrée au Maroc. Pour toute question relative à la confidentialité, contactez-nous à l'adresse privacy@maadine.ma.",
+        body: "Le responsable du traitement de vos données personnelles est Marrakech Maadine, une plateforme marketplace enregistrée au Maroc. Pour toute question relative à la confidentialité, contactez-nous à l'adresse maadinemarrakech@gmail.com.",
       },
       {
         heading: "2. Données Collectées",
@@ -134,7 +134,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "7. Vos Droits",
         body:
-          "En vertu de la loi 09-08 et du RGPD (le cas échéant), vous disposez des droits suivants :\n\n• **Accès** : obtenir une copie des données personnelles que nous détenons vous concernant.\n• **Rectification** : corriger des données inexactes ou incomplètes.\n• **Effacement** : demander la suppression de vos données, sous réserve des obligations légales de conservation.\n• **Portabilité** : recevoir vos données dans un format structuré et lisible par machine.\n• **Limitation** : demander la limitation du traitement dans certaines circonstances.\n• **Opposition** : vous opposer aux traitements fondés sur l'intérêt légitime.\n• **Retrait du consentement** : à tout moment pour les traitements fondés sur le consentement.\n\nPour exercer un droit, contactez-nous à privacy@maadine.ma. Nous répondrons dans un délai de 30 jours.",
+          "En vertu de la loi 09-08 et du RGPD (le cas échéant), vous disposez des droits suivants :\n\n• **Accès** : obtenir une copie des données personnelles que nous détenons vous concernant.\n• **Rectification** : corriger des données inexactes ou incomplètes.\n• **Effacement** : demander la suppression de vos données, sous réserve des obligations légales de conservation.\n• **Portabilité** : recevoir vos données dans un format structuré et lisible par machine.\n• **Limitation** : demander la limitation du traitement dans certaines circonstances.\n• **Opposition** : vous opposer aux traitements fondés sur l'intérêt légitime.\n• **Retrait du consentement** : à tout moment pour les traitements fondés sur le consentement.\n\nPour exercer un droit, contactez-nous à maadinemarrakech@gmail.com. Nous répondrons dans un délai de 30 jours.",
       },
       {
         heading: "8. Cookies",
@@ -144,7 +144,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "9. Sécurité",
         body:
-          "Nous appliquons des mesures de sécurité standard : chiffrement HTTPS/TLS pour toutes les données en transit, hachage bcrypt des mots de passe, cookies d'authentification HTTP-only, contrôles d'accès limitant l'accès du personnel aux données personnelles, et audits de sécurité réguliers. Malgré ces mesures, aucun système n'est infaillible. Utilisez un mot de passe fort et unique, et contactez-nous immédiatement à security@maadine.ma en cas d'accès non autorisé suspecté.",
+          "Nous appliquons des mesures de sécurité standard : chiffrement HTTPS/TLS pour toutes les données en transit, hachage bcrypt des mots de passe, cookies d'authentification HTTP-only, contrôles d'accès limitant l'accès du personnel aux données personnelles, et audits de sécurité réguliers. Malgré ces mesures, aucun système n'est infaillible. Utilisez un mot de passe fort et unique, et contactez-nous immédiatement à maadinemarrakech@gmail.com en cas d'accès non autorisé suspecté.",
       },
       {
         heading: "10. Transferts Internationaux",
@@ -159,7 +159,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "12. Contact & Réclamations",
         body:
-          "Pour toute question relative à la confidentialité, contactez-nous à privacy@maadine.ma.\n\nSi vous estimez que nous n'avons pas traité vos données de manière appropriée, vous avez le droit de déposer une plainte auprès de la Commission Nationale de Contrôle de la Protection des Données à Caractère Personnel (CNDP) sur www.cndp.ma.",
+          "Pour toute question relative à la confidentialité, contactez-nous à maadinemarrakech@gmail.com.\n\nSi vous estimez que nous n'avons pas traité vos données de manière appropriée, vous avez le droit de déposer une plainte auprès de la Commission Nationale de Contrôle de la Protection des Données à Caractère Personnel (CNDP) sur www.cndp.ma.",
       },
     ],
   },
@@ -172,7 +172,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
     sections: [
       {
         heading: "١. المتحكم في البيانات",
-        body: "المتحكم في معالجة بياناتكم الشخصية هو مراكش معادن، منصة سوق إلكتروني مسجّلة في المغرب. لأي استفسارات تتعلق بالخصوصية، يُرجى التواصل معنا على: privacy@maadine.ma.",
+        body: "المتحكم في معالجة بياناتكم الشخصية هو مراكش معادن، منصة سوق إلكتروني مسجّلة في المغرب. لأي استفسارات تتعلق بالخصوصية، يُرجى التواصل معنا على: maadinemarrakech@gmail.com.",
       },
       {
         heading: "٢. البيانات التي نجمعها",
@@ -202,7 +202,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "٧. حقوقكم",
         body:
-          "بموجب القانون 09-08 والـ GDPR (حيثما ينطبق)، تتمتعون بالحقوق التالية:\n\n• **الوصول**: طلب نسخة من بياناتكم الشخصية التي نحتفظ بها.\n• **التصحيح**: تصحيح البيانات غير الدقيقة أو غير المكتملة.\n• **المحو**: طلب حذف بياناتكم مع مراعاة الالتزامات القانونية للاحتفاظ بها.\n• **قابلية النقل**: استلام بياناتكم بصيغة منظّمة وقابلة للقراءة آلياً.\n• **التقييد**: طلب تقييد المعالجة في ظروف معينة.\n• **الاعتراض**: الاعتراض على المعالجة المستندة إلى المصلحة المشروعة.\n• **سحب الموافقة**: في أي وقت لأي معالجة تستند إلى موافقتكم.\n\nللاستفادة من أي حق، تواصلوا معنا على privacy@maadine.ma. سنردّ في غضون 30 يوماً.",
+          "بموجب القانون 09-08 والـ GDPR (حيثما ينطبق)، تتمتعون بالحقوق التالية:\n\n• **الوصول**: طلب نسخة من بياناتكم الشخصية التي نحتفظ بها.\n• **التصحيح**: تصحيح البيانات غير الدقيقة أو غير المكتملة.\n• **المحو**: طلب حذف بياناتكم مع مراعاة الالتزامات القانونية للاحتفاظ بها.\n• **قابلية النقل**: استلام بياناتكم بصيغة منظّمة وقابلة للقراءة آلياً.\n• **التقييد**: طلب تقييد المعالجة في ظروف معينة.\n• **الاعتراض**: الاعتراض على المعالجة المستندة إلى المصلحة المشروعة.\n• **سحب الموافقة**: في أي وقت لأي معالجة تستند إلى موافقتكم.\n\nللاستفادة من أي حق، تواصلوا معنا على maadinemarrakech@gmail.com. سنردّ في غضون 30 يوماً.",
       },
       {
         heading: "٨. ملفات تعريف الارتباط (الكوكيز)",
@@ -212,7 +212,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "٩. الأمن",
         body:
-          "نطبّق معايير أمان صناعية: تشفير HTTPS/TLS لجميع البيانات أثناء النقل، تجزئة كلمات المرور بخوارزمية bcrypt، كوكيز مصادقة HTTP-only، ضوابط وصول تحدّ من اطّلاع الموظفين على البيانات الشخصية، وعمليات تدقيق أمني دورية. بالرغم من هذه التدابير، لا يوجد نظام محصّن بالكامل. نشجّعكم على استخدام كلمة مرور قوية وفريدة، والتواصل معنا فوراً على security@maadine.ma إذا اشتبهتم في وصول غير مصرّح.",
+          "نطبّق معايير أمان صناعية: تشفير HTTPS/TLS لجميع البيانات أثناء النقل، تجزئة كلمات المرور بخوارزمية bcrypt، كوكيز مصادقة HTTP-only، ضوابط وصول تحدّ من اطّلاع الموظفين على البيانات الشخصية، وعمليات تدقيق أمني دورية. بالرغم من هذه التدابير، لا يوجد نظام محصّن بالكامل. نشجّعكم على استخدام كلمة مرور قوية وفريدة، والتواصل معنا فوراً على maadinemarrakech@gmail.com إذا اشتبهتم في وصول غير مصرّح.",
       },
       {
         heading: "١٠. النقل الدولي للبيانات",
@@ -227,7 +227,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "١٢. التواصل والشكاوى",
         body:
-          "لأي استفسارات تتعلق بالخصوصية، تواصلوا معنا على: privacy@maadine.ma.\n\nإذا رأيتم أننا لم نتعامل مع بياناتكم بالشكل المناسب، يحق لكم تقديم شكوى لدى اللجنة الوطنية لمراقبة حماية المعطيات الشخصية (CNDP) على الموقع: www.cndp.ma.",
+          "لأي استفسارات تتعلق بالخصوصية، تواصلوا معنا على: maadinemarrakech@gmail.com.\n\nإذا رأيتم أننا لم نتعامل مع بياناتكم بالشكل المناسب، يحق لكم تقديم شكوى لدى اللجنة الوطنية لمراقبة حماية المعطيات الشخصية (CNDP) على الموقع: www.cndp.ma.",
       },
     ],
   },

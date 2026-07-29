@@ -61,11 +61,11 @@ export default function Footer() {
               Contact
             </p>
             <div className="flex flex-col gap-2.5">
-              <a href="mailto:contact@maadine.ma" className="text-sm text-white/60 hover:text-gold transition-colors">
-                contact@maadine.ma
+              <a href="mailto:maadinemarrakech@gmail.com" className="text-sm text-white/60 hover:text-gold transition-colors">
+                maadinemarrakech@gmail.com
               </a>
-              <a href="mailto:legal@maadine.ma" className="text-sm text-white/60 hover:text-gold transition-colors">
-                legal@maadine.ma
+              <a href="mailto:maadinemarrakech@gmail.com" className="text-sm text-white/60 hover:text-gold transition-colors">
+                maadinemarrakech@gmail.com
               </a>
             </div>
           </div>
