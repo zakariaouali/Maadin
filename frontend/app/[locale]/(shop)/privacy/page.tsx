@@ -168,11 +168,11 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
     title: "سياسة الخصوصية",
     updated: "آخر تحديث: 28 يونيو 2026",
     intro:
-      "تشغّل مراكش معدن («نحن» أو «المنصة») سوقاً إلكترونياً للحرف اليدوية يمكن الوصول إليه عبر هذا الموقع. توضّح سياسة الخصوصية هذه كيفية جمع بياناتكم الشخصية واستخدامها وتخزينها وحمايتها عند استخدام منصتنا، وفقاً للقانون المغربي 09-08 المتعلق بحماية المعطيات ذات الطابع الشخصي، وللائحة الأوروبية العامة لحماية البيانات (GDPR) حيثما ينطبق ذلك.",
+      "تشغّل مراكش معادن («نحن» أو «المنصة») سوقاً إلكترونياً للحرف اليدوية يمكن الوصول إليه عبر هذا الموقع. توضّح سياسة الخصوصية هذه كيفية جمع بياناتكم الشخصية واستخدامها وتخزينها وحمايتها عند استخدام منصتنا، وفقاً للقانون المغربي 09-08 المتعلق بحماية المعطيات ذات الطابع الشخصي، وللائحة الأوروبية العامة لحماية البيانات (GDPR) حيثما ينطبق ذلك.",
     sections: [
       {
         heading: "١. المتحكم في البيانات",
-        body: "المتحكم في معالجة بياناتكم الشخصية هو مراكش معدن، منصة سوق إلكتروني مسجّلة في المغرب. لأي استفسارات تتعلق بالخصوصية، يُرجى التواصل معنا على: privacy@maadine.ma.",
+        body: "المتحكم في معالجة بياناتكم الشخصية هو مراكش معادن، منصة سوق إلكتروني مسجّلة في المغرب. لأي استفسارات تتعلق بالخصوصية، يُرجى التواصل معنا على: privacy@maadine.ma.",
       },
       {
         heading: "٢. البيانات التي نجمعها",
@@ -308,7 +308,7 @@ export default async function PrivacyPage({
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
-            {locale === "ar" ? "هذه الوثيقة ملزمة قانونياً وتُشكّل جزءاً من شروط استخدام منصة مراكش معدن." : locale === "fr" ? "Ce document est juridiquement contraignant et fait partie des conditions d'utilisation de Marrakech Maadine." : "This document is legally binding and forms part of the Marrakech Maadine Terms of Service."}
+            {locale === "ar" ? "هذه الوثيقة ملزمة قانونياً وتُشكّل جزءاً من شروط استخدام منصة مراكش معادن." : locale === "fr" ? "Ce document est juridiquement contraignant et fait partie des conditions d'utilisation de Marrakech Maadine." : "This document is legally binding and forms part of the Marrakech Maadine Terms of Service."}
           </div>
         </div>
       </div>

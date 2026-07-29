@@ -37,7 +37,7 @@ export async function generateMetadata({
   const titles: Record<string, string> = {
     en: "Marrakech Maadine - Moroccan Artisan Marketplace",
     fr: "Marrakech Maadine - Marché des artisans marocains",
-    ar: "مراكش معدن - سوق الحرفيين المغاربة",
+    ar: "مراكش معادن - سوق الحرفيين المغاربة",
   };
   const descriptions: Record<string, string> = {
     en: "Discover authentic Moroccan artisan products directly from creators in Marrakesh.",

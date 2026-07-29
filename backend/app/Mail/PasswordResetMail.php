@@ -23,7 +23,7 @@ class PasswordResetMail extends Mailable
         $subjects = [
             'en' => 'Reset your Marrakech Maadine password',
             'fr' => 'Réinitialisez votre mot de passe Marrakech Maadine',
-            'ar' => 'إعادة تعيين كلمة مرور مراكش معدن',
+            'ar' => 'إعادة تعيين كلمة مرور مراكش معادن',
         ];
 
         return new Envelope(

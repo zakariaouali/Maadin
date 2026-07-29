@@ -69,7 +69,7 @@
                     @if($locale === 'fr')
                       Nous avons reçu une demande pour réinitialiser le mot de passe de votre compte Maadine. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe sécurisé.
                     @elseif($locale === 'ar')
-                      تلقّينا طلباً لإعادة تعيين كلمة مرور حسابك على معدن. انقر على الزر أدناه لاختيار كلمة مرور جديدة وآمنة.
+                      تلقّينا طلباً لإعادة تعيين كلمة مرور حسابك على معادن. انقر على الزر أدناه لاختيار كلمة مرور جديدة وآمنة.
                     @else
                       We received a request to reset the password for your Maadine account. Click the button below to choose a new secure password.
                     @endif
