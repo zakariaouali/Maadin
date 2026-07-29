@@ -64,8 +64,8 @@ export default function Footer() {
               <a href="mailto:maadinemarrakech@gmail.com" className="text-sm text-white/60 hover:text-gold transition-colors">
                 maadinemarrakech@gmail.com
               </a>
-              <a href="mailto:maadinemarrakech@gmail.com" className="text-sm text-white/60 hover:text-gold transition-colors">
-                maadinemarrakech@gmail.com
+              <a href="tel:+212661686140" className="text-sm text-white/60 hover:text-gold transition-colors" dir="ltr">
+                +212 661-686140
               </a>
             </div>
           </div>
