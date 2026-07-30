@@ -409,7 +409,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </p>
               </div>
               <a
-                href="mailto:maadinemarrakech@gmail.com"
+                href="mailto:contact@maadinemarrakech.com"
                 className={`shrink-0 text-xs font-semibold px-4 py-2 rounded-lg transition-colors ${
                   user.plan === "premium"
                     ? "bg-[#c9a227] text-[#1f1b16] hover:bg-[#d4aa2e]"
