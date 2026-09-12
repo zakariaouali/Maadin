@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SellerVerificationUpdatedMail;
 use App\Models\AdminAuditLog;
 use App\Models\Seller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class SellerController extends Controller
 {
@@ -31,32 +33,49 @@ class SellerController extends Controller
 
     public function verify(Request $request, string $id)
     {
-        $seller = Seller::findOrFail($id);
+        $seller = Seller::with('user')->findOrFail($id);
         $seller->update(['status' => 'verified']);
 
         $this->logAction($request, 'verify_seller', 'seller', $seller->id, ['status' => 'verified']);
+        $this->notifySeller($seller, 'verified');
 
         return response()->json($seller);
     }
 
     public function suspend(Request $request, string $id)
     {
-        $seller = Seller::findOrFail($id);
+        $seller = Seller::with('user')->findOrFail($id);
         $seller->update(['status' => 'suspended']);
 
         $this->logAction($request, 'suspend_seller', 'seller', $seller->id, ['status' => 'suspended']);
+        $this->notifySeller($seller, 'suspended');
 
         return response()->json($seller);
     }
 
     public function reactivate(Request $request, string $id)
     {
-        $seller = Seller::findOrFail($id);
+        $seller = Seller::with('user')->findOrFail($id);
         $seller->update(['status' => 'verified']);
 
         $this->logAction($request, 'reactivate_seller', 'seller', $seller->id, ['status' => 'verified']);
+        $this->notifySeller($seller, 'verified');
 
         return response()->json($seller);
+    }
+
+    private function notifySeller(Seller $seller, string $status): void
+    {
+        if (!$seller->user) {
+            return;
+        }
+
+        Mail::to($seller->user->email)->send(new SellerVerificationUpdatedMail(
+            $seller->user->name,
+            $seller->store_name,
+            $status,
+            $seller->user->locale ?? 'en',
+        ));
     }
 
     private function logAction(Request $request, string $action, string $subjectType, int $subjectId, array $changes): void

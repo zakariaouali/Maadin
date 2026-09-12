@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api\Seller;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewSellerRegisteredMail;
 use App\Models\Seller;
 use App\Services\ImageService;
+use App\Support\AdminNotifier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class StoreController extends Controller
@@ -83,6 +86,9 @@ class StoreController extends Controller
         }
 
         $seller = Seller::create($data);
+
+        Mail::to(AdminNotifier::email())
+            ->send(new NewSellerRegisteredMail($seller->store_name, $user->name, $user->email));
 
         return response()->json($seller, 201);
     }
