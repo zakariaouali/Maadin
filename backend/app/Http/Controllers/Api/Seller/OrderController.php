@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api\Seller;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderStatusChangedMail;
+use App\Mail\ReviewRequestMail;
 use App\Models\Notification;
 use App\Support\NotificationMessages;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -114,6 +117,19 @@ class OrderController extends Controller
                     'tracking' => $trackingSuffix,
                 ]);
                 Notification::send($order->customer_id, 'order', $title, $body, '/customer/orders/' . $order->id, ['order_id' => $order->id]);
+
+                if ($customer) {
+                    Mail::to($customer->email)->send(new OrderStatusChangedMail(
+                        $order,
+                        $validated['status'],
+                        $validated['tracking_number'] ?? null,
+                        $locale,
+                    ));
+                }
+            }
+
+            if ($validated['status'] === 'delivered' && $customer) {
+                Mail::to($customer->email)->send(new ReviewRequestMail($order, $locale));
             }
         });
 

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderPlacedMail;
+use App\Mail\OrderReceivedMail;
 use App\Models\IdempotencyKey;
 use App\Models\Notification;
 use App\Support\NotificationMessages;
@@ -12,6 +14,7 @@ use App\Models\Product;
 use App\Models\Seller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class CheckoutController extends Controller
@@ -104,7 +107,8 @@ class CheckoutController extends Controller
                     $item['product']->increment('total_sales', $item['quantity']);
                 }
 
-                $createdOrders[] = $order->load('items');
+                $order->load('items');
+                $createdOrders[] = $order;
 
                 // Notify the seller about the new order
                 $store = Seller::with('user')->find($sellerId);
@@ -115,7 +119,11 @@ class CheckoutController extends Controller
                         'amount' => number_format($total, 2),
                     ]);
                     Notification::send($store->user_id, 'order', $title, $body, '/seller/orders/' . $order->id, ['order_id' => $order->id]);
+                    Mail::to($store->user->email)->send(new OrderReceivedMail($order, $locale));
                 }
+
+                // Confirmation email to the customer — one per seller order, matching the cart split
+                Mail::to($request->user()->email)->send(new OrderPlacedMail($order, $request->user()->locale ?? 'en'));
             }
 
             // Record the idempotency key with the response, inside the same transaction
