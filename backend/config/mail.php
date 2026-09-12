@@ -18,6 +18,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin Notification Recipient
+    |--------------------------------------------------------------------------
+    |
+    | Fixed inbox that receives admin-facing platform alerts (new customer,
+    | new seller, new support ticket, etc.). Use App\Support\AdminNotifier
+    | to read this rather than calling config() directly — it fails loudly
+    | if unset instead of silently sending to nobody.
+    |
+    */
+
+    'admin_notification_email' => env('ADMIN_NOTIFICATION_EMAIL'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Mailer Configurations
     |--------------------------------------------------------------------------
     |

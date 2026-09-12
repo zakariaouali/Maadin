@@ -9,7 +9,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Mail\NewCustomerRegisteredMail;
 use App\Mail\PasswordResetMail;
+use App\Mail\WelcomeEmail;
+use App\Support\AdminNotifier;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -47,6 +50,13 @@ class AuthController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
+
+        Mail::to($user->email)->send(new WelcomeEmail($user->name, $role, $locale));
+
+        if ($role === 'customer') {
+            Mail::to(AdminNotifier::email())
+                ->send(new NewCustomerRegisteredMail($user->name, $user->email));
+        }
 
         return response()->json(['user' => $user]);
     }

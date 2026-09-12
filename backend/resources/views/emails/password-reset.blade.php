@@ -9,7 +9,7 @@
   </p>
 
   {{-- Headline (clean sans, states the purpose immediately) --}}
-  <h1 style="margin:0 0 18px;font-size:22px;font-weight:700;color:#1a1610;line-height:1.3;text-align:{{ $locale === 'ar' ? 'right' : 'left' }};">
+  <h1 style="margin:0 0 16px;font-size:26px;font-weight:700;color:#1f1b16;line-height:1.3;text-align:{{ $locale === 'ar' ? 'right' : 'left' }};">
     @if($locale === 'fr') Réinitialisez votre mot de passe
     @elseif($locale === 'ar') إعادة تعيين كلمة المرور
     @else Reset your password
@@ -17,7 +17,7 @@
   </h1>
 
   {{-- Body --}}
-  <p style="margin:0 0 28px;font-size:14px;color:#5c4f3a;line-height:1.65;text-align:{{ $locale === 'ar' ? 'right' : 'left' }};">
+  <p style="margin:0 0 32px;font-size:15px;color:#5c4f3a;line-height:1.7;text-align:{{ $locale === 'ar' ? 'right' : 'left' }};">
     @if($locale === 'fr')
       Nous avons reçu une demande pour réinitialiser le mot de passe de votre compte. Cliquez sur le bouton ci-dessous pour en choisir un nouveau.
     @elseif($locale === 'ar')
@@ -32,7 +32,7 @@
     <tr>
       <td align="{{ $locale === 'ar' ? 'right' : 'left' }}">
         <a href="{{ $resetUrl }}"
-           style="display:inline-block;background:#c9a227;color:#1a1610;text-decoration:none;font-size:14px;font-weight:700;padding:13px 28px;border-radius:6px;">
+           style="display:inline-block;background:#c9a227;color:#1f1b16;text-decoration:none;font-size:14px;font-weight:700;padding:14px 32px;border-radius:8px;">
           @if($locale === 'fr') Réinitialiser le mot de passe
           @elseif($locale === 'ar') إعادة تعيين كلمة المرور
           @else Reset password
