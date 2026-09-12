@@ -1,0 +1,22 @@
+FROM serversideup/php:8.3-fpm-nginx
+
+# Laravel lives here.
+WORKDIR /var/www/html
+
+# This container only runs the queue worker — the main app (Dockerfile)
+# already handles migrations/optimizations, so autorun stays off here to
+# avoid two containers racing to run them on every deploy.
+ENV AUTORUN_ENABLED=false
+
+# Install PHP dependencies first for better build caching.
+# --no-scripts avoids needing app env vars at build time.
+COPY --chown=www-data:www-data composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-interaction --prefer-dist --optimize-autoloader
+
+# Copy the rest of the application.
+COPY --chown=www-data:www-data . .
+
+# Rebuild the optimized autoloader now that app code is present.
+RUN composer dump-autoload --no-dev --optimize --no-scripts
+
+CMD ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--max-time=3600"]
