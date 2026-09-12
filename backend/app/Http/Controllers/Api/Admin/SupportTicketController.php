@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SupportReplyMail;
 use App\Models\Notification;
 use App\Models\SupportTicket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class SupportTicketController extends Controller
 {
@@ -49,7 +51,7 @@ class SupportTicketController extends Controller
     // ── Update status / priority / notes / reply ─────────────────────────────
     public function update(Request $request, string $id)
     {
-        $ticket = SupportTicket::findOrFail($id);
+        $ticket = SupportTicket::with('user')->findOrFail($id);
 
         $validated = $request->validate([
             'status'      => 'sometimes|in:open,in_progress,resolved,closed',
@@ -58,22 +60,32 @@ class SupportTicketController extends Controller
             'admin_reply' => 'sometimes|nullable|string|max:5000',
         ]);
 
-        if (isset($validated['admin_reply']) && $validated['admin_reply'] && !$ticket->replied_at) {
+        $isNewReply = isset($validated['admin_reply']) && $validated['admin_reply'] && !$ticket->replied_at;
+
+        if ($isNewReply) {
             $validated['replied_by'] = Auth::id();
             $validated['replied_at'] = now();
         }
 
         $ticket->update($validated);
 
-        // Notify user if a reply was added
-        if (isset($validated['admin_reply']) && $validated['admin_reply'] && $ticket->user_id) {
-            Notification::send(
-                $ticket->user_id,
-                'support',
-                'Support ticket update',
-                "We replied to your request: \"{$ticket->subject}\".",
-                '/support'
-            );
+        if ($isNewReply) {
+            $recipientEmail = $ticket->user->email ?? $ticket->guest_email;
+            $locale = $ticket->user->locale ?? 'en';
+
+            if ($ticket->user_id) {
+                Notification::send(
+                    $ticket->user_id,
+                    'support',
+                    'Support ticket update',
+                    "We replied to your request: \"{$ticket->subject}\".",
+                    '/support'
+                );
+            }
+
+            if ($recipientEmail) {
+                Mail::to($recipientEmail)->send(new SupportReplyMail($ticket->fresh(), $locale));
+            }
         }
 
         return response()->json($ticket->fresh()->load(['user:id,name,email', 'repliedBy:id,name']));
