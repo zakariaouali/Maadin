@@ -20,10 +20,12 @@ COPY --chown=www-data:www-data . .
 RUN composer dump-autoload --no-dev --optimize --no-scripts
 
 
-# This image bakes in its own HEALTHCHECK for the web server (nginx/php-fpm),
-# which doesn't exist in this worker container — disable it so Coolify
-# doesn't report a false "unhealthy" status for a process that was never
-# meant to serve HTTP in the first place.
-HEALTHCHECK NONE
+# The base image's own HEALTHCHECK pings nginx/php-fpm, which don't run in
+# this worker container. Coolify's deploy process requires *some* Docker
+# health status to exist though (a fully absent one fails deployment
+# outright), so replace it with a real check: is the queue:work process
+# actually alive?
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD grep -q "queue:work" /proc/1/cmdline || exit 1
 
 CMD ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--max-time=3600"]
