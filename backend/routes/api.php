@@ -45,7 +45,7 @@ Route::middleware('throttle:10,1')->group(function () {
 });
 
 // ===== Support (public submit, no auth needed) =====
-Route::post('/support', [SupportTicketController::class, 'store']);
+Route::middleware('throttle:10,1')->post('/support', [SupportTicketController::class, 'store']);
 
 // ===== Public =====
 Route::get('/categories', [CategoryController::class, 'index']);
