@@ -19,4 +19,11 @@ COPY --chown=www-data:www-data . .
 # Rebuild the optimized autoloader now that app code is present.
 RUN composer dump-autoload --no-dev --optimize --no-scripts
 
+
+# This image bakes in its own HEALTHCHECK for the web server (nginx/php-fpm),
+# which doesn't exist in this worker container — disable it so Coolify
+# doesn't report a false "unhealthy" status for a process that was never
+# meant to serve HTTP in the first place.
+HEALTHCHECK NONE
+
 CMD ["php", "artisan", "queue:work", "--sleep=3", "--tries=3", "--max-time=3600"]
