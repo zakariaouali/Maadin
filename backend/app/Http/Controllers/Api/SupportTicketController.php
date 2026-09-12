@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewSupportTicketMail;
 use App\Models\Notification;
 use App\Models\SupportTicket;
+use App\Support\AdminNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class SupportTicketController extends Controller
 {
@@ -43,6 +46,14 @@ class SupportTicketController extends Controller
                 '/support'
             );
         }
+
+        Mail::to(AdminNotifier::email())->send(new NewSupportTicketMail(
+            $user ? $user->name : $validated['guest_name'],
+            $user ? $user->email : $validated['guest_email'],
+            $validated['category'],
+            $validated['subject'],
+            $validated['message'],
+        ));
 
         return response()->json($ticket->load('user:id,name,email'), 201);
     }

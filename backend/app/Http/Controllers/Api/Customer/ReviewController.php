@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewReviewMail;
 use App\Models\Notification;
 use App\Models\Order;
 use App\Models\Review;
 use App\Models\Seller;
 use App\Support\NotificationMessages;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class ReviewController extends Controller
 {
@@ -73,6 +75,7 @@ class ReviewController extends Controller
                 'rating'  => $validated['rating'],
             ]);
             Notification::send($seller->user_id, 'product', $title, $body, '/seller/products', ['review_id' => $review->id]);
+            Mail::to($seller->user->email)->send(new NewReviewMail($productName, $validated['rating'], $locale));
         }
 
         return response()->json($review, 201);

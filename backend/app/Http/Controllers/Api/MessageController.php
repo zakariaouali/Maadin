@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewMessageMail;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\Notification;
@@ -10,6 +11,7 @@ use App\Models\User;
 use App\Services\ContentFilterService;
 use App\Support\NotificationMessages;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class MessageController extends Controller
 {
@@ -136,6 +138,10 @@ class MessageController extends Controller
             'link'    => "/messages/{$conversation->id}",
             'data'    => ['conversation_id' => $conversation->id, 'sender_id' => $sender->id],
         ]);
+
+        if ($receiver) {
+            Mail::to($receiver->email)->send(new NewMessageMail($sender->name, $preview, $conversation->id, $locale));
+        }
 
         return response()->json([
             'message' => $message,
