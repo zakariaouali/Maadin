@@ -123,6 +123,10 @@ export default function Navbar() {
                 priority
               />
             </div>
+            {/* Compact wordmark on mobile — just the name, no subtitle, to fit alongside the other header icons */}
+            <span className="sm:hidden font-display text-base text-ink group-hover:text-gold-deep transition-colors">
+              Maadine
+            </span>
             <div className="hidden sm:flex flex-col leading-none">
               <span className="font-display text-xl text-ink group-hover:text-gold-deep transition-colors">
                 Marrakech Maadine
