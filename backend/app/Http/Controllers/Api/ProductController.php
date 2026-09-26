@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -33,27 +34,30 @@ class ProductController extends Controller
             ->whereHas('seller', fn($q) => $q->where('status', 'verified'))
             ->select(['id','seller_id','category_id','name','slug','price','rating','stock_quantity','total_sales','created_at']);
 
-        if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
+        // Query values can arrive as arrays (?x[]=1) or junk (?per_page=abc);
+        // read them through typed accessors so they can never cause a 500.
+        if ($request->integer('category_id') > 0) {
+            $query->whereIn('category_id', Category::idsIncludingChildren($request->integer('category_id')));
         }
 
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
+        if (is_numeric($request->query('min_price'))) {
+            $query->where('price', '>=', (float) $request->query('min_price'));
         }
 
-        if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
+        if (is_numeric($request->query('max_price'))) {
+            $query->where('price', '<=', (float) $request->query('max_price'));
         }
 
-        if ($request->filled('min_rating')) {
-            $query->where('rating', '>=', $request->min_rating);
+        if (is_numeric($request->query('min_rating'))) {
+            $query->where('rating', '>=', (float) $request->query('min_rating'));
         }
 
-        if ($request->filled('search')) {
-            $query->whereFullText(['name', 'description', 'short_description'], $request->search);
+        $search = is_string($request->query('search')) ? trim($request->query('search')) : '';
+        if ($search !== '') {
+            $query->whereFullText(['name', 'description', 'short_description'], $search);
         }
 
-        $sort = $request->get('sort', 'newest');
+        $sort = is_string($request->query('sort')) ? $request->query('sort') : 'newest';
         match ($sort) {
             'price_low' => $query->orderBy('price', 'asc'),
             'price_high' => $query->orderBy('price', 'desc'),
@@ -62,7 +66,9 @@ class ProductController extends Controller
             default => $query->orderBy('created_at', 'desc'),
         };
 
-        $products = $query->paginate($request->get('per_page', 20));
+        // 1..48 items per page: an unbounded per_page would let one request pull the whole catalogue
+        $perPage = $request->integer('per_page');
+        $products = $query->paginate($perPage > 0 ? min($perPage, 48) : 20);
 
         $products->getCollection()->transform(function ($product) use ($locale) {
             if ($product->category) {

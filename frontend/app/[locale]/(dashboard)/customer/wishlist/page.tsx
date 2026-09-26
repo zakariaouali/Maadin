@@ -24,6 +24,8 @@ interface WishlistItem {
 export default function WishlistPage() {
   const t = useTranslations("nav");
   const tCommon = useTranslations("common");
+  const tWish = useTranslations("wishlist");
+  const tCart = useTranslations("cart");
 
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,8 +54,8 @@ export default function WishlistPage() {
 
       {items.length === 0 ? (
         <EmptyState
-          title="Your wishlist is empty"
-          description="Save products you love by clicking the heart icon on any product page."
+          title={tWish("emptyTitle")}
+          description={tWish("emptyDesc")}
           icon={
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -61,7 +63,7 @@ export default function WishlistPage() {
           }
           action={
             <Link href="/products">
-              <Button variant="primary">Browse products</Button>
+              <Button variant="primary">{tCart("browseProducts")}</Button>
             </Link>
           }
         />

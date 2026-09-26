@@ -134,6 +134,7 @@
     "remove": "إزالة"
   },
   "checkout": {
+    "failed": "تعذّر إتمام الطلب. يرجى المحاولة مرة أخرى.",
     "title": "إتمام الشراء",
     "orderSummary": "ملخص الطلب",
     "shippingInfo": "معلومات الشحن",
@@ -178,6 +179,8 @@
     "qty": "الكمية"
   },
   "seller": {
+    "pendingReview": "قيد المراجعة",
+    "maxReached": "تم بلوغ الحد الأقصى",
     "myStore": "متجري",
     "createStore": "أنشئ متجرك",
     "storeName": "اسم المتجر",
@@ -642,6 +645,10 @@
     "internalNotesPlaceholder": "ملاحظات مرئية للمشرفين فقط…",
     "internalNotesHint": "غير مرئية للمستخدم",
     "saveReply": "حفظ والرد"
+  },
+  "wishlist": {
+    "emptyTitle": "قائمة المفضلة فارغة",
+    "emptyDesc": "احفظ المنتجات التي تعجبك بالضغط على أيقونة القلب في صفحة أي منتج."
   },
   "errors": {
     "notFoundTitle": "الصفحة غير موجودة",

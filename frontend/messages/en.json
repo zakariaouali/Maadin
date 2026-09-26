@@ -134,6 +134,7 @@
     "remove": "Remove"
   },
   "checkout": {
+    "failed": "Checkout failed. Please try again.",
     "title": "Checkout",
     "orderSummary": "Order Summary",
     "shippingInfo": "Shipping Information",
@@ -178,6 +179,8 @@
     "qty": "Qty"
   },
   "seller": {
+    "pendingReview": "Pending review",
+    "maxReached": "Maximum reached",
     "myStore": "My Store",
     "createStore": "Create Your Store",
     "storeName": "Store Name",
@@ -642,6 +645,10 @@
     "internalNotesPlaceholder": "Notes visible only to admins…",
     "internalNotesHint": "Not visible to the user",
     "saveReply": "Save & reply"
+  },
+  "wishlist": {
+    "emptyTitle": "Your wishlist is empty",
+    "emptyDesc": "Save products you love by clicking the heart icon on any product page."
   },
   "errors": {
     "notFoundTitle": "Page not found",

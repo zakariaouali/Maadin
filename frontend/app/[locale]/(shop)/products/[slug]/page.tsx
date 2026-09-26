@@ -1,3 +1,4 @@
+import { jsonLdString } from "@/lib/jsonld";
 import { cache, Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -148,7 +149,7 @@ export default async function ProductDetailPage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }}
       />
 
       <div className="mx-auto max-w-6xl px-4 md:px-6 py-6 md:py-10">

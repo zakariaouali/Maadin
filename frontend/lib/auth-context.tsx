@@ -29,8 +29,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUser = async () => {
     try {
-      const { data } = await api.get("/me");
-      setUser(data);
+      // /session answers 200 for logged-out visitors too (user: null), so no
+      // error is logged in the console on every page view
+      const { data } = await api.get("/session");
+      setUser(data.user ?? null);
     } catch {
       setUser(null);
     } finally {

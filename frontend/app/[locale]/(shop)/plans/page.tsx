@@ -1,10 +1,16 @@
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import PlansClient from "./PlansClient";
+import { DEFAULT_OG_IMAGES, SITE_URL, pageAlternates } from "@/lib/seo";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("plans");
-  return { title: t("metaTitle") };
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "plans" });
+  return {
+    title: t("metaTitle"),
+    alternates: pageAlternates(locale, "/plans"),
+    openGraph: { title: t("metaTitle"), url: `${SITE_URL}/${locale}/plans`, type: "website", images: DEFAULT_OG_IMAGES },
+  };
 }
 
 export default async function PlansPage({

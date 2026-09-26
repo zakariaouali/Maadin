@@ -7,7 +7,16 @@ import { Link } from "@/i18n/navigation";
 /* ─────────────────────────────────────────────────────────────
    Content data — EN / FR / AR fully written for each craft
    ───────────────────────────────────────────────────────────── */
-export interface CraftContent {
+export // The homepage crafts use short ids; the catalogue's category slugs are longer
+const CATEGORY_SLUG: Record<string, string> = {
+  zellige: "zellige",
+  pottery: "pottery",
+  leather: "leather-goods",
+  carpets: "rugs-carpets",
+  wood: "woodwork",
+};
+
+interface CraftContent {
   id: string;
   slug: string;            // links to /products?category=...
   label: string;           // short eyebrow label
@@ -315,7 +324,7 @@ function CraftCard({ craft, index }: { craft: CraftContent; index: number }) {
 
         {/* CTA */}
         <Link
-          href={`/products?category=${craft.slug}`}
+          href={`/products?category=${CATEGORY_SLUG[craft.slug] ?? craft.slug}`}
           className="group inline-flex items-center gap-2 text-sm font-semibold text-[#1f1b16] hover:text-[#c9a96e] transition-colors duration-200 w-fit"
         >
           {craft.ctaLabel}

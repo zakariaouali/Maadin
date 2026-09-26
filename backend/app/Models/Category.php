@@ -32,6 +32,16 @@ class Category extends Model
         return $this->hasMany(Product::class);
     }
 
+    /**
+     * The category's own id plus its sub-categories' ids. Choosing a parent
+     * ("Woodwork") must also show products filed under its children
+     * ("Carved Cedar"); an exact-id filter used to hide them.
+     */
+    public static function idsIncludingChildren(int $id): array
+    {
+        return array_merge([$id], static::where('parent_id', $id)->pluck('id')->all());
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

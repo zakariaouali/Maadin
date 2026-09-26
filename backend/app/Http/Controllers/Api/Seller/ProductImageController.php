@@ -18,7 +18,7 @@ class ProductImageController extends Controller
 
         $request->validate([
             'image_urls'   => 'nullable|array|max:5',
-            'image_urls.*' => 'required|string|url|max:1000',
+            'image_urls.*' => ['required', 'string', 'max:1000', new \App\Rules\CloudinaryUrl],
             'images'       => 'nullable|array|max:5',
             'images.*'     => 'required|file|mimetypes:image/jpeg,image/png,image/webp|max:5120',
         ]);

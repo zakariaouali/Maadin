@@ -9,6 +9,7 @@ interface Category {
   id: number;
   name: string;
   localised_name: string;
+  children?: Category[];
 }
 
 interface ProductFiltersProps {
@@ -70,11 +71,23 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
         className="border border-stone/30 rounded-sm px-3 py-2 text-sm outline-none focus:border-gold-deep bg-white min-w-[160px]"
       >
         <option value="">{t("allCategories")}</option>
-        {categories.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.localised_name}
-          </option>
-        ))}
+        {categories.map((c) =>
+          c.children && c.children.length > 0 ? (
+            // A craft with sub-categories: choosing the craft itself shows all of them
+            <optgroup key={c.id} label={c.localised_name}>
+              <option value={c.id}>{c.localised_name}</option>
+              {c.children.map((child) => (
+                <option key={child.id} value={child.id}>
+                  {"  "}{child.localised_name}
+                </option>
+              ))}
+            </optgroup>
+          ) : (
+            <option key={c.id} value={c.id}>
+              {c.localised_name}
+            </option>
+          )
+        )}
       </select>
 
       {/* Sort */}

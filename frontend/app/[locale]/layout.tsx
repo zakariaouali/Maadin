@@ -1,3 +1,4 @@
+import { jsonLdString } from "@/lib/jsonld";
 import type { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
@@ -60,10 +61,6 @@ export async function generateMetadata({
     description,
     keywords: keywords[locale] ?? keywords.en,
     applicationName: "Marrakech Maadine",
-    alternates: {
-      canonical: `/${locale}`,
-      languages: { en: "/en", fr: "/fr", ar: "/ar" },
-    },
     openGraph: {
       type: "website",
       siteName: "Marrakech Maadine",
@@ -142,7 +139,7 @@ export default async function LocaleLayout({
       <body className="min-h-full flex flex-col bg-sand text-ink">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }}
         />
         {gaId && (
           <>

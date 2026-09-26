@@ -1,3 +1,4 @@
+import { DEFAULT_OG_IMAGES } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
@@ -22,7 +23,7 @@ export async function generateMetadata({
         ar: `${SITE_URL}/ar/privacy`,
       },
     },
-    openGraph: { title: t("metaTitle"), description: t("metaDescription"), url, type: "website" },
+    openGraph: { title: t("metaTitle"), description: t("metaDescription"), url, type: "website", images: DEFAULT_OG_IMAGES },
   };
 }
 

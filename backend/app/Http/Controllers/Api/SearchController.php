@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\Seller;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class SearchController extends Controller
      */
     public function suggest(Request $request)
     {
-        $q = trim($request->get('q', ''));
+        $q = is_string($request->query('q')) ? trim($request->query('q')) : '';
 
         if (mb_strlen($q) < 2) {
             return response()->json(['products' => [], 'stores' => []]);
@@ -47,8 +48,8 @@ class SearchController extends Controller
      */
     public function index(Request $request)
     {
-        $q    = trim($request->get('q', ''));
-        $type = $request->get('type', 'all'); // all | products | stores
+        $q    = is_string($request->query('q')) ? trim($request->query('q')) : '';
+        $type = is_string($request->query('type')) ? $request->query('type') : 'all'; // all | products | stores
 
         if (mb_strlen($q) < 2) {
             return response()->json(['query' => $q, 'products' => null, 'stores' => [], 'total_products' => 0, 'total_stores' => 0]);
@@ -70,17 +71,17 @@ class SearchController extends Controller
                     ->orWhereFullText(['name', 'description', 'short_description'], $q)
                 );
 
-            if ($request->filled('category_id')) {
-                $pq->where('category_id', $request->category_id);
+            if ($request->integer('category_id') > 0) {
+                $pq->whereIn('category_id', Category::idsIncludingChildren($request->integer('category_id')));
             }
-            if ($request->filled('min_price')) {
-                $pq->where('price', '>=', $request->min_price);
+            if (is_numeric($request->query('min_price'))) {
+                $pq->where('price', '>=', (float) $request->query('min_price'));
             }
-            if ($request->filled('max_price')) {
-                $pq->where('price', '<=', $request->max_price);
+            if (is_numeric($request->query('max_price'))) {
+                $pq->where('price', '<=', (float) $request->query('max_price'));
             }
 
-            $sort = $request->get('sort', 'relevance');
+            $sort = is_string($request->query('sort')) ? $request->query('sort') : 'relevance';
             match ($sort) {
                 'price_low'  => $pq->orderBy('price', 'asc'),
                 'price_high' => $pq->orderBy('price', 'desc'),

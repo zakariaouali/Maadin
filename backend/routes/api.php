@@ -33,8 +33,11 @@ use App\Http\Controllers\Api\Admin\SupportTicketController as AdminSupportTicket
 use Illuminate\Support\Facades\Route;
 
 // ===== Search (public) =====
-Route::get('/search', [SearchController::class, 'index']);
-Route::get('/search/suggest', [SearchController::class, 'suggest']);
+// Search fires on every keystroke, so it gets a generous but real limit
+Route::middleware('throttle:120,1')->group(function () {
+    Route::get('/search', [SearchController::class, 'index']);
+    Route::get('/search/suggest', [SearchController::class, 'suggest']);
+});
 
 // ===== Auth =====
 Route::middleware('throttle:10,1')->group(function () {
@@ -43,6 +46,8 @@ Route::middleware('throttle:10,1')->group(function () {
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
+
+Route::get('/session', [AuthController::class, 'session']);
 
 // ===== Support (public submit, no auth needed) =====
 Route::middleware('throttle:10,1')->post('/support', [SupportTicketController::class, 'store']);
@@ -101,7 +106,8 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureAccountIsActive::c
     Route::prefix('messages')->group(function () {
         Route::get('/conversations', [MessageController::class, 'conversations']);
         Route::get('/conversations/{id}', [MessageController::class, 'show']);
-        Route::post('/send', [MessageController::class, 'store']);
+        // Each message also sends an email, so cap how fast one account can send
+        Route::post('/send', [MessageController::class, 'store'])->middleware('throttle:30,1');
     });
 
     // --- Admin ---

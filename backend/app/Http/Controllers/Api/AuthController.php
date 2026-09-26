@@ -135,6 +135,23 @@ class AuthController extends Controller
         return response()->json(['user' => $user]);
     }
 
+    // SESSION — what the site asks on every page load. A logged-out visitor is
+    // a normal, expected case, so it answers 200 {user: null} instead of the
+    // 401 error /me gives (which showed up as a red error in every visitor's
+    // browser console on every page).
+    public function session(Request $request)
+    {
+        $user = $request->user('sanctum');
+
+        if (!$user || $user->status !== 'active') {
+            return response()->json(['user' => null]);
+        }
+
+        return response()->json([
+            'user' => $user->fresh()->load('seller:id,user_id,store_name,status'),
+        ]);
+    }
+
     // ME
     public function me(Request $request)
     {
@@ -150,7 +167,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name'       => 'sometimes|required|string|max:255',
             'phone'      => 'nullable|string|max:20',
-            'avatar_url' => 'nullable|string|url|max:1000',
+            'avatar_url' => ['nullable', 'string', 'max:1000', new \App\Rules\CloudinaryUrl],
             'avatar'     => 'sometimes|nullable|file|mimetypes:image/jpeg,image/png,image/webp,image/gif|max:2048',
         ]);
 

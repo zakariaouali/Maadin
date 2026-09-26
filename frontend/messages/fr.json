@@ -134,6 +134,7 @@
     "remove": "Retirer"
   },
   "checkout": {
+    "failed": "La commande a échoué. Veuillez réessayer.",
     "title": "Paiement",
     "orderSummary": "Résumé de la commande",
     "shippingInfo": "Informations de livraison",
@@ -178,6 +179,8 @@
     "qty": "Qté"
   },
   "seller": {
+    "pendingReview": "En attente de validation",
+    "maxReached": "Maximum atteint",
     "myStore": "Ma boutique",
     "createStore": "Créer votre boutique",
     "storeName": "Nom de la boutique",
@@ -642,6 +645,10 @@
     "internalNotesPlaceholder": "Notes visibles uniquement par les admins…",
     "internalNotesHint": "Non visible par l'utilisateur",
     "saveReply": "Enregistrer et répondre"
+  },
+  "wishlist": {
+    "emptyTitle": "Votre liste de favoris est vide",
+    "emptyDesc": "Enregistrez les produits que vous aimez en cliquant sur le cœur sur la page d'un produit."
   },
   "errors": {
     "notFoundTitle": "Page introuvable",

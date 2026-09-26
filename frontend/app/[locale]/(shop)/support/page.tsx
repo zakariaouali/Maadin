@@ -1,3 +1,4 @@
+import { DEFAULT_OG_IMAGES } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import SupportForm from "./SupportForm";
@@ -33,6 +34,7 @@ export async function generateMetadata({
       description,
       url,
       type: "website",
+      images: DEFAULT_OG_IMAGES,
     },
   };
 }

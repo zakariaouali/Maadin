@@ -305,7 +305,7 @@ export default function SellerProductsPage() {
                       {p.is_approved ? (
                         <Badge variant="success">Approved</Badge>
                       ) : (
-                        <Badge variant="warning">Pending review</Badge>
+                        <Badge variant="warning">{t("pendingReview")}</Badge>
                       )}
                       {p.is_approved && (
                         <Badge variant="default" className={p.is_active ? "text-stone" : "opacity-50"}>
@@ -463,7 +463,7 @@ export default function SellerProductsPage() {
               {currentImages.length} / {MAX_IMAGES} images
             </p>
             {!canUploadMore && (
-              <span className="text-xs text-henna font-medium">Maximum reached</span>
+              <span className="text-xs text-henna font-medium">{t("maxReached")}</span>
             )}
           </div>
 

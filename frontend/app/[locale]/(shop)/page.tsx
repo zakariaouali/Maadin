@@ -1,9 +1,12 @@
+import { DEFAULT_OG_IMAGES } from "@/lib/seo";
+import { jsonLdString } from "@/lib/jsonld";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { getImageUrl } from "@/lib/image";
 import type { Metadata } from "next";
 import ArtisanatSection from "@/components/home/ArtisanatSection";
+import HeroVideo from "@/components/home/HeroVideo";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -62,6 +65,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       url: `${SITE_URL}/${locale}`,
       siteName: "Marrakech Maadine",
       type: "website",
+      images: DEFAULT_OG_IMAGES,
     },
   };
 }
@@ -258,25 +262,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(craftJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(craftJsonLd) }} />
 
       {/* ── HERO ─────────────────────────────────────────── */}
       {/* bg-[#2b1f12] shows while video loads — acts as the fallback */}
       <section className="relative h-[90vh] min-h-[560px] overflow-hidden bg-[#2b1f12]">
-        {/* Video — z-0, slightly blurred */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          className="absolute inset-0 w-full h-full object-cover z-0 scale-105"
-          style={{ filter: "blur(3px)" }}
-          aria-hidden="true"
-        >
-          <source src="/artisan-video.mp4" type="video/mp4" />
-        </video>
+        {/* Video — desktop only, loaded after the page settles (see HeroVideo) */}
+        <HeroVideo />
 
         {/* Heavy dark overlay — z-10 */}
         <div className="absolute inset-0 z-10 bg-black/60 pointer-events-none" />

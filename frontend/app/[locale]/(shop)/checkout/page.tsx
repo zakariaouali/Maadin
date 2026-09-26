@@ -12,6 +12,7 @@ import { Button, Input, Alert, PageHeader } from "@/components/ui";
 
 export default function CheckoutPage() {
   const t = useTranslations("checkout");
+  const tCart = useTranslations("cart");
   const router = useRouter();
   const { isAuthenticated, isLoading, user } = useAuth();
   const { items, totalPrice, clearCart } = useCartStore();
@@ -50,9 +51,9 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-md px-6 py-24 text-center">
-        <p className="text-stone mb-6">Your cart is empty.</p>
+        <p className="text-stone mb-6">{tCart("empty")}</p>
         <Link href="/products">
-          <Button variant="primary">Browse products</Button>
+          <Button variant="primary">{tCart("browseProducts")}</Button>
         </Link>
       </div>
     );
@@ -81,7 +82,7 @@ export default function CheckoutPage() {
       setError(
         err.response?.data?.errors?.items?.[0] ||
           err.response?.data?.message ||
-          "Checkout failed. Please try again."
+          t("failed")
       );
     }
 

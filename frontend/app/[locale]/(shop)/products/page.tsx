@@ -1,4 +1,6 @@
+import { DEFAULT_OG_IMAGES } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 import { Suspense } from "react";
 import { ProductCard, EmptyState } from "@/components/ui";
 import { ProductFilters } from "@/components/shop/ProductFilters";
@@ -21,6 +23,8 @@ interface Product {
 
 interface Category {
   id: number;
+  slug?: string;
+  children?: Category[];
   name: string;
   localised_name: string;
 }
@@ -87,6 +91,7 @@ export async function generateMetadata({
       url: `${SITE_URL}/${locale}/products`,
       siteName: "Marrakech Maadine",
       type: "website",
+      images: DEFAULT_OG_IMAGES,
     },
     robots: { index: !search, follow: true },
   };
@@ -97,11 +102,23 @@ export default async function ProductsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ category_id?: string; search?: string; sort?: string }>;
+  searchParams: Promise<{ category_id?: string; category?: string; search?: string; sort?: string }>;
 }) {
   const { locale } = await params;
-  const { category_id, search, sort } = await searchParams;
+  const { category_id, category, search, sort } = await searchParams;
   const t = await getTranslations({ locale, namespace: "products" });
+
+  // Links like /products?category=pottery (homepage craft buttons) carry a slug.
+  // Turn it into the id the filter works with, so the dropdown shows the selection too.
+  if (category && !category_id) {
+    const all = await fetchCategories(locale);
+    const flat = all.flatMap((c) => [c, ...(c.children ?? [])]);
+    const match = flat.find((c) => c.slug === category);
+    redirect({
+      href: { pathname: "/products", query: { ...(match ? { category_id: String(match.id) } : {}), ...(search ? { search } : {}) } },
+      locale,
+    });
+  }
 
   const [products, categories] = await Promise.all([
     fetchProducts({ category_id, search, sort, locale }),

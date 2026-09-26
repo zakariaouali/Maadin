@@ -2,6 +2,10 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import type { Metadata } from "next";
+
+// Login / register / password pages have nothing worth showing in search results
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function AuthLayout({
   children,

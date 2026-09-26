@@ -1,3 +1,4 @@
+import { DEFAULT_OG_IMAGES, SITE_URL, pageAlternates } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
@@ -23,9 +24,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${store.store_name} – Marrakech Maadine`,
     description: store.store_description ?? `Browse handmade products by ${store.store_name}.`,
+    alternates: pageAlternates(locale, `/stores/${slug}`),
     openGraph: {
       title: store.store_name,
-      images: store.banner_path ? [getImageUrl(store.banner_path)] : [],
+      url: `${SITE_URL}/${locale}/stores/${slug}`,
+      type: "website",
+      images: store.banner_path ? [getImageUrl(store.banner_path)] : DEFAULT_OG_IMAGES,
     },
   };
 }
