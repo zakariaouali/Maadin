@@ -23,6 +23,8 @@ export default function ForgotPasswordPage() {
     } catch (err: any) {
       if (err?.response?.status === 404) {
         setError(t("emailNotFound"));
+      } else if (err?.response?.status === 429) {
+        setError(t("tooManyAttempts"));
       } else {
         setError(t("loginFailed"));
       }

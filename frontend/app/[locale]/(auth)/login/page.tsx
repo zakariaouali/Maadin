@@ -24,7 +24,14 @@ export default function LoginPage() {
       await login(email, password);
       router.push("/");
     } catch (err: any) {
-      setError(err.response?.data?.message || t("loginFailed"));
+      // Show our own translated text, not the raw English message from the server
+      const status = err.response?.status;
+      const serverMessage: string = err.response?.data?.message ?? "";
+      if (status === 401) setError(t("invalidCredentials"));
+      else if (status === 429) setError(t("tooManyAttempts"));
+      else if (status === 403 && /banned/i.test(serverMessage)) setError(t("accountBanned"));
+      else if (status === 403) setError(t("accountSuspended"));
+      else setError(t("loginFailed"));
     }
     setLoading(false);
   };

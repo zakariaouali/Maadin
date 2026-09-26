@@ -52,6 +52,10 @@
     "support": "Support"
   },
   "auth": {
+    "invalidCredentials": "Incorrect email or password.",
+    "accountBanned": "This account has been banned. Contact support if you think this is a mistake.",
+    "accountSuspended": "This account is suspended. Contact support for help.",
+    "tooManyAttempts": "Too many attempts. Please wait a few minutes and try again.",
     "loginTitle": "Login",
     "registerTitle": "Create Account",
     "email": "Email",
