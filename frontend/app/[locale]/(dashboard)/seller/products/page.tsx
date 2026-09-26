@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { useAuth } from "@/lib/auth-context";
 import api from "@/lib/api";
 import { getImageUrl, normalizeImageFile } from "@/lib/image";
 import { uploadToCloudinary } from "@/lib/cloudinary";
@@ -29,6 +31,7 @@ const emptyForm = { name: "", description: "", price: "", stock: "", category_id
 export default function SellerProductsPage() {
   const t = useTranslations("seller");
   const tCommon = useTranslations("common");
+  const { user } = useAuth();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -55,6 +58,7 @@ export default function SellerProductsPage() {
   const formFileInputRef = useRef<HTMLInputElement>(null);
 
   const isVerified = storeStatus === "verified";
+  const hasStore = storeStatus !== null;
 
   const load = async () => {
     try {
@@ -71,7 +75,10 @@ export default function SellerProductsPage() {
         setStoreStatus(null); // no store yet
       }
     } catch (e: any) {
-      setError(e.response?.data?.message || t("failedLoadData"));
+      // 404 = this seller has no store yet; the "create your store" notice covers it
+      if (e.response?.status !== 404) {
+        setError(e.response?.data?.message || t("failedLoadData"));
+      }
     }
     setLoading(false);
   };
@@ -227,16 +234,31 @@ export default function SellerProductsPage() {
         action={
           isVerified ? (
             <Button variant="primary" onClick={openCreate}>{t("addProduct")}</Button>
-          ) : (
+          ) : hasStore ? (
             <span className="text-xs text-stone bg-stone/10 rounded-full px-3 py-1.5">
               {t("notVerified").split(".")[0]}
             </span>
-          )
+          ) : undefined
         }
       />
 
-      {/* Verification notice */}
-      {!isVerified && (
+      {/* No store yet: tell the seller what to do, instead of a false "pending verification" */}
+      {!hasStore && (
+        <div className="mb-6 rounded-xl border border-[#c9a227]/30 bg-[#c9a227]/8 px-5 py-4 flex flex-wrap items-center gap-3">
+          <p className="text-sm text-[#9c7a1a] leading-relaxed flex-1 min-w-[220px]">
+            {user?.plan === "starter" ? t("noStoreYet") : t("managedStoreSoon")}
+          </p>
+          <Link
+            href={user?.plan === "starter" ? "/seller/store" : "/seller/subscription"}
+            className="text-sm font-medium bg-gold hover:bg-gold-deep text-ink px-4 py-2 rounded-sm transition-colors"
+          >
+            {user?.plan === "starter" ? t("noStoreCta") : t("managedStoreCta")}
+          </Link>
+        </div>
+      )}
+
+      {/* Verification notice (a store exists but is not verified yet) */}
+      {hasStore && !isVerified && (
         <div className="mb-6 rounded-xl border border-[#c9a227]/30 bg-[#c9a227]/8 px-5 py-4 flex items-start gap-3">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a227" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
             <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>

@@ -72,11 +72,8 @@ export default function PlansClient({
       try {
         await api.post("/me/become-seller", { plan: planKey });
         await refetchUser();
-        if (planKey === "starter") {
-          router.push("/seller/store");
-          return;
-        }
-        setSuccess(i18n.weWillContact);
+        router.push(planKey === "starter" ? "/seller/store" : "/seller/subscription");
+        return;
       } catch (e: any) {
         setError(e.response?.data?.message ?? "Something went wrong.");
       }

@@ -46,7 +46,8 @@ function RegisterForm() {
     setLoading(true);
     try {
       await register({ name, email, password, phone, role, plan: role === "seller" ? plan : undefined });
-      router.push("/");
+      // A new seller's next step is their store, not the home page
+      router.push(role === "seller" ? (plan === "starter" ? "/seller/store" : "/seller/subscription") : "/");
     } catch (err: any) {
       const errors = err.response?.data?.errors;
       if (errors?.email) {
