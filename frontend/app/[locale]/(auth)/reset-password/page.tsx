@@ -37,8 +37,15 @@ function ResetPasswordForm() {
       setDone(true);
       setTimeout(() => router.push("/login"), 3000);
     } catch (err: any) {
-      const msg = err.response?.data?.message ?? "";
-      setError(msg.includes("expired") ? t("tokenExpired") : t("loginFailed"));
+      const data = err.response?.data;
+      const passwordError = data?.errors?.password?.[0];
+      if (passwordError) {
+        setError(passwordError);
+      } else if (err.response?.status === 422 || err.response?.status === 404) {
+        setError(t("tokenExpired"));
+      } else {
+        setError(t("resetFailed"));
+      }
     }
     setLoading(false);
   };

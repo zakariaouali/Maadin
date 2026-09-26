@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api\Seller;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SellerPlanRequestMail;
 use App\Models\Notification;
 use App\Models\PlanUpgradeRequest;
 use App\Models\User;
+use App\Support\AdminNotifier;
 use App\Support\NotificationMessages;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class SubscriptionController extends Controller
 {
@@ -73,8 +76,11 @@ class SubscriptionController extends Controller
         ]);
         Notification::create(['user_id' => $user->id, 'type' => 'system', 'title' => $title, 'body' => $body, 'link' => '/seller/subscription']);
 
+        Mail::to(AdminNotifier::email())
+            ->send(new SellerPlanRequestMail($user->name, $user->email, $validated['to_plan'], true));
+
         // Notify all admins
-        $admins = User::where('role', 'admin')->pluck('id');
+        $admins =User::where('role', 'admin')->pluck('id');
         foreach ($admins as $adminId) {
             [$aTitle, $aBody] = NotificationMessages::get('admin.upgrade_requested', 'en', [
                 'name' => $user->name,

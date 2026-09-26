@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\NewCustomerRegisteredMail;
 use App\Mail\PasswordResetMail;
+use App\Mail\SellerPlanRequestMail;
 use App\Mail\WelcomeEmail;
 use App\Support\AdminNotifier;
 use Illuminate\Support\Facades\Mail;
@@ -56,6 +57,10 @@ class AuthController extends Controller
         if ($role === 'customer') {
             Mail::to(AdminNotifier::email())
                 ->send(new NewCustomerRegisteredMail($user->name, $user->email));
+        } elseif (in_array($user->plan, ['managed', 'premium'])) {
+            // Our team creates these stores, so nothing else would alert us
+            Mail::to(AdminNotifier::email())
+                ->send(new SellerPlanRequestMail($user->name, $user->email, $user->plan));
         }
 
         return response()->json(['user' => $user]);
@@ -84,6 +89,11 @@ class AuthController extends Controller
 
         $locale = in_array($user->locale, ['en', 'fr', 'ar']) ? $user->locale : 'en';
         Mail::to($user->email)->send(new WelcomeEmail($user->name, 'seller', $locale));
+
+        if (in_array($user->plan, ['managed', 'premium'])) {
+            Mail::to(AdminNotifier::email())
+                ->send(new SellerPlanRequestMail($user->name, $user->email, $user->plan));
+        }
 
         return response()->json(['user' => $user->fresh()]);
     }
@@ -128,7 +138,8 @@ class AuthController extends Controller
     // ME
     public function me(Request $request)
     {
-        return response()->json($request->user()->fresh());
+        // `seller` lets the UI tell "seller without a store yet" from "seller with a store"
+        return response()->json($request->user()->fresh()->load('seller:id,user_id,store_name,status'));
     }
 
     // UPDATE PROFILE (name, phone, avatar)
@@ -221,7 +232,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid or expired reset token.'], 422);
         }
 
-        if (now()->diffInMinutes($record->created_at) > 60) {
+        if (\Illuminate\Support\Carbon::parse($record->created_at)->addMinutes(60)->isPast()) {
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
             return response()->json(['message' => 'Reset token has expired.'], 422);
         }

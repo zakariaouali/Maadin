@@ -84,6 +84,7 @@
     "resetPassword": "Réinitialiser le mot de passe",
     "resettingPassword": "Réinitialisation...",
     "passwordResetSuccess": "Mot de passe réinitialisé avec succès. Vous pouvez maintenant vous connecter.",
+    "resetFailed": "Une erreur est survenue. Veuillez réessayer.",
     "tokenExpired": "Ce lien de réinitialisation a expiré ou est invalide. Veuillez en demander un nouveau.",
     "backToLogin": "Retour à la connexion",
     "passwordMismatch": "Les mots de passe ne correspondent pas."

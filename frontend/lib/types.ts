@@ -9,6 +9,8 @@ export interface User {
   avatar_path: string | null;
   email_verified_at: string | null;
   created_at: string;
+  /** Only sent by /me: null for a seller who has not created a store yet */
+  seller?: { id: number; store_name: string; status: string } | null;
 }
 
 export interface Seller {

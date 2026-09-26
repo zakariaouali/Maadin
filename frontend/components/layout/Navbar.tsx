@@ -84,7 +84,10 @@ export default function Navbar() {
       : []),
   ];
 
-  const menuItems: { href: string; label: string; icon: React.ReactNode; badge?: number }[] = [
+  type MenuItem = { href: string; label: string; icon: React.ReactNode; badge?: number };
+  const tr = (ar: string, fr: string, en: string) => (locale === "ar" ? ar : locale === "fr" ? fr : en);
+
+  const customerItems: MenuItem[] = [
     {
       href: "/profile",
       label: locale === "ar" ? "ملفي" : locale === "fr" ? "Mon profil" : "My Profile",
@@ -106,6 +109,42 @@ export default function Navbar() {
       icon: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />,
     },
   ];
+
+  // Each role gets its own menu: admins never see shopping links, sellers see
+  // their store first and their own purchases under a clearer name.
+  const [profileItem, ordersItem, wishlistItem, messagesItem] = customerItems;
+  const hasStore = !!user?.seller;
+  const isManagedPlan = user?.plan === "managed" || user?.plan === "premium";
+
+  const sellerItem: MenuItem = {
+    href: hasStore ? "/seller/products" : isManagedPlan ? "/seller/subscription" : "/seller/store",
+    label: hasStore
+      ? tr("لوحة البائع", "Tableau vendeur", "Seller Dashboard")
+      : isManagedPlan
+        ? tr("باقتي وحالة متجري", "Mon offre et ma boutique", "My plan & store status")
+        : tr("أنشئ متجرك", "Créer ma boutique", "Set up your store"),
+    icon: <><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></>,
+  };
+
+  const adminItem: MenuItem = {
+    href: "/admin/analytics",
+    label: tr("لوحة الإدارة", "Administration", "Admin Dashboard"),
+    icon: <><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></>,
+    badge: urgentAdmin,
+  };
+
+  const menuItems: MenuItem[] =
+    user?.role === "admin"
+      ? [adminItem, messagesItem, profileItem]
+      : user?.role === "seller"
+        ? [
+            sellerItem,
+            messagesItem,
+            { ...ordersItem, label: tr("مشترياتي", "Mes achats", "My Purchases") },
+            wishlistItem,
+            profileItem,
+          ]
+        : customerItems;
 
   return (
     <header className="bg-white border-b border-stone/15 sticky top-0 z-40 shadow-sm">
@@ -260,36 +299,6 @@ export default function Navbar() {
                       </Link>
                     ))}
 
-                    {user?.role === "seller" && (
-                      <Link
-                        href="/seller/products"
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-sand transition-colors"
-                        onClick={() => setUserMenuOpen(false)}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-stone shrink-0">
-                          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                          <polyline points="9 22 9 12 15 12 15 22" />
-                        </svg>
-                        {locale === "ar" ? "لوحة البائع" : locale === "fr" ? "Tableau vendeur" : "Seller Dashboard"}
-                      </Link>
-                    )}
-
-                    {user?.role === "admin" && (
-                      <Link
-                        href="/admin/analytics"
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-sand transition-colors"
-                        onClick={() => setUserMenuOpen(false)}
-                      >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-stone shrink-0">
-                          <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" />
-                          <rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
-                        </svg>
-                        {locale === "ar" ? "لوحة الإدارة" : locale === "fr" ? "Administration" : "Admin Dashboard"}
-                        {urgentAdmin > 0 && (
-                          <span className="ms-auto bg-amber-500 text-white text-[10px] rounded-full px-1.5 py-0.5 font-medium">{urgentAdmin}</span>
-                        )}
-                      </Link>
-                    )}
 
                     <div className="border-t border-stone/10 mt-1" />
                     <button
@@ -365,15 +374,14 @@ export default function Navbar() {
                   </div>
                 </div>
                 <div className="my-1 border-t border-stone/10" />
-                <Link href="/customer/orders" onClick={() => setMenuOpen(false)} className="px-3 py-2.5 text-sm text-ink rounded-sm hover:bg-sand">
-                  {locale === "ar" ? "طلباتي" : locale === "fr" ? "Mes commandes" : "My Orders"}
-                </Link>
-                <Link href="/customer/wishlist" onClick={() => setMenuOpen(false)} className="px-3 py-2.5 text-sm text-ink rounded-sm hover:bg-sand">
-                  {locale === "ar" ? "المفضلة" : locale === "fr" ? "Favoris" : "Wishlist"}
-                </Link>
-                <Link href="/messages" onClick={() => setMenuOpen(false)} className="px-3 py-2.5 text-sm text-ink rounded-sm hover:bg-sand">
-                  {locale === "ar" ? "الرسائل" : locale === "fr" ? "Messages" : "Messages"}
-                </Link>
+                {menuItems.map((item) => (
+                  <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className="px-3 py-2.5 text-sm text-ink rounded-sm hover:bg-sand flex items-center">
+                    {item.label}
+                    {item.badge && item.badge > 0 ? (
+                      <span className="ms-auto bg-henna text-white text-[10px] rounded-full px-1.5 py-0.5 font-medium">{item.badge}</span>
+                    ) : null}
+                  </Link>
+                ))}
                 <div className="my-1 border-t border-stone/10" />
                 <button onClick={handleLogout} className="px-3 py-2.5 text-sm text-henna rounded-sm hover:bg-red-50 text-start">
                   {locale === "ar" ? "تسجيل الخروج" : locale === "fr" ? "Déconnexion" : "Sign out"}
