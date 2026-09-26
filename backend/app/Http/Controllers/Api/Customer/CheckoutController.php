@@ -42,16 +42,28 @@ class CheckoutController extends Controller
             return response()->json($existing->response, 201);
         }
 
-        $orders = DB::transaction(function () use ($validated, $request, $key, $userId) {
+        // The same product can appear on several lines: merge them so the stock
+        // check below sees the real total instead of each line on its own.
+        $cartItems = collect($validated['items'])
+            ->groupBy('product_id')
+            ->map(fn ($lines, $productId) => [
+                'product_id' => (int) $productId,
+                'quantity' => $lines->sum('quantity'),
+            ])
+            ->values()
+            ->all();
+
+        $orders = DB::transaction(function () use ($validated, $cartItems, $request, $key, $userId) {
             $createdOrders = [];
             $itemsBySeller = [];
 
-            foreach ($validated['items'] as $cartItem) {
+            foreach ($cartItems as $cartItem) {
                 $product = Product::where('id', $cartItem['product_id'])
                     ->lockForUpdate()
                     ->first();
 
-                if (!$product || !$product->is_active) {
+                // Same rule as the public shop: active AND approved by an admin
+                if (!$product || !$product->is_active || !$product->is_approved) {
                     throw ValidationException::withMessages([
                         'items' => "A product in your cart is no longer available.",
                     ]);
@@ -60,6 +72,13 @@ class CheckoutController extends Controller
                 if ($product->seller->status !== 'verified') {
                     throw ValidationException::withMessages([
                         'items' => "\"{$product->name}\" is no longer available.",
+                    ]);
+                }
+
+                // No buying from your own store (fake orders, self-reviews)
+                if ($product->seller->user_id === $userId) {
+                    throw ValidationException::withMessages([
+                        'items' => "You can't order your own product (\"{$product->name}\").",
                     ]);
                 }
 

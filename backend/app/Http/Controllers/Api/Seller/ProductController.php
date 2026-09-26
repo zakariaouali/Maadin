@@ -81,6 +81,16 @@ class ProductController extends Controller
             $validated['slug'] = $this->generateUniqueSlug($validated['name'], $product->id);
         }
 
+        // Changing what the listing says (not just price/stock) on an approved
+        // product puts it back in the admin review queue, so an approved
+        // listing can't be swapped for something else afterwards.
+        $contentChanged = collect(['name', 'description', 'category_id'])
+            ->contains(fn ($f) => array_key_exists($f, $validated) && (string) $validated[$f] !== (string) $product->{$f});
+
+        if ($product->is_approved && $contentChanged) {
+            $validated['is_approved'] = false;
+        }
+
         $product->update($validated);
 
         return response()->json($product);

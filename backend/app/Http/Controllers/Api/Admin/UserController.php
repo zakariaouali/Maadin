@@ -51,6 +51,14 @@ class UserController extends Controller
 
         $user->update(['status' => $validated['status']]);
 
+        // A suspended/banned seller's store must stop selling too. Coming back
+        // to "active" does NOT reopen the store: an admin does that explicitly
+        // with "reactivate seller", so a store suspended for its own reasons
+        // is never reopened by accident.
+        if ($validated['status'] !== 'active' && $user->seller && $user->seller->status !== 'suspended') {
+            $user->seller->update(['status' => 'suspended']);
+        }
+
         $this->logAction($request, 'update_user_status', 'user', $user->id, ['status' => $validated['status']]);
 
         return response()->json($user);

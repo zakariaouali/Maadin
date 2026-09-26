@@ -55,7 +55,7 @@ Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::get('/products/{product}/reviews', [ReviewController::class, 'index']);
 
 // ===== Authenticated =====
-Route::middleware(['auth:sanctum', \App\Http\Middleware\SyncUserLocale::class])->group(function () {
+Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureAccountIsActive::class, \App\Http\Middleware\SyncUserLocale::class])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/me/profile', [AuthController::class, 'updateProfile']);
     Route::post('/me/password', [AuthController::class, 'changePassword']);

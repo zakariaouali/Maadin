@@ -22,6 +22,7 @@ class StoreController extends Controller
 
         $products = $seller->products()
             ->where('is_active', true)
+            ->where('is_approved', true)
             ->with(['images' => fn($q) => $q->where('is_primary', true), 'category:id,name,name_fr,name_ar'])
             ->orderBy('created_at', 'desc')
             ->get(['id', 'seller_id', 'category_id', 'name', 'slug', 'price', 'stock_quantity', 'rating', 'total_reviews', 'short_description']);
