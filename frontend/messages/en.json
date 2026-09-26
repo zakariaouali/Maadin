@@ -64,6 +64,8 @@
     "creatingAccount": "Creating account...",
     "loginFailed": "Login failed",
     "registerFailed": "Registration failed",
+    "emailTaken": "This email already has an account. Log in, then pick your plan on the “Sell with us” page to become a seller with the same account.",
+    "emailTakenLogin": "Log in",
     "noAccount": "Don't have an account?",
     "haveAccount": "Already have an account?",
     "accountType": "Account type",

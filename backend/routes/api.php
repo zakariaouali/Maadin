@@ -59,6 +59,7 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\SyncUserLocale::class])-
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/me/profile', [AuthController::class, 'updateProfile']);
     Route::post('/me/password', [AuthController::class, 'changePassword']);
+    Route::post('/me/become-seller', [AuthController::class, 'becomeSeller']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // Notifications (unread counts for navbar badges)

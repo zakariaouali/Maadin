@@ -29,6 +29,7 @@ function RegisterForm() {
   const [role, setRole] = useState<"customer" | "seller">(initialRole);
   const [plan, setPlan] = useState<"starter" | "managed" | "premium">(initialPlan);
   const [error, setError] = useState("");
+  const [emailTaken, setEmailTaken] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -41,12 +42,18 @@ function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setEmailTaken(false);
     setLoading(true);
     try {
       await register({ name, email, password, phone, role, plan: role === "seller" ? plan : undefined });
       router.push("/");
     } catch (err: any) {
       const errors = err.response?.data?.errors;
+      if (errors?.email) {
+        setEmailTaken(true);
+        setLoading(false);
+        return;
+      }
       const firstError = errors ? Object.values(errors)[0] : null;
       setError(
         (Array.isArray(firstError) ? firstError[0] : firstError) ||
@@ -190,6 +197,15 @@ function RegisterForm() {
         )}
 
         {error && <p className="text-henna text-sm">{error}</p>}
+
+        {emailTaken && (
+          <p className="text-henna text-sm">
+            {t("emailTaken")}{" "}
+            <Link href="/login" className="underline font-medium">
+              {t("emailTakenLogin")}
+            </Link>
+          </p>
+        )}
 
         <button
           type="submit"

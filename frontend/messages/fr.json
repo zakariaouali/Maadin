@@ -64,6 +64,8 @@
     "creatingAccount": "Création du compte...",
     "loginFailed": "Échec de la connexion",
     "registerFailed": "Échec de l'inscription",
+    "emailTaken": "Cet e-mail a déjà un compte. Connectez-vous, puis choisissez votre offre sur la page « Vendre avec nous » pour devenir vendeur avec le même compte.",
+    "emailTakenLogin": "Se connecter",
     "noAccount": "Vous n'avez pas de compte ?",
     "haveAccount": "Vous avez déjà un compte ?",
     "accountType": "Type de compte",

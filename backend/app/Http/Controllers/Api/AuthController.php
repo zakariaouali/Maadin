@@ -61,6 +61,33 @@ class AuthController extends Controller
         return response()->json(['user' => $user]);
     }
 
+    // BECOME A SELLER — an existing customer switches their own account to
+    // seller in place (orders, wishlist, reviews and messages are kept).
+    // The store itself is created afterwards through POST /seller/store, or by
+    // the team for managed/premium plans.
+    public function becomeSeller(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'plan' => 'nullable|in:starter,managed,premium',
+        ]);
+
+        if ($user->role !== 'customer') {
+            return response()->json(['message' => 'Only customer accounts can become sellers.'], 422);
+        }
+
+        $user->update([
+            'role' => 'seller',
+            'plan' => $validated['plan'] ?? 'starter',
+        ]);
+
+        $locale = in_array($user->locale, ['en', 'fr', 'ar']) ? $user->locale : 'en';
+        Mail::to($user->email)->send(new WelcomeEmail($user->name, 'seller', $locale));
+
+        return response()->json(['user' => $user->fresh()]);
+    }
+
     // LOGIN
     public function login(Request $request)
     {

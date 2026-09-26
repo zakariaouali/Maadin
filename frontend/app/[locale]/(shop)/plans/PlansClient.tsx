@@ -44,7 +44,7 @@ export default function PlansClient({
   faqs: Faq[];
   i18n: I18n;
 }) {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, refetchUser } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [success, setSuccess] = useState("");
@@ -60,8 +60,27 @@ export default function PlansClient({
   };
 
   const handlePlanClick = async (planKey: string) => {
-    if (!isAuthenticated || !isSeller) {
+    if (!isAuthenticated) {
       router.push(`/register?role=seller&plan=${planKey}`);
+      return;
+    }
+
+    // Logged-in customer: switch this same account to seller, no new signup
+    if (!isSeller) {
+      setLoading(planKey);
+      setError("");
+      try {
+        await api.post("/me/become-seller", { plan: planKey });
+        await refetchUser();
+        if (planKey === "starter") {
+          router.push("/seller/store");
+          return;
+        }
+        setSuccess(i18n.weWillContact);
+      } catch (e: any) {
+        setError(e.response?.data?.message ?? "Something went wrong.");
+      }
+      setLoading(null);
       return;
     }
 
