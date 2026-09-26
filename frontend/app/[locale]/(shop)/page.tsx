@@ -429,7 +429,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
           {/* View all link */}
           <div className="text-center mt-10">
-            <Link href="/products" className="inline-flex items-center gap-2 text-sm text-gold-deep font-medium hover:underline">
+            <Link href="/products" className="inline-flex items-center gap-2 py-2 text-sm text-gold-deep font-medium hover:underline">
               {t("viewAll")}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
             </Link>
@@ -470,7 +470,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         )}
 
         <div className="mt-12 text-center">
-          <Link href="/products" className="inline-flex items-center gap-2 text-sm text-gold-deep font-medium hover:underline">
+          <Link href="/products" className="inline-flex items-center gap-2 py-2 text-sm text-gold-deep font-medium hover:underline">
             {t("viewAll")}
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6" /></svg>
           </Link>

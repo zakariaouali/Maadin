@@ -25,16 +25,16 @@ export default function Footer() {
               Explore
             </p>
             <div className="flex flex-col gap-2.5">
-              <Link href="/products" className="text-sm text-white/60 hover:text-gold transition-colors">
+              <Link href="/products" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
                 {t("products")}
               </Link>
-              <Link href="/login" className="text-sm text-white/60 hover:text-gold transition-colors">
+              <Link href="/login" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
                 {t("login")}
               </Link>
-              <Link href="/plans" className="text-sm text-white/60 hover:text-gold transition-colors">
+              <Link href="/plans" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
                 Sell on Maadine
               </Link>
-              <Link href="/support" className="text-sm text-white/60 hover:text-gold transition-colors">
+              <Link href="/support" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
                 {t("support")}
               </Link>
             </div>
@@ -46,10 +46,10 @@ export default function Footer() {
               {t("legal")}
             </p>
             <div className="flex flex-col gap-2.5">
-              <Link href="/privacy" className="text-sm text-white/60 hover:text-gold transition-colors">
+              <Link href="/privacy" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
                 {t("privacy")}
               </Link>
-              <Link href="/terms" className="text-sm text-white/60 hover:text-gold transition-colors">
+              <Link href="/terms" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
                 {t("terms")}
               </Link>
             </div>
@@ -61,10 +61,10 @@ export default function Footer() {
               Contact
             </p>
             <div className="flex flex-col gap-2.5">
-              <a href="mailto:contact@maadinemarrakech.com" className="text-sm text-white/60 hover:text-gold transition-colors">
+              <a href="mailto:contact@maadinemarrakech.com" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
                 contact@maadinemarrakech.com
               </a>
-              <a href="tel:+212661686140" className="text-sm text-white/60 hover:text-gold transition-colors" dir="ltr">
+              <a href="tel:+212661686140" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors" dir="ltr">
                 +212 661-686140
               </a>
             </div>
@@ -77,9 +77,9 @@ export default function Footer() {
         <div className="mx-auto max-w-7xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-white/30">
           <p>&copy; {new Date().getFullYear()} Marrakech Maadine. All rights reserved.</p>
           <div className="flex items-center gap-4">
-            <Link href="/privacy" className="hover:text-white/60 transition-colors">{t("privacy")}</Link>
+            <Link href="/privacy" className="inline-block py-2 hover:text-white/60 transition-colors">{t("privacy")}</Link>
             <span>·</span>
-            <Link href="/terms" className="hover:text-white/60 transition-colors">{t("terms")}</Link>
+            <Link href="/terms" className="inline-block py-2 hover:text-white/60 transition-colors">{t("terms")}</Link>
           </div>
         </div>
       </div>

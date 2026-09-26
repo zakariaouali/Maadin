@@ -325,7 +325,7 @@ function CraftCard({ craft, index }: { craft: CraftContent; index: number }) {
         {/* CTA */}
         <Link
           href={`/products?category=${CATEGORY_SLUG[craft.slug] ?? craft.slug}`}
-          className="group inline-flex items-center gap-2 text-sm font-semibold text-[#1f1b16] hover:text-[#c9a96e] transition-colors duration-200 w-fit"
+          className="group inline-flex items-center gap-2 py-1.5 text-sm font-semibold text-[#1f1b16] hover:text-[#c9a96e] transition-colors duration-200 w-fit"
         >
           {craft.ctaLabel}
           <span className="w-7 h-7 rounded-full border border-[#1f1b16]/20 group-hover:border-[#c9a96e]/50 flex items-center justify-center transition-colors duration-200">

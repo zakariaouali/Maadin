@@ -27,6 +27,7 @@
     "artisanatStat3Label": "Cities & regions"
   },
   "common": {
+    "skipToContent": "Skip to main content",
     "siteName": "Marrakech Maadine",
     "loading": "Loading...",
     "save": "Save",
