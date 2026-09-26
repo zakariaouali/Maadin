@@ -77,7 +77,9 @@ class ProductController extends Controller
             'is_active' => 'sometimes|boolean',
         ]);
 
-        if (isset($validated['name']) && $validated['name'] !== $product->name) {
+        // Keep the URL stable once the product has been published: renaming used to
+        // change the slug and break every shared link and search-engine entry.
+        if (isset($validated['name']) && $validated['name'] !== $product->name && !$product->is_approved) {
             $validated['slug'] = $this->generateUniqueSlug($validated['name'], $product->id);
         }
 

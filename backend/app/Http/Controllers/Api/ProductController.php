@@ -80,6 +80,39 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
+    /**
+     * Current price / stock / availability for the products in a cart.
+     * The cart keeps whatever price and stock it saw when the item was added,
+     * so the cart and checkout pages ask this before showing totals.
+     */
+    public function cartStatus(Request $request)
+    {
+        $validated = $request->validate([
+            'product_ids'   => 'required|array|min:1|max:50',
+            'product_ids.*' => 'integer',
+        ]);
+
+        $products = Product::whereIn('id', $validated['product_ids'])
+            ->with('seller:id,user_id,status')
+            ->get(['id', 'seller_id', 'price', 'stock_quantity', 'is_active', 'is_approved']);
+
+        $userId = $request->user('sanctum')?->id;
+
+        return response()->json([
+            'products' => $products->map(fn ($p) => [
+                'id'             => $p->id,
+                'price'          => (float) $p->price,
+                'stock_quantity' => $p->stock_quantity,
+                // same rule checkout enforces: active, approved, verified store,
+                // and not the customer's own store
+                'available'      => $p->is_active
+                    && $p->is_approved
+                    && $p->seller?->status === 'verified'
+                    && $p->seller?->user_id !== $userId,
+            ])->values(),
+        ]);
+    }
+
     public function show(Request $request, string $slug)
     {
         $locale = $this->localeFromRequest($request);

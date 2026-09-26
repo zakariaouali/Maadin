@@ -29,7 +29,8 @@ class ProductController extends Controller
             'is_active'       => 'sometimes|boolean',
         ]);
 
-        if (isset($validated['name']) && $validated['name'] !== $product->name) {
+        // Keep the URL stable once published (see the seller controller)
+        if (isset($validated['name']) && $validated['name'] !== $product->name && !$product->is_approved) {
             $validated['slug'] = $this->generateUniqueSlug($validated['name'], $product->id);
         }
 
@@ -107,7 +108,7 @@ class ProductController extends Controller
 
     private function generateUniqueSlug(string $name, ?int $ignoreId = null): string
     {
-        $slug     = Str::slug($name);
+        $slug     = Str::slug($name) ?: 'product';
         $original = $slug;
         $i        = 1;
 

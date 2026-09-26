@@ -121,6 +121,11 @@
     "category": "Catégorie"
   },
   "cart": {
+    "syncTitle": "Votre panier a été mis à jour",
+    "syncRemoved": "« {name} » n'est plus disponible et a été retiré de votre panier.",
+    "syncPrice": "Le prix de « {name} » est maintenant de {price} MAD.",
+    "syncStock": "Il ne reste que {count} × « {name} », la quantité a été ajustée.",
+    "syncDismiss": "Compris",
     "title": "Votre panier",
     "empty": "Votre panier est vide.",
     "browseProducts": "Parcourir les produits",

@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useCartStore } from "@/store/cartStore";
+import { useCartSync } from "@/lib/useCartSync";
+import { CartSyncNotice } from "@/components/shop/CartSyncNotice";
 import api from "@/lib/api";
 import Image from "next/image";
 import { getImageUrl } from "@/lib/image";
@@ -16,6 +18,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading, user } = useAuth();
   const { items, totalPrice, clearCart } = useCartStore();
+  const { changes, dismiss } = useCartSync();
 
   const idempotencyKey = useMemo(
     () => `${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -99,6 +102,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 md:px-6 py-6 md:py-10">
+      <CartSyncNotice changes={changes} onDismiss={dismiss} />
       <PageHeader title={t("title")} />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">

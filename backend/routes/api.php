@@ -56,6 +56,7 @@ Route::middleware('throttle:10,1')->post('/support', [SupportTicketController::c
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/stores/{slug}', [StoreController::class, 'show']);
 Route::get('/products', [ProductController::class, 'index']);
+Route::middleware('throttle:60,1')->post('/cart/status', [ProductController::class, 'cartStatus']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::get('/products/{product}/reviews', [ReviewController::class, 'index']);
 

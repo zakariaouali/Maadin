@@ -6,12 +6,15 @@ import Image from "next/image";
 import { getImageUrl } from "@/lib/image";
 import { useCartStore } from "@/store/cartStore";
 import { useAuth } from "@/lib/auth-context";
+import { useCartSync } from "@/lib/useCartSync";
+import { CartSyncNotice } from "@/components/shop/CartSyncNotice";
 
 export default function CartPage() {
   const locale = useLocale();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const { items, removeItem, updateQuantity, clearCart, totalPrice } = useCartStore();
+  const { changes, dismiss } = useCartSync();
 
   const label = (en: string, fr: string, ar: string) => locale === "fr" ? fr : locale === "ar" ? ar : en;
 
@@ -23,6 +26,7 @@ export default function CartPage() {
   if (!items.length) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-24 text-center space-y-5">
+        <div className="text-start"><CartSyncNotice changes={changes} onDismiss={dismiss} /></div>
         <div className="text-6xl">🛒</div>
         <h1 className="font-display text-2xl text-ink">{label("Your cart is empty", "Votre panier est vide", "سلتك فارغة")}</h1>
         <p className="text-stone">{label("Discover our artisan products and add them to your cart.", "Découvrez nos produits artisanaux et ajoutez-les à votre panier.", "اكتشف منتجاتنا الحرفية وأضفها إلى سلتك.")}</p>
@@ -42,6 +46,7 @@ export default function CartPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
+      <CartSyncNotice changes={changes} onDismiss={dismiss} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl text-ink">
           {label("My Cart", "Mon Panier", "سلتي")}

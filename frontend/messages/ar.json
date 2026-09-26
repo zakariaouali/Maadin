@@ -121,6 +121,11 @@
     "category": "الفئة"
   },
   "cart": {
+    "syncTitle": "تم تحديث سلتك",
+    "syncRemoved": "«{name}» لم يعد متوفراً وتمت إزالته من سلتك.",
+    "syncPrice": "أصبح سعر «{name}» الآن {price} درهم.",
+    "syncStock": "لم يتبق سوى {count} من «{name}»، لذلك تم تعديل الكمية.",
+    "syncDismiss": "حسناً",
     "title": "سلتك",
     "empty": "سلتك فارغة.",
     "browseProducts": "تصفح المنتجات",

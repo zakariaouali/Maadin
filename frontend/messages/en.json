@@ -121,6 +121,11 @@
     "category": "Category"
   },
   "cart": {
+    "syncTitle": "Your cart was updated",
+    "syncRemoved": "\"{name}\" is no longer available and was removed from your cart.",
+    "syncPrice": "The price of \"{name}\" is now {price} MAD.",
+    "syncStock": "Only {count} of \"{name}\" left, so the quantity was adjusted.",
+    "syncDismiss": "Got it",
     "title": "Your Cart",
     "empty": "Your cart is empty.",
     "browseProducts": "Browse products",

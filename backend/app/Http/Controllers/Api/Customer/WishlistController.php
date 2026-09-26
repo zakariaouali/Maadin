@@ -10,7 +10,10 @@ class WishlistController extends Controller
 {
     public function index(Request $request)
     {
+        // Skip products that were deleted, hidden or unapproved since they were
+        // saved: the page reads item.product.* and crashed on a missing product.
         $items = Wishlist::where('customer_id', $request->user()->id)
+            ->whereHas('product', fn ($q) => $q->active())
             ->with(['product' => function ($q) {
                 $q->with('primaryImage', 'seller:id,store_name,store_slug');
             }])
