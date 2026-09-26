@@ -466,6 +466,98 @@ function SubscriptionPanel({ user, onUpdated }: { user: AccountDetail["user"]; o
   );
 }
 
+/* ─── Add product modal ──────────────────────────────────────────────────── */
+// Creates the product on this store's behalf (already approved and listed),
+// then hands over to the edit window so photos can be added straight away.
+function AddProductModal({
+  userId,
+  categories,
+  onClose,
+  onCreated,
+}: {
+  userId: string;
+  categories: Category[];
+  onClose: () => void;
+  onCreated: (productId: number) => void;
+}) {
+  const t = useTranslations("admin");
+  const [form, setForm] = useState({
+    name: "", short_description: "", description: "", price: "", stock_quantity: "99", sku: "",
+    category_id: categories[0] ? String(categories[0].id) : "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true); setError("");
+    try {
+      const { data } = await api.post(`/admin/managed-sellers/${userId}/products`, {
+        ...form,
+        price: parseFloat(form.price),
+        stock_quantity: parseInt(form.stock_quantity),
+        category_id: parseInt(form.category_id),
+        sku: form.sku || null,
+        short_description: form.short_description || null,
+      });
+      onCreated(data.id);
+    } catch (err: any) {
+      const errors = err.response?.data?.errors;
+      setError(errors ? (Object.values(errors).flat() as string[]).join(" ") : err.response?.data?.message ?? "Failed.");
+    }
+    setSaving(false);
+  };
+
+  const field = "border border-stone/20 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gold/40 w-full bg-white";
+  const label = "text-xs font-semibold text-stone uppercase tracking-wide mb-1 block";
+
+  return (
+    <form onSubmit={submit} className="p-6 space-y-4 overflow-y-auto max-h-[80vh]">
+      {error && <Alert type="error">{error}</Alert>}
+      <p className="text-xs text-stone">{t("addProductHint")}</p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="sm:col-span-2">
+          <label className={label}>{t("name")} *</label>
+          <input className={field} value={form.name} onChange={(e) => set("name", e.target.value)} required />
+        </div>
+        <div>
+          <label className={label}>{t("priceMad")} *</label>
+          <input className={field} type="number" min="0.01" max="99999.99" step="0.01" value={form.price} onChange={(e) => set("price", e.target.value)} required />
+        </div>
+        <div>
+          <label className={label}>{t("stock")} *</label>
+          <input className={field} type="number" min="0" value={form.stock_quantity} onChange={(e) => set("stock_quantity", e.target.value)} required />
+        </div>
+        <div>
+          <label className={label}>{t("categories")} *</label>
+          <select className={field} value={form.category_id} onChange={(e) => set("category_id", e.target.value)} required>
+            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className={label}>{t("sku")}</label>
+          <input className={field} value={form.sku} onChange={(e) => set("sku", e.target.value)} />
+        </div>
+        <div className="sm:col-span-2">
+          <label className={label}>{t("shortDescription")}</label>
+          <input className={field} value={form.short_description} onChange={(e) => set("short_description", e.target.value)} />
+        </div>
+        <div className="sm:col-span-2">
+          <label className={label}>{t("description")} *</label>
+          <textarea className={field + " min-h-[120px] resize-y"} value={form.description} onChange={(e) => set("description", e.target.value)} required />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-2 border-t border-stone/10">
+        <button type="button" onClick={onClose} className="text-sm text-stone hover:text-ink transition-colors">{t("close")}</button>
+        <Button type="submit" variant="primary" loading={saving}>{t("createAndAddPhotos")}</Button>
+      </div>
+    </form>
+  );
+}
+
 /* ─── Page ───────────────────────────────────────────────────────────────── */
 export default function AccountDetailPage({ params }: { params: Promise<{ userId: string; locale: string }> }) {
   const { userId } = use(params);
@@ -478,6 +570,7 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
   // Product edit modal
   const [editingProduct, setEditingProduct] = useState<ProductDetail | null>(null);
   const [loadingProduct, setLoadingProduct] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
 
   useEffect(() => {
     api.get(`/admin/managed-sellers/${userId}`)
@@ -717,6 +810,9 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <p className="text-sm text-stone">{t("productCountLabel", { count: products?.length ?? 0 })}</p>
+              {seller
+                ? <Button variant="primary" onClick={() => setShowAdd(true)}>{t("addProduct")}</Button>
+                : <span className="text-xs text-stone italic">{t("createStoreFirst")}</span>}
             </div>
             {!products?.length ? <p className="text-sm text-stone italic">{t("noProductsYet")}</p> : (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -761,6 +857,21 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
           <SubscriptionPanel user={user} onUpdated={u => setData(d => d ? { ...d, user: u } : d)} />
         )}
       </div>
+
+      {/* Add product modal */}
+      <Modal open={showAdd} onClose={() => setShowAdd(false)} title={t("addProduct")} maxWidth="max-w-2xl" noPadding>
+        <AddProductModal
+          userId={userId}
+          categories={categories}
+          onClose={() => setShowAdd(false)}
+          onCreated={async (productId) => {
+            setShowAdd(false);
+            // Refresh the list, then open the new product so photos can be added
+            api.get(`/admin/managed-sellers/${userId}`).then(r => setData(r.data)).catch(() => {});
+            await openProductEdit(productId);
+          }}
+        />
+      </Modal>
 
       {/* Product edit modal */}
       <Modal

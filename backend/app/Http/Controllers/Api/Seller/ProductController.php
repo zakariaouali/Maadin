@@ -115,7 +115,7 @@ class ProductController extends Controller
 
     private function generateUniqueSlug(string $name, ?int $ignoreId = null): string
     {
-        $slug = Str::slug($name);
+        $slug = Str::slug($name) ?: 'product';
         $original = $slug;
         $i = 1;
 

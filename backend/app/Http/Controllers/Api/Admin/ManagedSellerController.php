@@ -248,20 +248,23 @@ class ManagedSellerController extends Controller
         return response()->json($seller->fresh());
     }
 
-    // ── Admin adds product for premium seller ────────────────────────────────
+    // ── Admin adds a product to a managed/premium seller's store ─────────────
+    // (Premium: the team lists everything. Managed: sellers add their own, but
+    // the team can also list on their behalf, e.g. our own Maadine store.)
     public function createProduct(Request $request, string $userId)
     {
         $user   = User::findOrFail($userId);
         $seller = $user->seller ?? abort(404, 'Create a store first.');
 
-        if ($user->plan !== 'premium') {
-            return response()->json(['message' => 'Only premium sellers have products managed by admin.'], 403);
+        if (!in_array($user->plan, ['managed', 'premium'])) {
+            return response()->json(['message' => 'Only managed or premium stores can have products added by admin.'], 403);
         }
 
         $validated = $request->validate([
-            'category_id'    => 'required|exists:categories,id',
-            'name'           => 'required|string|max:255',
-            'description'    => 'required|string',
+            'category_id'       => 'required|exists:categories,id',
+            'name'              => 'required|string|max:255',
+            'short_description' => 'nullable|string|max:500',
+            'description'       => 'required|string',
             'price'          => 'required|numeric|min:0.01|max:99999.99',
             'stock_quantity' => 'required|integer|min:0',
             'sku'            => 'nullable|string|max:100|unique:products,sku',
@@ -272,6 +275,7 @@ class ManagedSellerController extends Controller
         $validated['seller_id']   = $seller->id;
         $validated['slug']        = $this->uniqueProductSlug($validated['name']);
         $validated['is_approved'] = true;
+        $validated['is_active']   = true;
 
         $product = Product::create($validated);
 
@@ -297,7 +301,7 @@ class ManagedSellerController extends Controller
 
     private function uniqueProductSlug(string $name, ?int $ignoreId = null): string
     {
-        $slug = Str::slug($name); $orig = $slug; $i = 1;
+        $slug = Str::slug($name) ?: 'product'; $orig = $slug; $i = 1;
         while (Product::where('slug', $slug)->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))->exists()) {
             $slug = "{$orig}-{$i}"; $i++;
         }
