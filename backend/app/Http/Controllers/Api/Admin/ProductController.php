@@ -61,7 +61,7 @@ class ProductController extends Controller
         $existingCount = $product->images()->count();
 
         if ($existingCount + count($request->file('images')) > 10) {
-            return response()->json(['message' => 'Maximum 10 images per product.'], 422);
+            return response()->json(['message' => __('Maximum 10 images per product.')], 422);
         }
 
         $uploaded = [];
@@ -103,7 +103,7 @@ class ProductController extends Controller
             $product->images()->orderBy('display_order')->first()?->update(['is_primary' => true]);
         }
 
-        return response()->json(['message' => 'Image deleted']);
+        return response()->json(['message' => __('Image deleted')]);
     }
 
     private function generateUniqueSlug(string $name, ?int $ignoreId = null): string
@@ -169,7 +169,7 @@ class ProductController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return response()->json(['message' => 'Product removed']);
+        return response()->json(['message' => __('Product removed')]);
     }
 
     public function approve(Request $request, string $id)

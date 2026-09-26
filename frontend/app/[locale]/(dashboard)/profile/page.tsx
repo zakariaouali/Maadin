@@ -7,9 +7,11 @@ import api from "@/lib/api";
 import { getImageUrl, normalizeImageFile } from "@/lib/image";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { Alert, Button, PageHeader, Spinner } from "@/components/ui";
+import { RoleName } from "@/components/ui/RoleName";
 
 export default function ProfilePage() {
   const t = useTranslations("admin");
+  const tu = useTranslations("ui");
   const { user, refetchUser } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -113,9 +115,9 @@ export default function ProfilePage() {
             </button>
             <div>
               <p className="text-sm font-medium text-ink">{user.name}</p>
-              <p className="text-xs text-stone capitalize">{user.role}</p>
+              <p className="text-xs text-stone"><RoleName role={user.role} /></p>
               <button type="button" onClick={() => fileInputRef.current?.click()} className="text-xs text-gold-deep hover:underline mt-1">
-                {t("edit")} photo
+                {tu("editPhoto")}
               </button>
             </div>
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onPickFile} />

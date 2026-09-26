@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 
 type Variant =
   | "default"
@@ -35,33 +36,38 @@ export function Badge({ children, variant = "default", className = "" }: BadgePr
 
 // Convenience helpers for order statuses
 export function OrderStatusBadge({ status }: { status: string }) {
+  const t = useTranslations("seller");
   const map: Record<string, { label: string; variant: Variant }> = {
-    pending:   { label: "Pending",   variant: "warning" },
-    confirmed: { label: "Confirmed", variant: "info" },
-    shipped:   { label: "Shipped",   variant: "gold" },
-    delivered: { label: "Delivered", variant: "success" },
-    cancelled: { label: "Cancelled", variant: "danger" },
+    pending:   { label: t("statusPending"),   variant: "warning" },
+    confirmed: { label: t("statusConfirmed"), variant: "info" },
+    shipped:   { label: t("statusShipped"),   variant: "gold" },
+    delivered: { label: t("statusDelivered"), variant: "success" },
+    cancelled: { label: t("statusCancelled"), variant: "danger" },
   };
   const cfg = map[status] ?? { label: status, variant: "default" };
   return <Badge variant={cfg.variant}>{cfg.label}</Badge>;
 }
 
 export function SellerLevelBadge({ level }: { level: string }) {
+  const t = useTranslations("ui");
   const map: Record<string, { label: string; variant: Variant }> = {
-    bronze:           { label: "Bronze",           variant: "default" },
-    silver:           { label: "Silver",           variant: "info" },
-    gold:             { label: "Gold",             variant: "gold" },
-    verified_artisan: { label: "Verified Artisan", variant: "success" },
+    bronze:           { label: t("levelBronze"),     variant: "default" },
+    silver:           { label: t("levelSilver"),     variant: "info" },
+    gold:             { label: t("levelGold"),       variant: "gold" },
+    verified_artisan: { label: t("verifiedArtisan"), variant: "success" },
   };
   const cfg = map[level] ?? { label: level, variant: "default" };
   return <Badge variant={cfg.variant}>{cfg.label}</Badge>;
 }
 
 export function SellerStatusBadge({ status }: { status: string }) {
+  const t = useTranslations("ui");
   const map: Record<string, { label: string; variant: Variant }> = {
-    pending:   { label: "Pending",   variant: "warning" },
-    verified:  { label: "Verified",  variant: "success" },
-    suspended: { label: "Suspended", variant: "danger" },
+    pending:   { label: t("statusPending"),   variant: "warning" },
+    verified:  { label: t("statusVerified"),  variant: "success" },
+    suspended: { label: t("statusSuspended"), variant: "danger" },
+    upgrade_pending:        { label: t("statusUpgradePending"),        variant: "warning" },
+    suspended_subscription: { label: t("statusSuspendedSubscription"), variant: "danger" },
   };
   const cfg = map[status] ?? { label: status, variant: "default" };
   return <Badge variant={cfg.variant}>{cfg.label}</Badge>;

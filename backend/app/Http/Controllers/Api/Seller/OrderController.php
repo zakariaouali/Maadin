@@ -25,7 +25,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $seller = $request->user()->seller;
-        abort_if(!$seller, 404, 'No store found for this account.');
+        abort_if(!$seller, 404, __('No store found for this account.'));
 
         $orders = $seller->orders()
             ->with(['items.product:id,slug', 'items.product.primaryImage:id,product_id,image_path', 'customer:id,name,phone'])
@@ -38,7 +38,7 @@ class OrderController extends Controller
     public function show(Request $request, string $id)
     {
         $seller = $request->user()->seller;
-        abort_if(!$seller, 404, 'No store found for this account.');
+        abort_if(!$seller, 404, __('No store found for this account.'));
 
         $order = $seller->orders()
             ->with(['items.product:id,slug', 'items.product.primaryImage:id,product_id,image_path', 'customer:id,name,phone'])
@@ -50,7 +50,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, string $id)
     {
         $seller = $request->user()->seller;
-        abort_if(!$seller, 404, 'No store found for this account.');
+        abort_if(!$seller, 404, __('No store found for this account.'));
 
         $order = $seller->orders()->findOrFail($id);
 
@@ -69,7 +69,7 @@ class OrderController extends Controller
 
         if (!in_array($validated['status'], $allowedTransitions[$order->status] ?? [])) {
             return response()->json([
-                'message' => "Cannot change status from '{$order->status}' to '{$validated['status']}'.",
+                'message' => __('Cannot change status from ":from" to ":to".', ['from' => $order->status, 'to' => $validated['status']]),
             ], 422);
         }
 

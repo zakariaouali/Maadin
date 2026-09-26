@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 export default function Footer() {
+  const tu = useTranslations("ui");
   const t = useTranslations("footer");
 
   return (
@@ -22,7 +23,7 @@ export default function Footer() {
           {/* Explore */}
           <div>
             <p className="text-[11px] uppercase tracking-widest text-white/30 mb-4 font-medium">
-              Explore
+              {tu("explore")}
             </p>
             <div className="flex flex-col gap-2.5">
               <Link href="/products" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
@@ -32,7 +33,7 @@ export default function Footer() {
                 {t("login")}
               </Link>
               <Link href="/plans" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
-                Sell on Maadine
+                {tu("sellOnMaadine")}
               </Link>
               <Link href="/support" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
                 {t("support")}
@@ -58,7 +59,7 @@ export default function Footer() {
           {/* Contact */}
           <div>
             <p className="text-[11px] uppercase tracking-widest text-white/30 mb-4 font-medium">
-              Contact
+              {tu("contact")}
             </p>
             <div className="flex flex-col gap-2.5">
               <a href="mailto:contact@maadinemarrakech.com" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
@@ -75,7 +76,7 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-white/10">
         <div className="mx-auto max-w-7xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-white/30">
-          <p>&copy; {new Date().getFullYear()} Marrakech Maadine. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Marrakech Maadine. {tu("rightsReserved")}</p>
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="inline-block py-2 hover:text-white/60 transition-colors">{t("privacy")}</Link>
             <span>·</span>

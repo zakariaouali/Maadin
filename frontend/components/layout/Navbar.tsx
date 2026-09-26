@@ -11,6 +11,8 @@ import api from "@/lib/api";
 import SearchBar from "@/components/layout/SearchBar";
 import NotificationBell from "@/components/layout/NotificationBell";
 import MessagesBell from "@/components/layout/MessagesBell";
+import { useTranslations } from "next-intl";
+import { RoleName } from "@/components/ui/RoleName";
 
 const locales = [
   { code: "en", label: "EN" },
@@ -40,6 +42,7 @@ function useNotifications(enabled: boolean) {
 }
 
 export default function Navbar() {
+  const tu = useTranslations("ui");
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -221,7 +224,7 @@ export default function Navbar() {
               <Link
                 href="/customer/wishlist"
                 className="relative hidden sm:inline-flex p-2 text-stone hover:text-henna transition-colors rounded-sm hover:bg-sand"
-                aria-label="Wishlist"
+                aria-label={tu("wishlist")}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -239,7 +242,7 @@ export default function Navbar() {
             <Link
               href="/cart"
               className="relative p-2 text-stone hover:text-gold-deep transition-colors rounded-sm hover:bg-sand"
-              aria-label="Cart"
+              aria-label={tu("cart")}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <circle cx="9" cy="21" r="1" />
@@ -275,7 +278,7 @@ export default function Navbar() {
                         <p className="text-sm font-semibold text-ink truncate">{user?.name}</p>
                         <p className="text-[11px] text-stone truncate">{user?.email}</p>
                         <span className="mt-1 inline-block text-[10px] uppercase tracking-wider text-gold-deep font-semibold bg-gold/10 px-2 py-0.5 rounded-sm">
-                          {user?.role}
+                          <RoleName role={user?.role} />
                         </span>
                       </div>
                     </div>
@@ -328,7 +331,7 @@ export default function Navbar() {
             <button
               className="md:hidden p-2 text-ink rounded-sm hover:bg-sand"
               onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="Menu"
+              aria-label={tu("menu")}
             >
               {menuOpen ? (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

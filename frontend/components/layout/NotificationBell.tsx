@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useLocale } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import api from "@/lib/api";
+import { useTranslations } from "next-intl";
+import { timeAgo } from "@/lib/i18n-helpers";
 
 interface AppNotification {
   id: number;
@@ -15,16 +17,6 @@ interface AppNotification {
   created_at: string;
 }
 
-function timeAgo(dateStr: string, locale: string) {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60) return locale === "ar" ? "الآن" : locale === "fr" ? "à l'instant" : "just now";
-  const m = Math.floor(diff / 60);
-  if (diff < 3600) return locale === "ar" ? `منذ ${m}د` : locale === "fr" ? `il y a ${m}m` : `${m}m ago`;
-  const h = Math.floor(diff / 3600);
-  if (diff < 86400) return locale === "ar" ? `منذ ${h}س` : locale === "fr" ? `il y a ${h}h` : `${h}h ago`;
-  const d = Math.floor(diff / 86400);
-  return locale === "ar" ? `منذ ${d}ي` : locale === "fr" ? `il y a ${d}j` : `${d}d ago`;
-}
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
   message: (
@@ -57,6 +49,7 @@ const TYPE_COLOR: Record<string, string> = {
 };
 
 export default function NotificationBell() {
+  const tu = useTranslations("ui");
   const locale = useLocale();
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
@@ -110,7 +103,7 @@ export default function NotificationBell() {
     <div className="relative" ref={ref}>
       <button onClick={handleOpen}
         className="relative p-2 text-stone hover:text-gold-deep transition-colors rounded-sm hover:bg-sand"
-        aria-label="Notifications">
+        aria-label={tu("notifications")}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />

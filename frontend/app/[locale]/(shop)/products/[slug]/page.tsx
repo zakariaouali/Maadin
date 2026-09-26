@@ -10,6 +10,7 @@ import { ProductImageGallery } from "@/components/shop/ProductImageGallery";
 import { getImageUrl } from "@/lib/image";
 import { ProductReviews, ReviewsSkeleton } from "./ProductReviews";
 import type { Metadata } from "next";
+import { formatPrice } from "@/lib/i18n-helpers";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -60,7 +61,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const product = await getProduct(slug, locale);
-  if (!product) return { title: "Product not found" };
+  if (!product) {
+    const tu = await getTranslations({ locale, namespace: "ui" });
+    return { title: tu("productNotFound") };
+  }
 
   const description = (product.short_description || product.description || "")
     .replace(/<[^>]+>/g, "")
@@ -107,6 +111,7 @@ export default async function ProductDetailPage({
   if (!product) notFound();
 
   const t = await getTranslations({ locale, namespace: "products" });
+  const tu = await getTranslations({ locale, namespace: "ui" });
 
   const primaryImage = product.images.find((i) => i.is_primary) ?? product.images[0];
 
@@ -155,7 +160,7 @@ export default async function ProductDetailPage({
       <div className="mx-auto max-w-6xl px-4 md:px-6 py-6 md:py-10">
         {/* Breadcrumb */}
         <nav className="text-xs text-stone mb-8 flex items-center gap-2">
-          <Link href="/" className="hover:text-ink transition-colors">Home</Link>
+          <Link href="/" className="hover:text-ink transition-colors">{tu("home")}</Link>
           <span>/</span>
           <Link href="/products" className="hover:text-ink transition-colors">{t("title")}</Link>
           {product.category && (
@@ -218,7 +223,7 @@ export default async function ProductDetailPage({
             )}
 
             {/* Price */}
-            <p className="text-3xl font-semibold text-ink">{product.price} MAD</p>
+            <p className="text-3xl font-semibold text-ink">{formatPrice(product.price, locale)}</p>
 
             {/* Stock */}
             <div className="flex items-center gap-2">

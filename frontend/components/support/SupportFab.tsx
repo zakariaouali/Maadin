@@ -2,8 +2,10 @@
 
 import { Link } from "@/i18n/navigation";
 import { usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 export default function SupportFab() {
+  const tu = useTranslations("ui");
   const pathname = usePathname();
 
   // Hide on the support pages themselves to avoid redundancy
@@ -12,7 +14,7 @@ export default function SupportFab() {
   return (
     <Link
       href="/support"
-      aria-label="Support"
+      aria-label={tu("support")}
       className="fixed bottom-6 end-6 z-40 group flex items-center gap-2.5 bg-[#1f1b16] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden"
       style={{ paddingLeft: "0.875rem", paddingRight: "0.875rem", paddingTop: "0.75rem", paddingBottom: "0.75rem" }}
     >
@@ -26,7 +28,7 @@ export default function SupportFab() {
       </svg>
       {/* Label — expands on hover */}
       <span className="max-w-0 overflow-hidden group-hover:max-w-[80px] transition-all duration-200 text-sm font-semibold whitespace-nowrap">
-        Support
+        {tu("support")}
       </span>
     </Link>
   );

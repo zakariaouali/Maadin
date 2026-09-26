@@ -90,7 +90,7 @@ class MessageController extends Controller
             $receiver = User::findOrFail($validated['receiver_id']);
 
             if ($receiver->id === $sender->id) {
-                return response()->json(['message' => 'You cannot message yourself.'], 422);
+                return response()->json(['message' => __('You cannot message yourself.')], 422);
             }
 
             // Determine buyer/seller roles for the conversation record

@@ -8,6 +8,7 @@ import api from "@/lib/api";
 import { Alert, Button, OrderStatusBadge, PageHeader, Spinner } from "@/components/ui";
 import { getImageUrl } from "@/lib/image";
 import Image from "next/image";
+import { formatDate, formatPrice } from "@/lib/i18n-helpers";
 
 interface OrderItem {
   id: number;
@@ -35,6 +36,7 @@ interface Order {
 const STATUSES = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
 
 export default function SellerOrderDetailPage() {
+  const tu = useTranslations("ui");
   const t = useTranslations("seller");
   const tCommon = useTranslations("common");
   const { id } = useParams<{ id: string }>();
@@ -54,7 +56,7 @@ export default function SellerOrderDetailPage() {
         setNewStatus(r.data.status);
         setTracking(r.data.tracking_number ?? "");
       })
-      .catch(() => setError("Failed to load order."))
+      .catch(() => setError(tu("failedLoadOrder")))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -77,7 +79,7 @@ export default function SellerOrderDetailPage() {
   };
 
   if (loading) return <div className="flex justify-center py-24"><Spinner size="lg" /></div>;
-  if (error || !order) return <Alert type="error">{error || "Order not found."}</Alert>;
+  if (error || !order) return <Alert type="error">{error || tu("orderNotFound")}</Alert>;
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -98,7 +100,7 @@ export default function SellerOrderDetailPage() {
       <div className="bg-white border border-stone/20 rounded-sm p-5 space-y-1">
         <OrderStatusBadge status={order.status} />
         <p className="text-xs text-stone">
-          {new Date(order.created_at).toLocaleDateString()}
+          {formatDate(order.created_at)}
         </p>
       </div>
 
@@ -124,15 +126,15 @@ export default function SellerOrderDetailPage() {
                   <p className="text-xs text-stone">×{item.quantity}</p>
                 </div>
                 <p className="text-sm font-medium text-ink shrink-0">
-                  {(parseFloat(item.price_at_purchase) * item.quantity).toFixed(2)} MAD
+                  {formatPrice(parseFloat(item.price_at_purchase) * item.quantity)}
                 </p>
               </li>
             );
           })}
         </ul>
         <div className="px-5 py-3 border-t border-stone/10 flex justify-between">
-          <span className="text-sm text-stone">Total</span>
-          <span className="font-semibold text-ink">{parseFloat(order.total_price).toFixed(2)} MAD</span>
+          <span className="text-sm text-stone">{tu("total")}</span>
+          <span className="font-semibold text-ink">{formatPrice(order.total_price)}</span>
         </div>
       </div>
 
@@ -170,7 +172,7 @@ export default function SellerOrderDetailPage() {
               type="text"
               value={tracking}
               onChange={(e) => setTracking(e.target.value)}
-              placeholder="optional"
+              placeholder={tu("optional")}
               className="border border-stone/30 rounded-sm px-3 py-2 text-sm outline-none focus:border-gold-deep"
             />
           </div>

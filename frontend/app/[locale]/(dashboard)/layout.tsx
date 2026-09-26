@@ -8,6 +8,7 @@ import { Spinner, UserAvatar } from "@/components/ui";
 import Navbar from "@/components/layout/Navbar";
 import SupportFab from "@/components/support/SupportFab";
 import api from "@/lib/api";
+import { RoleName } from "@/components/ui/RoleName";
 
 const PLAN_COLORS: Record<string, string> = {
   starter: "bg-stone/10 text-stone",
@@ -19,6 +20,7 @@ interface Badges { pending_sellers?: number; pending_products?: number; unread_m
 interface ManagedAccount { id: number; name: string; plan: "managed" | "premium"; seller: { store_name: string; store_slug: string } | null }
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const tu = useTranslations("ui");
   const t = useTranslations("nav");
   const tAdmin = useTranslations("admin");
   const tSeller = useTranslations("seller");
@@ -62,7 +64,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         if (user.role !== "admin") {
           const newReplies = (next.unread_support ?? 0) - (prev.unread_support ?? 0);
           if (newReplies > 0 && Object.keys(prev).length > 0) {
-            showToast("Your support ticket received a reply");
+            showToast(tu("supportReplyToast"));
           }
         }
 
@@ -152,7 +154,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <button
         onClick={() => setSidebarOpen(true)}
         className="md:hidden fixed bottom-5 start-5 z-40 bg-gold text-ink rounded-full w-12 h-12 flex items-center justify-center shadow-lg"
-        aria-label="Open menu"
+        aria-label={tu("openMenu")}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
@@ -173,7 +175,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <UserAvatar name={user?.name} avatarPath={user?.avatar_path} size={40} />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-ink truncate">{user?.name}</p>
-            <p className="text-xs text-stone capitalize mt-0.5">{user?.role}</p>
+            <p className="text-xs text-stone mt-0.5"><RoleName role={user?.role} /></p>
             {user?.role === "seller" && user?.plan && (
               <span className={`inline-block mt-1 text-[10px] uppercase tracking-widest font-semibold px-2 py-0.5 rounded-full ${PLAN_COLORS[user.plan] ?? PLAN_COLORS.starter}`}>
                 {tPlans(`${user.plan}Name`)}
@@ -188,7 +190,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <>
               <p className="text-[10px] uppercase tracking-widest text-stone px-3 mb-1">{tAdmin("analytics")}</p>
               {navLink("/admin/analytics", tAdmin("analytics"))}
-              <p className="text-[10px] uppercase tracking-widest text-stone px-3 mt-3 mb-1">Manage</p>
+              <p className="text-[10px] uppercase tracking-widest text-stone px-3 mt-3 mb-1">{tu("manage")}</p>
               {navLink("/admin/users", tAdmin("users"))}
               {navLink("/admin/sellers", tAdmin("sellers"), badges.pending_sellers)}
               {/* Managed & Premium expandable tree */}
@@ -202,7 +204,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       onClick={() => setManagedOpen(o => !o)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-sm text-sm transition-colors ${isOnManagedPage ? "bg-gold/20 text-gold-deep font-medium" : "text-stone hover:text-ink hover:bg-sand"}`}
                     >
-                      <span>Managed &amp; Premium</span>
+                      <span>{tu("managedPremium")}</span>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform ${managedOpen ? "rotate-180" : ""}`}><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
 
@@ -211,7 +213,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         {/* All accounts link */}
                         <Link href="/admin/managed-sellers"
                           className={`flex items-center gap-2 px-2 py-1.5 rounded-sm text-xs transition-colors ${pathname === "/admin/managed-sellers" ? "text-gold-deep font-semibold" : "text-stone hover:text-ink"}`}>
-                          All accounts
+                          {tu("allAccounts")}
                         </Link>
 
                         {/* Premium sub-group */}
@@ -221,7 +223,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               className="w-full flex items-center justify-between px-2 py-1.5 text-xs text-stone hover:text-ink transition-colors rounded-sm">
                               <span className="flex items-center gap-1.5">
                                 <span className="w-1.5 h-1.5 rounded-full bg-ink/60 inline-block"/>
-                                Premium ({premiumAccounts.length})
+                                {tu("premiumPlan")} ({premiumAccounts.length})
                               </span>
                               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform ${premiumOpen ? "rotate-180" : ""}`}><polyline points="6 9 12 15 18 9"/></svg>
                             </button>
@@ -249,7 +251,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                               className="w-full flex items-center justify-between px-2 py-1.5 text-xs text-stone hover:text-ink transition-colors rounded-sm">
                               <span className="flex items-center gap-1.5">
                                 <span className="w-1.5 h-1.5 rounded-full bg-gold-deep/60 inline-block"/>
-                                Managed ({managedOnlyAccounts.length})
+                                {tu("managedPlan")} ({managedOnlyAccounts.length})
                               </span>
                               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`transition-transform ${managedSubOpen ? "rotate-180" : ""}`}><polyline points="6 9 12 15 18 9"/></svg>
                             </button>
@@ -271,7 +273,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         )}
 
                         {managedAccounts.length === 0 && (
-                          <p className="px-2 py-1 text-xs text-stone/50 italic">No accounts yet</p>
+                          <p className="px-2 py-1 text-xs text-stone/50 italic">{tu("noAccountsYet")}</p>
                         )}
                       </div>
                     )}
@@ -281,8 +283,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {navLink("/admin/products", tAdmin("products"), badges.pending_products)}
               {navLink("/admin/orders", tAdmin("orders"))}
               {navLink("/admin/categories", tAdmin("categories"))}
-              {navLink("/admin/reviews", "Reviews")}
-              {navLink("/admin/subscriptions", "Subscriptions")}
+              {navLink("/admin/reviews", tu("reviews"))}
+              {navLink("/admin/subscriptions", tu("subscriptions"))}
               {navLink("/admin/conversations", tAdmin("conversations"), badges.unread_messages)}
               {navLink("/admin/penalties", tAdmin("penalties"))}
               {navLink("/admin/support", tAdmin("support"), badges.support_tickets)}
@@ -291,7 +293,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {user?.role === "seller" && (
             <>
-              <p className="text-[10px] uppercase tracking-widest text-stone px-3 mb-1">Store</p>
+              <p className="text-[10px] uppercase tracking-widest text-stone px-3 mb-1">{tu("store")}</p>
               {/* only starter creates/manages their own store */}
               {user.plan === "starter" && navLink("/seller/store", tSeller("myStore"))}
               {/* starter + managed can add their own products */}
@@ -303,12 +305,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 navLink("/seller/orders", tSeller("incomingOrders"), badges.pending_orders)
               )}
               {navLink("/seller/reviews", tSeller("myReviews"))}
-              {navLink("/seller/subscription", "Subscription")}
+              {navLink("/seller/subscription", tu("subscription"))}
             </>
           )}
 
-          <p className="text-[10px] uppercase tracking-widest text-stone px-3 mt-3 mb-1">Account</p>
-          {navLink("/profile", "My Profile")}
+          <p className="text-[10px] uppercase tracking-widest text-stone px-3 mt-3 mb-1">{tu("account")}</p>
+          {navLink("/profile", tu("myProfile"))}
           {navLink("/customer/orders", t("myOrders"))}
           {navLink("/customer/wishlist", t("myWishlist"))}
           {navLink("/messages", t("messages"), badges.unread_messages)}
@@ -341,19 +343,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <UserAvatar name={user?.name} avatarPath={user?.avatar_path} size={40} />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-ink truncate">{user?.name}</p>
-            <p className="text-xs text-stone capitalize mt-0.5">{user?.role}</p>
+            <p className="text-xs text-stone mt-0.5"><RoleName role={user?.role} /></p>
           </div>
         </div>
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto">
           {user?.role === "seller" && (
             <>
-              <p className="text-[10px] uppercase tracking-widest text-stone px-3 mb-1">Store</p>
+              <p className="text-[10px] uppercase tracking-widest text-stone px-3 mb-1">{tu("store")}</p>
               {user.plan === "starter" && navLink("/seller/store", tSeller("myStore"))}
               {(user.plan === "starter" || user.plan === "managed") && navLink("/seller/products", tSeller("myProducts"))}
               {user.plan === "starter" && navLink("/seller/orders", tSeller("incomingOrders"), badges.pending_orders)}
               {navLink("/seller/reviews", tSeller("myReviews"))}
-              {navLink("/seller/subscription", "Subscription")}
+              {navLink("/seller/subscription", tu("subscription"))}
             </>
           )}
           {user?.role === "admin" && (
@@ -364,13 +366,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {navLink("/admin/products", tAdmin("products"), badges.pending_products)}
               {navLink("/admin/orders", tAdmin("orders"))}
               {navLink("/admin/categories", tAdmin("categories"))}
-              {navLink("/admin/reviews", "Reviews")}
-              {navLink("/admin/subscriptions", "Subscriptions")}
+              {navLink("/admin/reviews", tu("reviews"))}
+              {navLink("/admin/subscriptions", tu("subscriptions"))}
               {navLink("/admin/support", tAdmin("support"), badges.support_tickets)}
             </>
           )}
-          <p className="text-[10px] uppercase tracking-widest text-stone px-3 mt-3 mb-1">Account</p>
-          {navLink("/profile", "My Profile")}
+          <p className="text-[10px] uppercase tracking-widest text-stone px-3 mt-3 mb-1">{tu("account")}</p>
+          {navLink("/profile", tu("myProfile"))}
           {navLink("/customer/orders", t("myOrders"))}
           {navLink("/customer/wishlist", t("myWishlist"))}
           {navLink("/messages", t("messages"), badges.unread_messages)}

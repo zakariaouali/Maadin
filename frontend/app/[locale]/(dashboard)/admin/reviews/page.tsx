@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { getImageUrl } from "@/lib/image";
 import api from "@/lib/api";
+import { formatDate } from "@/lib/i18n-helpers";
 
 interface Review {
   id: number;
@@ -56,6 +57,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function AdminReviewsPage() {
+  const tu = useTranslations("ui");
   const t = useTranslations("admin");
 
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -101,8 +103,8 @@ export default function AdminReviewsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-display text-2xl text-ink">Reviews</h1>
-          <p className="text-sm text-stone mt-0.5">{meta.total} total{pending > 0 && ` · ${pending} pending`}</p>
+          <h1 className="font-display text-2xl text-ink">{tu("reviews")}</h1>
+          <p className="text-sm text-stone mt-0.5">{meta.total} {tu("totalLower")}{pending > 0 && ` · ${tu("pendingCount", { count: pending })}`}</p>
         </div>
       </div>
 
@@ -112,11 +114,11 @@ export default function AdminReviewsPage() {
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search review content…"
+            placeholder={tu("searchReviewsPlaceholder")}
             className="flex-1 border border-stone/30 rounded-lg px-3 py-2 text-sm outline-none focus:border-gold-deep"
           />
           <button type="submit" className="px-4 py-2 bg-ink text-white text-sm rounded-lg hover:bg-gold-deep transition-colors">
-            Search
+            {tu("search")}
           </button>
         </form>
 
@@ -140,7 +142,7 @@ export default function AdminReviewsPage() {
         </div>
       ) : reviews.length === 0 ? (
         <div className="text-center py-20 bg-white border border-stone/10 rounded-xl text-stone">
-          No reviews found.
+          {tu("noReviewsFound")}
         </div>
       ) : (
         <div className="space-y-3">
@@ -155,13 +157,13 @@ export default function AdminReviewsPage() {
                     <span className="text-sm font-medium text-ink">{r.customer.name}</span>
                     <Stars rating={r.rating} />
                     <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full capitalize ${STATUS_STYLES[r.status]}`}>
-                      {r.status}
+                      {r.status === "approved" ? tu("approved") : r.status === "rejected" ? tu("rejected") : tu("statusPending")}
                     </span>
                     {r.is_verified_purchase && (
-                      <span className="text-[11px] text-green-600 bg-green-50 px-2 py-0.5 rounded-full">✓ Verified</span>
+                      <span className="text-[11px] text-green-600 bg-green-50 px-2 py-0.5 rounded-full">{tu("verifiedMark")}</span>
                     )}
                     {r.deleted_at && (
-                      <span className="text-[11px] text-red-500 bg-red-50 px-2 py-0.5 rounded-full">Deleted</span>
+                      <span className="text-[11px] text-red-500 bg-red-50 px-2 py-0.5 rounded-full">{tu("deleted")}</span>
                     )}
                   </div>
 
@@ -169,11 +171,11 @@ export default function AdminReviewsPage() {
                   <p className="text-sm text-stone leading-relaxed line-clamp-3">{r.content}</p>
 
                   <div className="flex items-center gap-3 mt-3 text-xs text-stone/60 flex-wrap">
-                    <span>Product: <Link href={`/products/${r.product.slug}`} className="text-gold-deep hover:underline">{r.product.name}</Link></span>
+                    <span>{tu("productLabel")} <Link href={`/products/${r.product.slug}`} className="text-gold-deep hover:underline">{r.product.name}</Link></span>
                     <span>·</span>
-                    <span>Store: <Link href={`/stores/${r.seller.store_slug}`} className="text-gold-deep hover:underline">{r.seller.store_name}</Link></span>
+                    <span>{tu("storeLabel")} <Link href={`/stores/${r.seller.store_slug}`} className="text-gold-deep hover:underline">{r.seller.store_name}</Link></span>
                     <span>·</span>
-                    <span>{new Date(r.created_at).toLocaleDateString()}</span>
+                    <span>{formatDate(r.created_at)}</span>
                   </div>
                 </div>
 
@@ -187,7 +189,7 @@ export default function AdminReviewsPage() {
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                       >
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                        Approve
+                        {tu("approve")}
                       </button>
                     )}
                     {r.status !== "rejected" && (
@@ -197,7 +199,7 @@ export default function AdminReviewsPage() {
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 text-white text-xs font-medium rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50"
                       >
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        Reject
+                        {tu("reject")}
                       </button>
                     )}
                     <button
@@ -206,7 +208,7 @@ export default function AdminReviewsPage() {
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 text-xs font-medium rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 border border-red-200"
                     >
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-                      Delete
+                      {tu("delete")}
                     </button>
                   </div>
                 )}
@@ -221,12 +223,12 @@ export default function AdminReviewsPage() {
         <div className="flex items-center justify-center gap-2 mt-8">
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
             className="px-4 py-2 text-sm border border-stone/20 rounded-lg hover:bg-sand disabled:opacity-40 transition-colors">
-            ← Prev
+            {tu("prev")}
           </button>
           <span className="text-sm text-stone">{page} / {meta.last_page}</span>
           <button onClick={() => setPage(p => Math.min(meta.last_page, p + 1))} disabled={page === meta.last_page}
             className="px-4 py-2 text-sm border border-stone/20 rounded-lg hover:bg-sand disabled:opacity-40 transition-colors">
-            Next →
+            {tu("next")}
           </button>
         </div>
       )}

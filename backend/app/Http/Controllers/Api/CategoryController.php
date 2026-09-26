@@ -9,7 +9,7 @@ class CategoryController extends Controller
 {
     public function index(\Illuminate\Http\Request $request)
     {
-        $locale = in_array($request->query('locale'), ['fr', 'ar']) ? $request->query('locale') : 'en';
+        $locale = \App\Support\RequestLocale::from($request);
 
         $categories = Category::active()
             ->whereNull('parent_id')

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { getImageUrl } from "@/lib/image";
 import { Alert, Badge, Button, Modal, PageHeader, Spinner } from "@/components/ui";
+import { formatDate } from "@/lib/i18n-helpers";
 
 interface SellerUser {
   id: number; name: string; email: string; phone?: string; plan?: string; created_at?: string;
@@ -131,7 +132,7 @@ export default function AdminSellersPage() {
 
                 <div className="flex items-center gap-3 shrink-0">
                   <Badge variant={STATUS_VARIANT[s.status] ?? "default"}>{t(s.status as "pending" | "verified" | "suspended")}</Badge>
-                  <span className="text-xs text-stone hidden md:block">{new Date(s.created_at).toLocaleDateString()}</span>
+                  <span className="text-xs text-stone hidden md:block">{formatDate(s.created_at)}</span>
                 </div>
 
                 <div className="flex gap-2 shrink-0">
@@ -298,7 +299,7 @@ function SellerReviewPanel({
             <InfoRow label={t("email")} value={s.user.email} />
             <InfoRow label={t("phone")} value={s.user.phone} />
             <InfoRow label={t("plan")} value={s.user.plan} />
-            <InfoRow label={t("memberSince")} value={s.user.created_at ? new Date(s.user.created_at).toLocaleDateString() : undefined} />
+            <InfoRow label={t("memberSince")} value={s.user.created_at ? formatDate(s.user.created_at) : undefined} />
           </div>
 
           {/* Store info */}

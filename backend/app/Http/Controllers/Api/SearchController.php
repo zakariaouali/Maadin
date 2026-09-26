@@ -91,7 +91,7 @@ class SearchController extends Controller
                 default      => $pq->orderByRaw("CASE WHEN name LIKE ? THEN 0 ELSE 1 END, total_sales DESC", [$like]),
             };
 
-            $locale = in_array($request->query('locale'), ['fr', 'ar']) ? $request->query('locale') : 'en';
+            $locale = \App\Support\RequestLocale::from($request);
             $paginated = $pq->paginate(20);
             $paginated->getCollection()->each(function ($product) use ($locale) {
                 if ($product->category) {

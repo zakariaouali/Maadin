@@ -8,6 +8,7 @@ import api from "@/lib/api";
 import { Alert, Button, OrderStatusBadge, PageHeader, Spinner } from "@/components/ui";
 import { getImageUrl } from "@/lib/image";
 import Image from "next/image";
+import { formatDate, formatPrice } from "@/lib/i18n-helpers";
 
 interface OrderItem {
   id: number;
@@ -54,6 +55,7 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
 }
 
 export default function CustomerOrderDetailPage() {
+  const tu = useTranslations("ui");
   const t = useTranslations("orders");
   const tCommon = useTranslations("common");
   const { id } = useParams<{ id: string }>();
@@ -75,7 +77,7 @@ export default function CustomerOrderDetailPage() {
   useEffect(() => {
     api.get(`/customer/orders/${id}`)
       .then((r) => setOrder(r.data))
-      .catch(() => setError("Failed to load order."))
+      .catch(() => setError(tu("failedLoadOrder")))
       .finally(() => setLoading(false));
 
     // load which products this user already reviewed
@@ -127,7 +129,7 @@ export default function CustomerOrderDetailPage() {
   };
 
   if (loading) return <div className="flex justify-center py-24"><Spinner size="lg" /></div>;
-  if (error || !order) return <Alert type="error">{error || "Order not found."}</Alert>;
+  if (error || !order) return <Alert type="error">{error || tu("orderNotFound")}</Alert>;
 
   const canCancel = order.status === "pending";
   const isDelivered = order.status === "delivered";
@@ -153,7 +155,7 @@ export default function CustomerOrderDetailPage() {
         <div className="space-y-1">
           <OrderStatusBadge status={order.status} />
           <p className="text-xs text-stone">
-            {t("placedOn")} {new Date(order.created_at).toLocaleDateString()}
+            {t("placedOn")} {formatDate(order.created_at)}
           </p>
           {order.seller && (
             <p className="text-xs text-stone">{order.seller.store_name}</p>
@@ -190,12 +192,12 @@ export default function CustomerOrderDetailPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-ink font-medium truncate">{item.product_name}</p>
                     <p className="text-xs text-stone">
-                      {t("unitPrice")}: {parseFloat(item.price_at_purchase).toFixed(2)} MAD · {t("qty")}: {item.quantity}
+                      {t("unitPrice")}: {formatPrice(item.price_at_purchase)} · {t("qty")}: {item.quantity}
                     </p>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-medium text-ink">
-                      {(parseFloat(item.price_at_purchase) * item.quantity).toFixed(2)} MAD
+                      {formatPrice(parseFloat(item.price_at_purchase) * item.quantity)}
                     </p>
                     {isDelivered && (
                       alreadyReviewed ? (
@@ -242,8 +244,8 @@ export default function CustomerOrderDetailPage() {
           })}
         </ul>
         <div className="px-5 py-3 border-t border-stone/10 flex justify-between">
-          <span className="text-sm text-stone">Total</span>
-          <span className="font-semibold text-ink">{parseFloat(order.total_price).toFixed(2)} MAD</span>
+          <span className="text-sm text-stone">{tu("total")}</span>
+          <span className="font-semibold text-ink">{formatPrice(order.total_price)}</span>
         </div>
       </div>
 
@@ -251,7 +253,7 @@ export default function CustomerOrderDetailPage() {
       {isDelivered && order.items.some((item) => !reviewedIds.has(item.product_id)) && (
         <div className="bg-gold/10 border border-gold/30 rounded-sm px-5 py-4 flex items-center gap-3">
           <span className="text-xl">⭐</span>
-          <p className="text-sm text-ink">{t("leaveReview")} — share your experience with these products!</p>
+          <p className="text-sm text-ink">{t("leaveReview")} — {tu("shareExperience")}</p>
         </div>
       )}
 
@@ -259,15 +261,15 @@ export default function CustomerOrderDetailPage() {
       <div className="bg-white border border-stone/20 rounded-sm p-5 space-y-3">
         <h2 className="text-sm font-semibold text-ink">{t("orderInfo")}</h2>
         <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-          <span className="text-stone">Address</span>
+          <span className="text-stone">{tu("address")}</span>
           <span className="text-ink">{order.shipping_address}</span>
-          <span className="text-stone">City</span>
+          <span className="text-stone">{tu("city")}</span>
           <span className="text-ink">{order.shipping_city}</span>
-          <span className="text-stone">Phone</span>
+          <span className="text-stone">{tu("phone")}</span>
           <span className="text-ink">{order.phone}</span>
           {order.notes && (
             <>
-              <span className="text-stone">Notes</span>
+              <span className="text-stone">{tu("notes")}</span>
               <span className="text-ink">{order.notes}</span>
             </>
           )}

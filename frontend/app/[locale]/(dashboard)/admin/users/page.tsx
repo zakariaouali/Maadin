@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { Alert, Badge, Button, PageHeader, Spinner } from "@/components/ui";
+import { formatDate } from "@/lib/i18n-helpers";
+import { RoleName } from "@/components/ui/RoleName";
 
 interface User {
   id: number; name: string; email: string; phone?: string;
@@ -14,6 +16,7 @@ type RoleFilter = "all" | "customer" | "seller";
 const SV: Record<string, "success"|"warning"|"danger"|"default"> = { active:"success", suspended:"warning", banned:"danger" };
 
 export default function AdminUsersPage() {
+  const tu = useTranslations("ui");
   const t = useTranslations("admin");
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +67,7 @@ export default function AdminUsersPage() {
       <form onSubmit={(e) => { e.preventDefault(); load(st,rf,search); }} className="flex gap-2">
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t("searchUsers")}
           className="border border-stone/30 rounded-sm px-3 py-2 text-sm outline-none focus:border-gold-deep flex-1 max-w-xs" />
-        <Button type="submit" variant="secondary" size="sm">Search</Button>
+        <Button type="submit" variant="secondary" size="sm">{tu("search")}</Button>
       </form>
       {loading ? <div className="flex justify-center py-16"><Spinner size="lg" /></div>
       : users.length === 0 ? <p className="text-stone text-sm py-8 text-center">{t("noUsers")}</p>
@@ -79,11 +82,11 @@ export default function AdminUsersPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <p className="text-sm font-medium text-ink">{u.name}</p>
-                    <Badge variant={u.role==="seller"?"gold":"default"} className="capitalize">{u.role}</Badge>
+                    <Badge variant={u.role==="seller"?"gold":"default"} ><RoleName role={u.role} /></Badge>
                     <Badge variant={SV[u.status]??"default"}>{u.status}</Badge>
                   </div>
                   <p className="text-xs text-stone truncate mt-0.5">{u.email}</p>
-                  {u.last_login_at && <p className="text-xs text-stone/60 mt-0.5">{t("lastLogin")}: {new Date(u.last_login_at).toLocaleDateString()}</p>}
+                  {u.last_login_at && <p className="text-xs text-stone/60 mt-0.5">{t("lastLogin")}: {formatDate(u.last_login_at)}</p>}
                 </div>
               </div>
               <div className="flex flex-wrap gap-1.5 mt-2 ms-12">

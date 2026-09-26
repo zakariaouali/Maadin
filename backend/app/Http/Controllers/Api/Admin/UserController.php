@@ -46,7 +46,7 @@ class UserController extends Controller
         ]);
 
         if ($user->role === 'admin') {
-            return response()->json(['message' => 'Cannot change status of another admin.'], 403);
+            return response()->json(['message' => __('Cannot change status of another admin.')], 403);
         }
 
         $user->update(['status' => $validated['status']]);

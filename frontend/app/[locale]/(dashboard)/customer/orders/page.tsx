@@ -8,6 +8,7 @@ import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { getImageUrl } from "@/lib/image";
 import { Alert, Badge, Button, EmptyState, OrderStatusBadge, PageHeader, Spinner } from "@/components/ui";
+import { formatDate, formatPrice } from "@/lib/i18n-helpers";
 
 interface OrderItem {
   id: number;
@@ -127,7 +128,7 @@ export default function CustomerOrdersPage() {
                 <div className="flex items-center gap-3">
                   <OrderStatusBadge status={order.status} />
                   <span className="text-xs text-stone">
-                    {new Date(order.created_at).toLocaleDateString()}
+                    {formatDate(order.created_at)}
                   </span>
                 </div>
               </div>
@@ -151,7 +152,7 @@ export default function CustomerOrdersPage() {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-ink">{item.product_name}</p>
                           <p className="text-xs text-stone mt-0.5">
-                            ×{item.quantity} · {item.price_at_purchase} MAD
+                            ×{item.quantity} · {formatPrice(item.price_at_purchase)}
                           </p>
                         </div>
 
@@ -235,7 +236,7 @@ export default function CustomerOrdersPage() {
                 <Link href={`/customer/orders/${order.id}`} className="text-xs text-gold-deep hover:underline">
                   {t("orderDetail")}
                 </Link>
-                <span className="text-sm font-semibold text-ink">{order.total_price} MAD</span>
+                <span className="text-sm font-semibold text-ink">{formatPrice(order.total_price)}</span>
               </div>
             </div>
           ))}

@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { Badge, Button, PageHeader, Spinner } from "@/components/ui";
 import { CategoryIcon } from "@/components/support/CategoryIcon";
+import { timeAgo } from "@/lib/i18n-helpers";
+import { RoleName } from "@/components/ui/RoleName";
 
 interface Ticket {
   id: number;
@@ -34,13 +36,6 @@ const PRIORITY_COLOR: Record<string, string> = {
   low: "text-stone bg-stone/10", normal: "text-amber-700 bg-amber-50", high: "text-henna bg-henna/10",
 };
 
-function timeAgo(d: string) {
-  const diff = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
 
 export default function AdminSupportPage() {
   const t = useTranslations("support");
@@ -203,7 +198,7 @@ export default function AdminSupportPage() {
               <div className="bg-sand/50 rounded-xl p-3 text-xs space-y-1">
                 <div className="flex justify-between"><span className="text-stone">{t("from")}</span><span className="font-medium text-[#1f1b16]">{selected.user?.name ?? selected.guest_name ?? "—"}</span></div>
                 <div className="flex justify-between"><span className="text-stone">{ta("email")}</span><span className="font-medium text-[#1f1b16] truncate ms-2">{selected.user?.email ?? selected.guest_email ?? "—"}</span></div>
-                <div className="flex justify-between"><span className="text-stone">{ta("role")}</span><span className="font-medium text-[#1f1b16] capitalize">{selected.role}</span></div>
+                <div className="flex justify-between"><span className="text-stone">{ta("role")}</span><span className="font-medium text-[#1f1b16]"><RoleName role={selected.role} /></span></div>
                 <div className="flex justify-between"><span className="text-stone">{ta("date")}</span><span className="font-medium text-[#1f1b16]">{timeAgo(selected.created_at)}</span></div>
               </div>
 

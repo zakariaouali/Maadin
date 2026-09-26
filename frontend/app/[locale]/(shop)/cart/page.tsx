@@ -8,6 +8,7 @@ import { useCartStore } from "@/store/cartStore";
 import { useAuth } from "@/lib/auth-context";
 import { useCartSync } from "@/lib/useCartSync";
 import { CartSyncNotice } from "@/components/shop/CartSyncNotice";
+import { formatPrice } from "@/lib/i18n-helpers";
 
 export default function CartPage() {
   const locale = useLocale();
@@ -81,8 +82,8 @@ export default function CartPage() {
                         <Link href={`/products/${item.slug}`} className="text-sm font-semibold text-ink hover:text-gold-deep transition-colors line-clamp-1">
                           {item.name}
                         </Link>
-                        <p className="text-sm font-bold text-gold-deep mt-0.5">{(item.price * item.quantity).toLocaleString()} MAD</p>
-                        <p className="text-xs text-stone">{item.price.toLocaleString()} MAD {label("each", "chacun", "للواحدة")}</p>
+                        <p className="text-sm font-bold text-gold-deep mt-0.5">{formatPrice(item.price * item.quantity, locale)}</p>
+                        <p className="text-xs text-stone">{formatPrice(item.price, locale)} {label("each", "chacun", "للواحدة")}</p>
                       </div>
 
                       {/* Quantity controls */}
@@ -119,14 +120,14 @@ export default function CartPage() {
               {items.map(item => (
                 <div key={item.product_id} className="flex justify-between text-stone">
                   <span className="truncate me-2">{item.name} × {item.quantity}</span>
-                  <span className="shrink-0 font-medium">{(item.price * item.quantity).toLocaleString()} MAD</span>
+                  <span className="shrink-0 font-medium">{formatPrice(item.price * item.quantity, locale)}</span>
                 </div>
               ))}
             </div>
 
             <div className="border-t border-stone/10 pt-3 flex justify-between font-bold text-ink text-base">
               <span>{label("Total", "Total", "المجموع")}</span>
-              <span>{totalPrice().toLocaleString()} MAD</span>
+              <span>{formatPrice(totalPrice(), locale)}</span>
             </div>
 
             <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 text-xs text-amber-800 flex gap-2">

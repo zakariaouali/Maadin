@@ -6,6 +6,8 @@ import Image from "next/image";
 import api from "@/lib/api";
 import { getImageUrl } from "@/lib/image";
 import { Alert, Badge, Button, Modal, PageHeader, Spinner } from "@/components/ui";
+import { CategoryOptions } from "@/components/shop/CategoryOptions";
+import { currencyLabel, formatAmount, formatDate, formatPrice } from "@/lib/i18n-helpers";
 
 interface ProductImage { id: number; image_path: string; is_primary: boolean; }
 interface Category { id: number; name: string; }
@@ -78,6 +80,7 @@ function EditForm({
   categories: Category[];
   onSaved: (updated: ProductDetail) => void;
 }) {
+  const tu = useTranslations("ui");
   const [form, setForm] = useState({
     name: product.name,
     short_description: product.short_description ?? "",
@@ -185,9 +188,7 @@ function EditForm({
         <div>
           <label className="text-xs font-medium text-stone uppercase tracking-wide mb-1 block">{t("categories")}</label>
           <select className={field} value={form.category_id} onChange={(e) => set("category_id", e.target.value)}>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
+            <CategoryOptions categories={categories} />
           </select>
         </div>
 
@@ -241,7 +242,7 @@ function EditForm({
                   </button>
                 </div>
                 {img.is_primary && (
-                  <span className="absolute top-1 start-1 bg-gold text-white text-[9px] font-bold px-1 rounded">MAIN</span>
+                  <span className="absolute top-1 start-1 bg-gold text-white text-[9px] font-bold px-1 rounded">{tu("mainImage")}</span>
                 )}
               </div>
             ) : null;
@@ -293,6 +294,7 @@ function ProductModal({
   onDelete: (id: number) => void;
 }) {
   const t = useTranslations("admin");
+  const tu = useTranslations("ui");
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [product, setProduct] = useState(initial);
   const [activeImg, setActiveImg] = useState<ProductImage | null>(
@@ -386,7 +388,7 @@ function ProductModal({
                 })}
               </div>
             )}
-            <p className="text-[11px] text-stone">{product.images.length} image{product.images.length !== 1 ? "s" : ""} uploaded</p>
+            <p className="text-[11px] text-stone">{tu("imagesUploaded", { count: product.images.length })}</p>
           </div>
 
           {/* Product info */}
@@ -397,8 +399,8 @@ function ProductModal({
                 <p className="text-sm text-stone mt-1 leading-relaxed">{product.short_description}</p>
               )}
               <div className="flex items-end gap-3 mt-3">
-                <span className="text-2xl font-extrabold text-ink">{Number(product.price).toLocaleString()}</span>
-                <span className="text-base text-stone mb-0.5">MAD</span>
+                <span className="text-2xl font-extrabold text-ink">{formatAmount(product.price)}</span>
+                <span className="text-base text-stone mb-0.5">{currencyLabel()}</span>
               </div>
               {Number(product.rating) > 0 && (
                 <div className="flex items-center gap-1.5 mt-1.5">
@@ -414,7 +416,7 @@ function ProductModal({
                 { label: t("categories"), value: product.category.name },
                 { label: t("stock"), value: t("units", { count: product.stock_quantity }) },
                 { label: t("skuLabel"), value: product.sku ?? "—" },
-                { label: t("memberSince"), value: new Date(product.created_at).toLocaleDateString() },
+                { label: t("memberSince"), value: formatDate(product.created_at) },
               ].map(({ label, value }) => (
                 <div key={label} className="bg-sand/60 rounded-lg px-3 py-2.5">
                   <p className="text-[10px] uppercase tracking-widest text-stone font-medium">{label}</p>
@@ -460,6 +462,7 @@ function ProductModal({
 }
 
 export default function AdminProductsPage() {
+  const tu = useTranslations("ui");
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -503,7 +506,7 @@ export default function AdminProductsPage() {
     setActing(id); setError(""); setSuccess("");
     try {
       await api.put(`/admin/products/${id}/approve`);
-      setSuccess("Product approved and published.");
+      setSuccess(tu("productApproved"));
       setReviewing((prev) => prev ? { ...prev, is_approved: true, is_active: true } : null);
       await load();
     } catch (e: any) { setError(e.response?.data?.message || "Failed."); }
@@ -514,7 +517,7 @@ export default function AdminProductsPage() {
     setActing(id); setError(""); setSuccess("");
     try {
       await api.put(`/admin/products/${id}/reject`);
-      setSuccess("Product rejected.");
+      setSuccess(tu("productRejected"));
       setReviewing(null);
       await load();
     } catch (e: any) { setError(e.response?.data?.message || "Failed."); }
@@ -583,9 +586,9 @@ export default function AdminProductsPage() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-ink truncate">{p.name}</p>
                 <p className="text-xs text-stone mt-0.5">
-                  {p.seller.store_name} · {p.category.name} · {p.price} MAD
+                  {p.seller.store_name} · {p.category.name} · {formatPrice(p.price)}
                 </p>
-                <p className="text-xs text-stone/60 mt-0.5">{new Date(p.created_at).toLocaleDateString()}</p>
+                <p className="text-xs text-stone/60 mt-0.5">{formatDate(p.created_at)}</p>
               </div>
 
               <div className="flex items-center gap-2 shrink-0">

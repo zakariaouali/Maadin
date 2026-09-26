@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import api from "@/lib/api";
 import { Badge, PageHeader, Spinner } from "@/components/ui";
 import { CategoryIcon } from "@/components/support/CategoryIcon";
+import { timeAgo } from "@/lib/i18n-helpers";
 
 interface Ticket {
   id: number;
@@ -33,13 +34,6 @@ const PRIORITY_DOT: Record<string, string> = {
 };
 
 
-function timeAgo(d: string) {
-  const diff = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
 
 export default function MyTicketsPage() {
   const t = useTranslations("support");

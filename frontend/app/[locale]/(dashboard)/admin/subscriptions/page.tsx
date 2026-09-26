@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import { Alert, Badge, Button, PageHeader, Spinner } from "@/components/ui";
+import { useTranslations } from "next-intl";
+import { formatDate, formatPrice } from "@/lib/i18n-helpers";
+import { PlanName } from "@/components/ui/RoleName";
 
 interface ManagedSeller {
   id: number;
@@ -37,6 +40,7 @@ function daysLeft(dateStr: string | null) {
 }
 
 export default function AdminSubscriptionsPage() {
+  const tu = useTranslations("ui");
   const [tab, setTab] = useState<Tab>("subscriptions");
   const [sellers, setSellers] = useState<ManagedSeller[]>([]);
   const [requests, setRequests] = useState<UpgradeRequest[]>([]);
@@ -66,7 +70,7 @@ export default function AdminSubscriptionsPage() {
     setSuccess("");
     try {
       await api.post(`/admin/managed-sellers/${userId}/mark-paid`);
-      setSuccess("Payment marked — subscription renewed for 1 month.");
+      setSuccess(tu("paymentMarked"));
       load();
     } catch (e: any) {
       setError(e.response?.data?.message ?? "Failed.");
@@ -94,7 +98,7 @@ export default function AdminSubscriptionsPage() {
 
   return (
     <div className="max-w-5xl space-y-5">
-      <PageHeader title="Subscriptions & Upgrades" />
+      <PageHeader title={tu("subscriptionsUpgrades")} />
 
       {error && <Alert type="error">{error}</Alert>}
       {success && <Alert type="success">{success}</Alert>}
@@ -102,10 +106,10 @@ export default function AdminSubscriptionsPage() {
       {/* Tabs */}
       <div className="flex gap-1 bg-sand rounded-sm p-1 w-fit">
         <button className={tabCls("subscriptions")} onClick={() => setTab("subscriptions")}>
-          Subscriptions
+          {tu("subscriptions")}
         </button>
         <button className={tabCls("upgrades")} onClick={() => setTab("upgrades")}>
-          Upgrade Requests
+          {tu("upgradeRequests")}
           {requests.length > 0 && (
             <span className="ms-2 bg-amber-500 text-white text-[10px] rounded-full px-1.5 py-0.5 font-bold">
               {requests.length}
@@ -119,7 +123,7 @@ export default function AdminSubscriptionsPage() {
       ) : tab === "subscriptions" ? (
         <div className="bg-white border border-stone/20 rounded-sm divide-y divide-stone/10">
           {sellers.length === 0 ? (
-            <p className="text-center text-stone py-12 text-sm">No managed sellers yet.</p>
+            <p className="text-center text-stone py-12 text-sm">{tu("noManagedSellers")}</p>
           ) : sellers.map((s) => {
             const days = daysLeft(s.subscription_expires_at);
             const expired = days !== null && days < 0;
@@ -137,9 +141,9 @@ export default function AdminSubscriptionsPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="text-sm font-medium text-ink">{s.name}</p>
                       <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${PLAN_BADGE[s.plan] ?? "bg-stone/10 text-stone"}`}>
-                        {s.plan}
+                        <PlanName plan={s.plan} />
                       </span>
-                      {isSuspended && <Badge variant="danger">Suspended</Badge>}
+                      {isSuspended && <Badge variant="danger">{tu("suspended")}</Badge>}
                     </div>
                     <p className="text-xs text-stone truncate">{s.email}</p>
                     {s.seller && <p className="text-xs text-stone/60">{s.seller.store_name}</p>}
@@ -148,13 +152,13 @@ export default function AdminSubscriptionsPage() {
 
                 <div className="mt-3 ms-12 flex flex-wrap items-center gap-x-6 gap-y-1 text-xs">
                   <span className="text-stone">
-                    Fee: <strong className="text-ink">{s.monthly_fee ? `${parseFloat(s.monthly_fee).toFixed(2)} MAD/mo` : "—"}</strong>
+                    {tu("feeLabel")} <strong className="text-ink">{s.monthly_fee ? `${formatPrice(s.monthly_fee)}${tu("perMonth")}` : "—"}</strong>
                   </span>
                   <span className={expired ? "text-red-600 font-medium" : expiringSoon ? "text-amber-600 font-medium" : "text-stone"}>
-                    Expires: <strong>{s.subscription_expires_at ? new Date(s.subscription_expires_at).toLocaleDateString() : "—"}</strong>
+                    {tu("expiresLabel")} <strong>{s.subscription_expires_at ? formatDate(s.subscription_expires_at) : "—"}</strong>
                     {days !== null && (
                       <span className="ms-1">
-                        ({expired ? `${Math.abs(days)}d overdue` : `${days}d left`})
+                        ({expired ? tu("daysOverdue", { count: Math.abs(days) }) : tu("daysLeft", { count: days })})
                       </span>
                     )}
                   </span>
@@ -168,10 +172,10 @@ export default function AdminSubscriptionsPage() {
                       loading={acting === s.id}
                       onClick={() => markPaid(s.id)}
                     >
-                      ✓ Mark as Paid (+1 month)
+                      {tu("markPaidButton")}
                     </Button>
                     {expired && (
-                      <p className="text-xs text-red-600 mt-1">Store is suspended — marking paid will reactivate it.</p>
+                      <p className="text-xs text-red-600 mt-1">{tu("storeSuspendedNote")}</p>
                     )}
                   </div>
                 )}
@@ -182,7 +186,7 @@ export default function AdminSubscriptionsPage() {
       ) : (
         <div className="bg-white border border-stone/20 rounded-sm divide-y divide-stone/10">
           {requests.length === 0 ? (
-            <p className="text-center text-stone py-12 text-sm">No pending upgrade requests.</p>
+            <p className="text-center text-stone py-12 text-sm">{tu("noUpgradeRequests")}</p>
           ) : requests.map((req) => (
             <div key={req.id} className="px-5 py-4">
               <div className="flex items-start gap-3">
@@ -193,12 +197,12 @@ export default function AdminSubscriptionsPage() {
                   <p className="text-sm font-medium text-ink">{req.user.name}</p>
                   <p className="text-xs text-stone">{req.user.email}</p>
                   <p className="text-xs text-stone mt-1">
-                    Wants to upgrade:{" "}
+                    {tu("wantsToUpgrade")}{" "}
                     <span className={`font-semibold px-2 py-0.5 rounded-full text-[11px] ${PLAN_BADGE[req.from_plan] ?? "bg-stone/10 text-stone"}`}>{req.from_plan}</span>
                     {" → "}
                     <span className={`font-semibold px-2 py-0.5 rounded-full text-[11px] ${PLAN_BADGE[req.to_plan] ?? "bg-stone/10 text-stone"}`}>{req.to_plan}</span>
                   </p>
-                  <p className="text-[10px] text-stone/60 mt-0.5">Requested {new Date(req.created_at).toLocaleDateString()}</p>
+                  <p className="text-[10px] text-stone/60 mt-0.5">{tu("requested")} {formatDate(req.created_at)}</p>
                 </div>
               </div>
               <div className="mt-3 ms-12 flex gap-2 flex-wrap">
@@ -208,7 +212,7 @@ export default function AdminSubscriptionsPage() {
                   loading={acting === req.id}
                   onClick={() => handleUpgrade(req.id, "approve")}
                 >
-                  Approve
+                  {tu("approve")}
                 </Button>
                 <Button
                   variant="secondary"
@@ -216,7 +220,7 @@ export default function AdminSubscriptionsPage() {
                   loading={acting === req.id}
                   onClick={() => handleUpgrade(req.id, "reject")}
                 >
-                  Reject
+                  {tu("reject")}
                 </Button>
               </div>
             </div>

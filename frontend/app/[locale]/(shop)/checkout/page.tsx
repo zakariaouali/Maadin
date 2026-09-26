@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useCartStore } from "@/store/cartStore";
@@ -11,9 +11,12 @@ import api from "@/lib/api";
 import Image from "next/image";
 import { getImageUrl } from "@/lib/image";
 import { Button, Input, Alert, PageHeader } from "@/components/ui";
+import { formatPrice } from "@/lib/i18n-helpers";
 
 export default function CheckoutPage() {
+  const tu = useTranslations("ui");
   const t = useTranslations("checkout");
+  const locale = useLocale();
   const tCart = useTranslations("cart");
   const router = useRouter();
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -145,7 +148,7 @@ export default function CheckoutPage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
-                  placeholder="Any delivery instructions..."
+                  placeholder={tu("deliveryNotesPlaceholder")}
                   className="w-full border border-stone/30 rounded-sm px-3 py-2 text-sm outline-none focus:border-gold-deep resize-none"
                 />
               </div>
@@ -193,7 +196,7 @@ export default function CheckoutPage() {
                             {item.name} <span className="text-stone/60">×{item.quantity}</span>
                           </span>
                           <span className="text-ink shrink-0 font-medium">
-                            {(item.price * item.quantity).toFixed(2)} MAD
+                            {formatPrice(item.price * item.quantity, locale)}
                           </span>
                         </div>
                       );
@@ -206,12 +209,12 @@ export default function CheckoutPage() {
             <div className="zellige-divider my-4" />
 
             <div className="flex justify-between font-semibold text-ink text-base">
-              <span>Total</span>
-              <span>{totalPrice().toFixed(2)} MAD</span>
+              <span>{tu("total")}</span>
+              <span>{formatPrice(totalPrice(), locale)}</span>
             </div>
 
             <p className="text-xs text-stone mt-3 leading-relaxed">
-              By placing your order you agree to our terms. Payment is collected on delivery.
+              {tu("checkoutTermsNote")}
             </p>
           </div>
         </div>

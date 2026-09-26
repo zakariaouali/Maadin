@@ -181,7 +181,7 @@ class ManagedSellerController extends Controller
         $user = User::where('role', 'seller')->whereIn('plan', ['managed', 'premium'])->findOrFail($userId);
 
         if ($user->seller) {
-            return response()->json(['message' => 'This seller already has a store.'], 422);
+            return response()->json(['message' => __('This seller already has a store.')], 422);
         }
 
         $validated = $request->validate([
@@ -257,7 +257,7 @@ class ManagedSellerController extends Controller
         $seller = $user->seller ?? abort(404, 'Create a store first.');
 
         if (!in_array($user->plan, ['managed', 'premium'])) {
-            return response()->json(['message' => 'Only managed or premium stores can have products added by admin.'], 403);
+            return response()->json(['message' => __('Only managed or premium stores can have products added by admin.')], 403);
         }
 
         $validated = $request->validate([

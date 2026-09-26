@@ -65,26 +65,26 @@ class CheckoutController extends Controller
                 // Same rule as the public shop: active AND approved by an admin
                 if (!$product || !$product->is_active || !$product->is_approved) {
                     throw ValidationException::withMessages([
-                        'items' => "A product in your cart is no longer available.",
+                        'items' => __('A product in your cart is no longer available.'),
                     ]);
                 }
 
                 if ($product->seller->status !== 'verified') {
                     throw ValidationException::withMessages([
-                        'items' => "\"{$product->name}\" is no longer available.",
+                        'items' => __('":name" is no longer available.', ['name' => $product->name]),
                     ]);
                 }
 
                 // No buying from your own store (fake orders, self-reviews)
                 if ($product->seller->user_id === $userId) {
                     throw ValidationException::withMessages([
-                        'items' => "You can't order your own product (\"{$product->name}\").",
+                        'items' => __("You can't order your own product (\":name\").",['name' => $product->name]),
                     ]);
                 }
 
                 if ($product->stock_quantity < $cartItem['quantity']) {
                     throw ValidationException::withMessages([
-                        'items' => "Only {$product->stock_quantity} left of \"{$product->name}\".",
+                        'items' => __('Only :count left of ":name".', ['count' => $product->stock_quantity, 'name' => $product->name]),
                     ]);
                 }
 

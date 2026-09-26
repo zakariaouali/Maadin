@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { Badge, Button, Modal, PageHeader, Spinner, Alert } from "@/components/ui";
+import { formatDate, formatDateTime } from "@/lib/i18n-helpers";
 
 interface Conversation {
   id: number;
@@ -29,6 +30,7 @@ interface ConversationDetail {
 }
 
 export default function AdminConversationsPage() {
+  const tu = useTranslations("ui");
   const t = useTranslations("admin");
 
   const [tab, setTab] = useState<"all" | "flagged">("all");
@@ -53,7 +55,7 @@ export default function AdminConversationsPage() {
       const res = await api.get("/admin/conversations", { params });
       setConversations(res.data?.data ?? res.data ?? []);
     } catch {
-      setError("Failed to load conversations.");
+      setError(tu("failedLoadConversations"));
     } finally {
       setLoading(false);
     }
@@ -86,7 +88,7 @@ export default function AdminConversationsPage() {
       setDeleteId(null);
       fetchConversations();
     } catch {
-      setError("Failed to delete conversation.");
+      setError(tu("failedDeleteConversation"));
     } finally {
       setDeleting(false);
     }
@@ -156,8 +158,8 @@ export default function AdminConversationsPage() {
                 <th className="text-left px-4 py-3 text-stone font-medium">{t("buyer")}</th>
                 <th className="text-left px-4 py-3 text-stone font-medium">{t("seller")}</th>
                 <th className="text-left px-4 py-3 text-stone font-medium">{t("messagesCount")}</th>
-                <th className="text-left px-4 py-3 text-stone font-medium">Last Message</th>
-                <th className="text-left px-4 py-3 text-stone font-medium">Status</th>
+                <th className="text-left px-4 py-3 text-stone font-medium">{tu("lastMessage")}</th>
+                <th className="text-left px-4 py-3 text-stone font-medium">{tu("status")}</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -171,7 +173,7 @@ export default function AdminConversationsPage() {
                   <td className="px-4 py-3 text-stone">{c.messages_count}</td>
                   <td className="px-4 py-3 text-stone">
                     {c.last_message_at
-                      ? new Date(c.last_message_at).toLocaleDateString()
+                      ? formatDate(c.last_message_at)
                       : "—"}
                   </td>
                   <td className="px-4 py-3">
@@ -244,13 +246,13 @@ export default function AdminConversationsPage() {
                     >
                       {msg.has_blocked_content ? (
                         <span className="text-henna text-xs font-medium">
-                          ⚠ Contact info hidden
+                          {tu("contactHidden")}
                         </span>
                       ) : (
                         <p>{msg.content}</p>
                       )}
                       <p className="text-stone text-xs">
-                        {new Date(msg.created_at).toLocaleString()}
+                        {formatDateTime(msg.created_at)}
                       </p>
                     </div>
                   </div>
@@ -268,7 +270,7 @@ export default function AdminConversationsPage() {
         title={t("delete")}
       >
         <p className="text-sm text-stone mb-6">
-          Are you sure you want to delete this conversation? This action cannot be undone.
+          {tu("confirmDeleteConversation")}
         </p>
         <div className="flex justify-end gap-3">
           <Button variant="secondary" onClick={() => setDeleteId(null)}>

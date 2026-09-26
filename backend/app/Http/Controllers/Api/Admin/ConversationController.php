@@ -45,6 +45,6 @@ class ConversationController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
-        return response()->json(['message' => 'Conversation removed']);
+        return response()->json(['message' => __('Conversation removed')]);
     }
 }

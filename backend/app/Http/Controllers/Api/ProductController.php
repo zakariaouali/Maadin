@@ -11,7 +11,7 @@ class ProductController extends Controller
 {
     private function localeFromRequest(Request $request): string
     {
-        return in_array($request->query('locale'), ['fr', 'ar']) ? $request->query('locale') : 'en';
+        return \App\Support\RequestLocale::from($request);
     }
 
     private function localisedCategoryName(mixed $category, string $locale): string

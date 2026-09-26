@@ -79,7 +79,7 @@ class AuthController extends Controller
         ]);
 
         if ($user->role !== 'customer') {
-            return response()->json(['message' => 'Only customer accounts can become sellers.'], 422);
+            return response()->json(['message' => __('Only customer accounts can become sellers.')], 422);
         }
 
         $user->update([
@@ -108,7 +108,7 @@ class AuthController extends Controller
 
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response()->json([
-                'message' => 'Invalid credentials'
+                'message' => __('Invalid credentials')
             ], 401);
         }
 
@@ -116,12 +116,12 @@ class AuthController extends Controller
 
         if ($user->status === 'banned') {
             Auth::logout();
-            return response()->json(['message' => 'Account has been banned'], 403);
+            return response()->json(['message' => __('Account has been banned')], 403);
         }
 
         if ($user->status === 'suspended') {
             Auth::logout();
-            return response()->json(['message' => 'Account has been suspended'], 403);
+            return response()->json(['message' => __('Account has been suspended')], 403);
         }
 
         $request->session()->regenerate();
@@ -203,7 +203,7 @@ class AuthController extends Controller
 
         $user->update(['password' => \Hash::make($request->password)]);
 
-        return response()->json(['message' => 'Password updated.']);
+        return response()->json(['message' => __('Password updated.')]);
     }
 
     // FORGOT PASSWORD — sends reset link via email
@@ -214,7 +214,7 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return response()->json(['message' => 'No account found with this email address.'], 404);
+            return response()->json(['message' => __('No account found with this email address.')], 404);
         }
 
         $token = Str::random(64);
@@ -229,7 +229,7 @@ class AuthController extends Controller
 
         Mail::to($user->email)->send(new PasswordResetMail($user->name, $resetUrl, $user->locale ?? 'en'));
 
-        return response()->json(['message' => 'If an account exists, a reset link has been sent.']);
+        return response()->json(['message' => __('If an account exists, a reset link has been sent.')]);
     }
 
     // RESET PASSWORD
@@ -246,23 +246,23 @@ class AuthController extends Controller
             ->first();
 
         if (!$record || !Hash::check($request->token, $record->token)) {
-            return response()->json(['message' => 'Invalid or expired reset token.'], 422);
+            return response()->json(['message' => __('Invalid or expired reset token.')], 422);
         }
 
         if (\Illuminate\Support\Carbon::parse($record->created_at)->addMinutes(60)->isPast()) {
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
-            return response()->json(['message' => 'Reset token has expired.'], 422);
+            return response()->json(['message' => __('Reset token has expired.')], 422);
         }
 
         $user = User::where('email', $request->email)->first();
         if (!$user) {
-            return response()->json(['message' => 'User not found.'], 404);
+            return response()->json(['message' => __('User not found.')], 404);
         }
 
         $user->update(['password' => Hash::make($request->password)]);
         DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-        return response()->json(['message' => 'Password reset successfully.']);
+        return response()->json(['message' => __('Password reset successfully.')]);
     }
 
     // LOGOUT
@@ -272,6 +272,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->json(['message' => 'Logged out']);
+        return response()->json(['message' => __('Logged out')]);
     }
 }

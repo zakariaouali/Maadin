@@ -7,6 +7,7 @@ import { Spinner } from "@/components/ui";
 import Image from "next/image";
 import { getImageUrl } from "@/lib/image";
 import { Link } from "@/i18n/navigation";
+import { formatPrice } from "@/lib/i18n-helpers";
 
 interface ManagedUser {
   id: number; name: string; email: string;
@@ -22,6 +23,7 @@ function daysUntil(date: string | null) {
 
 export default function ManagedSellersPage() {
   const t = useTranslations("admin");
+  const tu = useTranslations("ui");
   const [accounts, setAccounts] = useState<ManagedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "managed" | "premium">("all");
@@ -116,7 +118,7 @@ export default function ManagedSellersPage() {
 
                 {/* Subscription */}
                 <div className="text-right shrink-0 hidden sm:block">
-                  {a.monthly_fee && <p className="text-sm font-bold text-ink">{Number(a.monthly_fee).toLocaleString()} MAD/mo</p>}
+                  {a.monthly_fee && <p className="text-sm font-bold text-ink">{formatPrice(a.monthly_fee)}{tu("perMonth")}</p>}
                   {days === null ? (
                     <p className="text-xs text-stone/50">{t("noExpirySet")}</p>
                   ) : expired ? (

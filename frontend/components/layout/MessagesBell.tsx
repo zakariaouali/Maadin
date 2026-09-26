@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { getImageUrl } from "@/lib/image";
 import api from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { timeAgo } from "@/lib/i18n-helpers";
 
 interface Conversation {
   id: number;
@@ -29,20 +30,6 @@ function Avatar({ name, avatarPath }: { name: string; avatarPath?: string }) {
   );
 }
 
-function timeAgo(dateStr: string, locale: string) {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60) return locale === "ar" ? "الآن" : locale === "fr" ? "à l'instant" : "just now";
-  if (diff < 3600) {
-    const m = Math.floor(diff / 60);
-    return locale === "ar" ? `منذ ${m}د` : locale === "fr" ? `il y a ${m}m` : `${m}m ago`;
-  }
-  if (diff < 86400) {
-    const h = Math.floor(diff / 3600);
-    return locale === "ar" ? `منذ ${h}س` : locale === "fr" ? `il y a ${h}h` : `${h}h ago`;
-  }
-  const d = Math.floor(diff / 86400);
-  return locale === "ar" ? `منذ ${d}ي` : locale === "fr" ? `il y a ${d}j` : `${d}d ago`;
-}
 
 export default function MessagesBell() {
   const locale = useLocale();

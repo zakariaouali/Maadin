@@ -34,7 +34,7 @@ class WishlistController extends Controller
             ->exists();
 
         if ($exists) {
-            return response()->json(['message' => 'Already in wishlist.'], 422);
+            return response()->json(['message' => __('Already in wishlist.')], 422);
         }
 
         $item = Wishlist::create([
@@ -52,9 +52,9 @@ class WishlistController extends Controller
             ->delete();
 
         if (!$deleted) {
-            return response()->json(['message' => 'Item not in wishlist.'], 404);
+            return response()->json(['message' => __('Item not in wishlist.')], 404);
         }
 
-        return response()->json(['message' => 'Removed from wishlist']);
+        return response()->json(['message' => __('Removed from wishlist')]);
     }
 }

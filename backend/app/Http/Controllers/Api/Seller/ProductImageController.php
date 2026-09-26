@@ -36,7 +36,7 @@ class ProductImageController extends Controller
         $existingCount = $product->images()->count();
 
         if ($existingCount + count($urls) > 10) {
-            return response()->json(['message' => 'Maximum 10 images per product.'], 422);
+            return response()->json(['message' => __('Maximum 10 images per product.')], 422);
         }
 
         $uploaded = [];
@@ -81,14 +81,14 @@ class ProductImageController extends Controller
             $next?->update(['is_primary' => true]);
         }
 
-        return response()->json(['message' => 'Image deleted']);
+        return response()->json(['message' => __('Image deleted')]);
     }
 
     private function ownedProductOrFail(Request $request, string $productId): Product
     {
         $seller = $request->user()->seller;
 
-        abort_if(!$seller, 404, 'No store found for this account.');
+        abort_if(!$seller, 404, __('No store found for this account.'));
 
         return $seller->products()->findOrFail($productId);
     }

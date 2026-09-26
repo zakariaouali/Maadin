@@ -20,7 +20,7 @@ class StoreController extends Controller
         $seller = $request->user()->seller;
 
         if (!$seller) {
-            return response()->json(['message' => 'No store found for this account.'], 404);
+            return response()->json(['message' => __('No store found for this account.')], 404);
         }
 
         return response()->json($seller);
@@ -31,11 +31,11 @@ class StoreController extends Controller
         $user = $request->user();
 
         if (in_array($user->plan, ['managed', 'premium'])) {
-            return response()->json(['message' => 'Your store is created and managed by our team. Please contact us.'], 403);
+            return response()->json(['message' => __('Your store is created and managed by our team. Please contact us.')], 403);
         }
 
         if ($user->seller) {
-            return response()->json(['message' => 'Store already exists for this account.'], 422);
+            return response()->json(['message' => __('Store already exists for this account.')], 422);
         }
 
         $validated = $request->validate([
@@ -98,7 +98,7 @@ class StoreController extends Controller
         $seller = $request->user()->seller;
 
         if (!$seller) {
-            return response()->json(['message' => 'No store found for this account.'], 404);
+            return response()->json(['message' => __('No store found for this account.')], 404);
         }
 
         $validated = $request->validate([

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import api from "@/lib/api";
 import { Alert, Button, PageHeader, Spinner } from "@/components/ui";
+import { formatPrice } from "@/lib/i18n-helpers";
 
 interface SubscriptionStatus {
   plan: string;
@@ -15,16 +16,14 @@ interface SubscriptionStatus {
   pending_upgrade: { id: number; from_plan: string; to_plan: string; status: string } | null;
 }
 
-const PLAN_LABELS: Record<string, string> = {
-  starter: "Starter",
-  managed: "Managed — 100 MAD/mo",
-  premium: "Premium",
-};
-
 const PLAN_ORDER = ["starter", "managed", "premium"];
 
 export default function SellerSubscriptionPage() {
   const t = useTranslations("seller");
+  const tp = useTranslations("plans");
+  const tu = useTranslations("ui");
+  const planName = (p: string) => (p === "managed" ? tp("managedName") : p === "premium" ? tp("premiumName") : tp("starterName"));
+  const planPrice = (p: string) => (p === "managed" ? tp("managedPrice") : p === "premium" ? tp("premiumPrice") : tp("starterPrice"));
   const [data, setData] = useState<SubscriptionStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState<string | null>(null);
@@ -113,10 +112,10 @@ export default function SellerSubscriptionPage() {
         <h2 className="text-sm font-semibold text-stone uppercase tracking-wide">{t("currentPlan")}</h2>
 
         <div className="flex items-center gap-3">
-          <span className="text-xl font-bold text-ink capitalize">{data.plan}</span>
+          <span className="text-xl font-bold text-ink">{planName(data.plan)}</span>
           {data.plan !== "starter" && (
             <span className="text-xs bg-[#c9a227]/15 text-[#9c7a1a] font-semibold px-2.5 py-0.5 rounded-full">
-              {data.monthly_fee ? `${parseFloat(data.monthly_fee).toFixed(0)} MAD/mo` : "Paid"}
+              {data.monthly_fee ? `${formatPrice(data.monthly_fee)}${tu("perMonth")}` : tu("paid")}
             </span>
           )}
         </div>
@@ -170,8 +169,8 @@ export default function SellerSubscriptionPage() {
                 className="flex items-center justify-between gap-4 p-4 border border-stone/15 rounded-sm"
               >
                 <div>
-                  <p className="text-sm font-semibold text-ink capitalize">{plan}</p>
-                  <p className="text-xs text-stone">{PLAN_LABELS[plan]}</p>
+                  <p className="text-sm font-semibold text-ink">{planName(plan)}</p>
+                  <p className="text-xs text-stone">{planPrice(plan)}</p>
                 </div>
                 <Button
                   variant="primary"

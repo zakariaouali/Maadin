@@ -51,6 +51,7 @@ function formatTime(dateStr: string) {
 }
 
 export default function ConversationPage() {
+  const tu = useTranslations("ui");
   const t = useTranslations("messages");
   const params = useParams();
   const conversationId = params.id as string;
@@ -169,12 +170,12 @@ export default function ConversationPage() {
                   <span className="text-[10px] text-stone">{formatTime(m.created_at)}</span>
                   {isMine && (
                     m.is_read ? (
-                      <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className="text-gold-deep" aria-label="Seen">
+                      <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className="text-gold-deep" aria-label={tu("seen")}>
                         <path d="M1 5l3 3 5-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M5 5l3 3 5-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     ) : (
-                      <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className="text-stone/40" aria-label="Sent">
+                      <svg width="16" height="10" viewBox="0 0 16 10" fill="none" className="text-stone/40" aria-label={tu("sent")}>
                         <path d="M3 5l3 3 5-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     )

@@ -97,7 +97,7 @@ class CategoryController extends Controller
 
         if ($category->products()->exists()) {
             return response()->json([
-                'message' => 'Cannot delete a category that has products assigned to it.',
+                'message' => __('Cannot delete a category that has products assigned to it.'),
             ], 422);
         }
 
@@ -107,7 +107,7 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return response()->json(['message' => 'Category deleted']);
+        return response()->json(['message' => __('Category deleted')]);
     }
 
     private function generateUniqueSlug(string $name, ?int $ignoreId = null): string

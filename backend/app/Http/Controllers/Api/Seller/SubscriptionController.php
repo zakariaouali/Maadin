@@ -47,13 +47,13 @@ class SubscriptionController extends Controller
         ]);
 
         if ($validated['to_plan'] === $user->plan) {
-            return response()->json(['message' => 'You are already on this plan.'], 422);
+            return response()->json(['message' => __('You are already on this plan.')], 422);
         }
 
         // One pending request at a time
         $existing = PlanUpgradeRequest::where('user_id', $user->id)->where('status', 'pending')->exists();
         if ($existing) {
-            return response()->json(['message' => 'You already have a pending upgrade request.'], 422);
+            return response()->json(['message' => __('You already have a pending upgrade request.')], 422);
         }
 
         $upgradeRequest = PlanUpgradeRequest::create([

@@ -9,6 +9,8 @@ import api from "@/lib/api";
 import { getImageUrl, normalizeImageFile } from "@/lib/image";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { Alert, Badge, Button, EmptyState, Input, Modal, PageHeader, Spinner } from "@/components/ui";
+import { CategoryOptions } from "@/components/shop/CategoryOptions";
+import { formatPrice, localizedName, resolveLocale } from "@/lib/i18n-helpers";
 
 const MAX_IMAGES = 5;
 
@@ -29,6 +31,7 @@ interface Product {
 const emptyForm = { name: "", description: "", price: "", stock: "", category_id: "", sku: "", is_active: true };
 
 export default function SellerProductsPage() {
+  const tu = useTranslations("ui");
   const t = useTranslations("seller");
   const tCommon = useTranslations("common");
   const { user } = useAuth();
@@ -299,11 +302,11 @@ export default function SellerProductsPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-ink truncate">{p.name}</p>
                     <p className="text-xs text-stone mt-0.5">
-                      {p.category?.name} · {p.price} MAD · Stock: {p.stock_quantity}
+                      {p.category ? localizedName(p.category, resolveLocale()) : ""} · {formatPrice(p.price)} · {tu("stockLabel")} {p.stock_quantity}
                     </p>
                     <div className="flex flex-wrap items-center gap-1.5 mt-2">
                       {p.is_approved ? (
-                        <Badge variant="success">Approved</Badge>
+                        <Badge variant="success">{tu("approved")}</Badge>
                       ) : (
                         <Badge variant="warning">{t("pendingReview")}</Badge>
                       )}
@@ -347,9 +350,7 @@ export default function SellerProductsPage() {
               className="border border-stone/30 rounded-sm px-3 py-2 text-sm outline-none focus:border-gold-deep bg-white"
             >
               <option value="">— {t("productCategory")} —</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
+              <CategoryOptions categories={categories} />
             </select>
           </div>
 
@@ -363,7 +364,7 @@ export default function SellerProductsPage() {
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               rows={6}
               required
-              placeholder="Describe your product — materials, dimensions, technique, what makes it special..."
+              placeholder={tu("describePlaceholder")}
               className="w-full border border-stone/30 rounded-lg px-3.5 py-3 text-sm outline-none focus:border-gold-deep focus:ring-2 focus:ring-gold/20 resize-y transition-colors bg-sand/30"
             />
           </div>
@@ -392,7 +393,7 @@ export default function SellerProductsPage() {
           {!editingId && (
             <div>
               <p className="text-sm text-stone mb-2">
-                {t("uploadImages")} <span className="text-stone/50">({t("optional")} · max {MAX_IMAGES})</span>
+                {t("uploadImages")} <span className="text-stone/50">({t("optional")} · {tu("maxLabel")} {MAX_IMAGES})</span>
               </p>
               {formFiles.length < MAX_IMAGES && (
                 <div
@@ -460,7 +461,7 @@ export default function SellerProductsPage() {
           {/* Slot count */}
           <div className="flex items-center justify-between">
             <p className="text-xs text-stone">
-              {currentImages.length} / {MAX_IMAGES} images
+              {currentImages.length} / {MAX_IMAGES} {tu("imagesWord")}
             </p>
             {!canUploadMore && (
               <span className="text-xs text-henna font-medium">{t("maxReached")}</span>

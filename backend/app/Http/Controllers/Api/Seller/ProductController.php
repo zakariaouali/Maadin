@@ -15,7 +15,7 @@ class ProductController extends Controller
         $seller = $request->user()->seller;
 
         if (!$seller) {
-            return response()->json(['message' => 'No store found for this account.'], 404);
+            return response()->json(['message' => __('No store found for this account.')], 404);
         }
 
         $products = $seller->products()
@@ -31,11 +31,11 @@ class ProductController extends Controller
         $seller = $request->user()->seller;
 
         if (!$seller) {
-            return response()->json(['message' => 'You must create a store before adding products.'], 422);
+            return response()->json(['message' => __('You must create a store before adding products.')], 422);
         }
 
         if ($seller->status !== 'verified') {
-            return response()->json(['message' => 'Your store must be verified before you can list products.'], 403);
+            return response()->json(['message' => __('Your store must be verified before you can list products.')], 403);
         }
 
         $validated = $request->validate([
@@ -103,14 +103,14 @@ class ProductController extends Controller
         $product = $this->ownedProductOrFail($request, $id);
         $product->delete();
 
-        return response()->json(['message' => 'Product deleted']);
+        return response()->json(['message' => __('Product deleted')]);
     }
 
     private function ownedProductOrFail(Request $request, string $id): Product
     {
         $seller = $request->user()->seller;
 
-        abort_if(!$seller, 404, 'No store found for this account.');
+        abort_if(!$seller, 404, __('No store found for this account.'));
 
         return $seller->products()->findOrFail($id);
     }

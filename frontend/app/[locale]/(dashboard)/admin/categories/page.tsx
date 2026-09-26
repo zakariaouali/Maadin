@@ -42,6 +42,7 @@ const EMPTY_FORM: FormState = {
 };
 
 export default function AdminCategoriesPage() {
+  const tu = useTranslations("ui");
   const t = useTranslations("admin");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -68,7 +69,7 @@ export default function AdminCategoriesPage() {
       const res = await api.get("/admin/categories");
       setCategories(res.data?.data ?? res.data ?? []);
     } catch {
-      setError("Failed to load categories.");
+      setError(tu("failedLoadCategories"));
     } finally {
       setLoading(false);
     }
@@ -140,7 +141,7 @@ export default function AdminCategoriesPage() {
       setModalOpen(false);
       fetchCategories();
     } catch {
-      setError("Failed to save category.");
+      setError(tu("failedSaveCategory"));
     } finally {
       setSubmitting(false);
     }
@@ -151,7 +152,7 @@ export default function AdminCategoriesPage() {
       await api.put(`/admin/categories/${cat.id}`, { is_active: !cat.is_active });
       fetchCategories();
     } catch {
-      setError("Failed to update category.");
+      setError(tu("failedUpdateCategory"));
     }
   };
 
@@ -261,7 +262,7 @@ export default function AdminCategoriesPage() {
                 <div className="relative h-36 w-full">
                   <Image src={imagePreview} alt="preview" fill className="object-cover" />
                   <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                    <span className="text-white text-xs font-medium bg-black/50 px-3 py-1 rounded-sm">Change image</span>
+                    <span className="text-white text-xs font-medium bg-black/50 px-3 py-1 rounded-sm">{tu("changeImage")}</span>
                   </div>
                 </div>
               ) : (
@@ -325,7 +326,7 @@ export default function AdminCategoriesPage() {
               onChange={(e) => setForm((f) => ({ ...f, parent_id: e.target.value }))}
               className="w-full border border-stone/30 rounded-sm px-3 py-2 text-sm outline-none focus:border-gold-deep"
             >
-              <option value="">— No parent (top level) —</option>
+              <option value="">{tu("noParent")}</option>
               {topLevelCats
                 .filter((c) => !editTarget || c.id !== editTarget.id)
                 .map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -371,7 +372,7 @@ export default function AdminCategoriesPage() {
         {deleteError ? (
           <Alert type="error">{deleteError}</Alert>
         ) : (
-          <p className="text-sm text-stone mb-6">Are you sure you want to delete this category?</p>
+          <p className="text-sm text-stone mb-6">{tu("confirmDeleteCategory")}</p>
         )}
         <div className="flex justify-end gap-3 mt-4">
           <Button variant="secondary" onClick={() => setDeleteId(null)}>{t("cancel")}</Button>

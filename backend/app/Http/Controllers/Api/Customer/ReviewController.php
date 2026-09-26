@@ -28,7 +28,7 @@ class ReviewController extends Controller
 
         if ($order->status !== 'delivered') {
             return response()->json([
-                'message' => 'You can only review products from delivered orders.',
+                'message' => __('You can only review products from delivered orders.'),
             ], 422);
         }
 
@@ -36,7 +36,7 @@ class ReviewController extends Controller
 
         if (!$itemExists) {
             return response()->json([
-                'message' => 'This product was not part of that order.',
+                'message' => __('This product was not part of that order.'),
             ], 422);
         }
 
@@ -46,7 +46,7 @@ class ReviewController extends Controller
 
         if ($alreadyReviewed) {
             return response()->json([
-                'message' => 'You have already reviewed this product.',
+                'message' => __('You have already reviewed this product.'),
             ], 422);
         }
 
@@ -110,7 +110,7 @@ class ReviewController extends Controller
         $this->recalculateProductRating($productId);
         $this->recalculateSellerRating($sellerId);
 
-        return response()->json(['message' => 'Review deleted']);
+        return response()->json(['message' => __('Review deleted')]);
     }
 
     public function myReviews(Request $request)

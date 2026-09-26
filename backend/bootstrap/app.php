@@ -21,6 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->statefulApi();
 
+        // Respond in the visitor's language (X-Locale header)
+        // (prepended so the language is already set when the login check builds its error)
+        $middleware->api(prepend: [\App\Http\Middleware\SetApiLocale::class]);
+
         $middleware->validateCsrfTokens(except: [
             'api/*',
         ]);
@@ -35,7 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {
-                return response()->json(['message' => 'Unauthenticated.'], 401);
+                return response()->json(['message' => __('Unauthenticated.')], 401);
             }
         });
 
@@ -43,7 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // [App\Models\Product]", leaking internal class names to anyone.
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
             if ($request->is('api/*')) {
-                return response()->json(['message' => 'Not found.'], 404);
+                return response()->json(['message' => __('Not found.')], 404);
             }
         });
     })->create();

@@ -10,7 +10,7 @@ class StoreController extends Controller
 {
     public function show(Request $request, string $slug)
     {
-        $locale = in_array($request->query('locale'), ['fr', 'ar']) ? $request->query('locale') : 'en';
+        $locale = \App\Support\RequestLocale::from($request);
         $seller = Seller::where('store_slug', $slug)
             ->where('status', 'verified')
             ->select([

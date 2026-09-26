@@ -37,21 +37,21 @@ class ReviewController extends Controller
         $review->restore(); // in case soft-deleted
         $review->update(['status' => 'approved']);
         $this->recalculate($review);
-        return response()->json(['message' => 'Review approved.']);
+        return response()->json(['message' => __('Review approved.')]);
     }
 
     public function reject(Review $review)
     {
         $review->update(['status' => 'rejected']);
         $this->recalculate($review);
-        return response()->json(['message' => 'Review rejected.']);
+        return response()->json(['message' => __('Review rejected.')]);
     }
 
     public function destroy(Review $review)
     {
         $review->delete();
         $this->recalculate($review);
-        return response()->json(['message' => 'Review deleted.']);
+        return response()->json(['message' => __('Review deleted.')]);
     }
 
     private function recalculate(Review $review): void

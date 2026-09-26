@@ -8,6 +8,9 @@ import { Alert, Button, Modal, OrderStatusBadge, Spinner } from "@/components/ui
 import Image from "next/image";
 import { getImageUrl } from "@/lib/image";
 import { Link } from "@/i18n/navigation";
+import { CategoryOptions } from "@/components/shop/CategoryOptions";
+import { formatDate, formatPrice, timeAgo } from "@/lib/i18n-helpers";
+import { PlanName } from "@/components/ui/RoleName";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 interface Category { id: number; name: string; }
@@ -46,13 +49,6 @@ function daysUntil(date: string | null) {
   return Math.ceil((new Date(date).getTime() - Date.now()) / 86400000);
 }
 
-function timeAgo(dateStr: string) {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
 
 /* ─── Product edit modal ─────────────────────────────────────────────────── */
 function ProductEditModal({
@@ -66,6 +62,7 @@ function ProductEditModal({
   onClose: () => void;
   onSaved: (p: ProductDetail) => void;
 }) {
+  const tu = useTranslations("ui");
   const [form, setForm] = useState({
     name: initial.name,
     short_description: initial.short_description ?? "",
@@ -161,7 +158,7 @@ function ProductEditModal({
         <div>
           <label className="text-xs font-semibold text-stone uppercase tracking-wide mb-1 block">{t("categories")}</label>
           <select className={field} value={form.category_id} onChange={(e) => set("category_id", e.target.value)}>
-            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            <CategoryOptions categories={categories} />
           </select>
         </div>
         <div>
@@ -204,7 +201,7 @@ function ProductEditModal({
                   </button>
                 </div>
                 {img.is_primary && (
-                  <span className="absolute top-1 start-1 bg-gold text-white text-[9px] font-bold px-1 rounded">MAIN</span>
+                  <span className="absolute top-1 start-1 bg-gold text-white text-[9px] font-bold px-1 rounded">{tu("mainImage")}</span>
                 )}
               </div>
             ) : null;
@@ -429,11 +426,11 @@ function SubscriptionPanel({ user, onUpdated }: { user: AccountDetail["user"]; o
               <p className="text-lg font-bold text-green-700 mt-1">{t("subscriptionDaysRemaining", { days: days! })}</p>
             )}
             {user.subscription_expires_at && (
-              <p className="text-xs text-stone mt-0.5">{t("renewsLabel")} {new Date(user.subscription_expires_at).toLocaleDateString()}</p>
+              <p className="text-xs text-stone mt-0.5">{t("renewsLabel")} {formatDate(user.subscription_expires_at)}</p>
             )}
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-ink">{user.monthly_fee ? `${Number(user.monthly_fee).toLocaleString()} MAD` : "—"}</p>
+            <p className="text-2xl font-bold text-ink">{user.monthly_fee ? formatPrice(user.monthly_fee) : "—"}</p>
             <p className="text-xs text-stone">{t("perMonth")}</p>
           </div>
         </div>
@@ -533,7 +530,7 @@ function AddProductModal({
         <div>
           <label className={label}>{t("categories")} *</label>
           <select className={field} value={form.category_id} onChange={(e) => set("category_id", e.target.value)} required>
-            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            <CategoryOptions categories={categories} />
           </select>
         </div>
         <div>
@@ -560,6 +557,7 @@ function AddProductModal({
 
 /* ─── Page ───────────────────────────────────────────────────────────────── */
 export default function AccountDetailPage({ params }: { params: Promise<{ userId: string; locale: string }> }) {
+  const tu = useTranslations("ui");
   const { userId } = use(params);
   const t = useTranslations("admin");
   const [data, setData] = useState<AccountDetail | null>(null);
@@ -605,7 +603,7 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
   };
 
   if (loading) return <div className="flex justify-center py-20"><Spinner size="lg" /></div>;
-  if (!data) return <p className="text-stone">Account not found.</p>;
+  if (!data) return <p className="text-stone">{tu("accountNotFound")}</p>;
 
   const { user, seller, orders, products, conversations } = data;
   const logoUrl = getImageUrl(seller?.logo_path ?? undefined);
@@ -645,7 +643,7 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
             <div className="flex-1 min-w-0 pt-8">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="font-display text-xl text-ink">{user.name}</h1>
-                <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${user.plan === "premium" ? "bg-ink/10 text-ink" : "bg-gold/15 text-gold-deep"}`}>{user.plan}</span>
+                <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${user.plan === "premium" ? "bg-ink/10 text-ink" : "bg-gold/15 text-gold-deep"}`}><PlanName plan={user.plan} /></span>
                 {seller && <span className={`text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full ${seller.status === "verified" ? "bg-green-50 text-green-700" : "bg-henna/10 text-henna"}`}>{t(seller.status as "pending" | "verified" | "suspended")}</span>}
               </div>
               <p className="text-sm text-stone">{user.email}{user.phone ? ` · ${user.phone}` : ""}</p>
@@ -656,10 +654,10 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
           {seller && (
             <div className="flex gap-4 flex-wrap">
               {[
-                { v: orders?.length ?? 0, l: "orders" },
-                { v: products?.length ?? 0, l: "products" },
-                { v: conversations?.filter(c => c.unread_count > 0).length ?? 0, l: "unread convos" },
-                { v: orders?.filter(o => o.status === "pending").length ?? 0, l: "pending" },
+                { v: orders?.length ?? 0, l: tu("statOrders") },
+                { v: products?.length ?? 0, l: tu("statProducts") },
+                { v: conversations?.filter(c => c.unread_count > 0).length ?? 0, l: tu("statUnread") },
+                { v: orders?.filter(o => o.status === "pending").length ?? 0, l: tu("statPending") },
               ].map(s => (
                 <div key={s.l} className="text-center px-4 py-2 bg-sand rounded-xl border border-stone/10">
                   <p className="text-lg font-bold text-ink">{s.v}</p>
@@ -737,7 +735,7 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
                     <div key={o.id} className="flex items-center gap-3">
                       <div className="flex-1 min-w-0"><p className="text-xs font-medium text-ink truncate">{o.customer?.name ?? "—"}</p><p className="text-[10px] text-stone">{timeAgo(o.created_at)}</p></div>
                       <OrderStatusBadge status={o.status} />
-                      <span className="text-xs font-semibold text-ink shrink-0">{Number(o.total_price).toLocaleString()} MAD</span>
+                      <span className="text-xs font-semibold text-ink shrink-0">{formatPrice(o.total_price)}</span>
                     </div>
                   ))}
                 </div>
@@ -763,15 +761,15 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
             {!orders?.length ? <p className="text-sm text-stone italic p-6">{t("noOrdersYet")}</p> : (
               <table className="w-full text-sm">
                 <thead><tr className="border-b border-stone/10 text-[10px] uppercase tracking-wider text-stone">
-                  <th className="text-left px-4 py-3">Customer</th><th className="text-left px-4 py-3">Status</th>
-                  <th className="text-right px-4 py-3">Amount</th><th className="text-right px-4 py-3">Date</th>
+                  <th className="text-left px-4 py-3">{tu("customer")}</th><th className="text-left px-4 py-3">{tu("status")}</th>
+                  <th className="text-right px-4 py-3">{tu("amount")}</th><th className="text-right px-4 py-3">{tu("date")}</th>
                 </tr></thead>
                 <tbody className="divide-y divide-stone/10">
                   {orders.map(o => (
                     <tr key={o.id} className="hover:bg-sand/30 transition-colors">
                       <td className="px-4 py-3 font-medium text-ink">{o.customer?.name ?? "—"}</td>
                       <td className="px-4 py-3"><OrderStatusBadge status={o.status} /></td>
-                      <td className="px-4 py-3 text-right font-semibold">{Number(o.total_price).toLocaleString()} MAD</td>
+                      <td className="px-4 py-3 text-right font-semibold">{formatPrice(o.total_price)}</td>
                       <td className="px-4 py-3 text-right text-stone text-xs">{timeAgo(o.created_at)}</td>
                     </tr>
                   ))}
@@ -792,7 +790,7 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
                     {av ? <Image src={av} alt="" width={36} height={36} className="object-cover w-full h-full" /> : <span className="text-xs font-bold text-gold-deep">{(c.buyer?.name ?? "?").charAt(0)}</span>}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-ink">{c.buyer?.name ?? "Unknown"}</p>
+                    <p className="text-sm font-semibold text-ink">{c.buyer?.name ?? tu("unknown")}</p>
                     {c.product && <p className="text-xs text-stone truncate">{c.product.name}</p>}
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
@@ -841,8 +839,8 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
                       </div>
                       <div className="p-3">
                         <p className="text-xs font-semibold text-ink line-clamp-1">{p.name}</p>
-                        <p className="text-xs text-gold-deep font-bold mt-1">{Number(p.price).toLocaleString()} MAD</p>
-                        <p className="text-[10px] text-stone mt-0.5">Stock: {p.stock_quantity}</p>
+                        <p className="text-xs text-gold-deep font-bold mt-1">{formatPrice(p.price)}</p>
+                        <p className="text-[10px] text-stone mt-0.5">{tu("stockLabel")} {p.stock_quantity}</p>
                       </div>
                     </button>
                   );

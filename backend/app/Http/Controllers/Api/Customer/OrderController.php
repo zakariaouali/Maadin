@@ -34,7 +34,7 @@ class OrderController extends Controller
 
         if ($order->status !== 'pending') {
             return response()->json([
-                'message' => 'Only pending orders can be cancelled by the customer.',
+                'message' => __('Only pending orders can be cancelled by the customer.'),
             ], 422);
         }
 

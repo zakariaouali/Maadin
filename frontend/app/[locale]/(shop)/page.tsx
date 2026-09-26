@@ -7,6 +7,8 @@ import { getImageUrl } from "@/lib/image";
 import type { Metadata } from "next";
 import ArtisanatSection from "@/components/home/ArtisanatSection";
 import HeroVideo from "@/components/home/HeroVideo";
+import { currencyLabel, formatAmount } from "@/lib/i18n-helpers";
+import { useLocale } from "next-intl";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -95,6 +97,7 @@ function FeaturedProductCard({ slug, name, price, rating, storeName, storeSlug, 
   slug: string; name: string; price: string | number; rating?: string | number;
   storeName?: string; storeSlug?: string; storeLogoPath?: string | null; categoryName?: string; imagePath?: string;
 }) {
+  const locale = useLocale();
   const imageUrl = getImageUrl(imagePath);
   const logoUrl = getImageUrl(storeLogoPath ?? undefined);
   return (
@@ -163,8 +166,8 @@ function FeaturedProductCard({ slug, name, price, rating, storeName, storeSlug, 
         </Link>
         <div className="flex items-center justify-between mt-2 pt-2 border-t border-stone/10">
           <span className="font-semibold text-ink text-sm">
-            {Number(price).toLocaleString()}
-            <span className="text-[10px] text-stone font-normal ms-1">MAD</span>
+            {formatAmount(price, locale)}
+            <span className="text-[10px] text-stone font-normal ms-1">{currencyLabel(locale)}</span>
           </span>
           {rating && Number(rating) > 0 && (
             <span className="flex items-center gap-1 text-[11px] text-stone">

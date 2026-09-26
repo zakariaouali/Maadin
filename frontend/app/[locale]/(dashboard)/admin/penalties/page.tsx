@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { Badge, Button, Modal, PageHeader, Spinner, Alert } from "@/components/ui";
+import { formatDate } from "@/lib/i18n-helpers";
 
 interface Penalty {
   id: number;
@@ -36,6 +37,7 @@ const PENALTY_TYPE_COLORS: Record<string, string> = {
 };
 
 export default function AdminPenaltiesPage() {
+  const tu = useTranslations("ui");
   const t = useTranslations("admin");
 
   const [penalties, setPenalties] = useState<Penalty[]>([]);
@@ -63,7 +65,7 @@ export default function AdminPenaltiesPage() {
       const res = await api.get("/admin/penalties");
       setPenalties(res.data?.data ?? res.data ?? []);
     } catch {
-      setError("Failed to load penalties.");
+      setError(tu("failedLoadPenalties"));
     } finally {
       setLoading(false);
     }
@@ -107,7 +109,7 @@ export default function AdminPenaltiesPage() {
       setForm({ seller_id: "", type: "warning", reason: "fake_stock", description: "", duration_days: "" });
       fetchPenalties();
     } catch {
-      setError("Failed to issue penalty.");
+      setError(tu("failedIssuePenalty"));
     } finally {
       setSubmitting(false);
     }
@@ -142,7 +144,7 @@ export default function AdminPenaltiesPage() {
                 <th className="text-left px-4 py-3 text-stone font-medium">{t("penaltyType")}</th>
                 <th className="text-left px-4 py-3 text-stone font-medium">{t("reason")}</th>
                 <th className="text-left px-4 py-3 text-stone font-medium">{t("issuedBy")}</th>
-                <th className="text-left px-4 py-3 text-stone font-medium">Issued</th>
+                <th className="text-left px-4 py-3 text-stone font-medium">{tu("issued")}</th>
                 <th className="text-left px-4 py-3 text-stone font-medium">{t("expiresAt")}</th>
               </tr>
             </thead>
@@ -164,10 +166,10 @@ export default function AdminPenaltiesPage() {
                   </td>
                   <td className="px-4 py-3 text-stone">{p.issued_by?.name ?? "—"}</td>
                   <td className="px-4 py-3 text-stone">
-                    {new Date(p.created_at).toLocaleDateString()}
+                    {formatDate(p.created_at)}
                   </td>
                   <td className="px-4 py-3 text-stone">
-                    {p.expires_at ? new Date(p.expires_at).toLocaleDateString() : "—"}
+                    {p.expires_at ? formatDate(p.expires_at) : "—"}
                   </td>
                 </tr>
               ))}
@@ -198,7 +200,7 @@ export default function AdminPenaltiesPage() {
                 onChange={(e) => setForm((f) => ({ ...f, seller_id: e.target.value }))}
                 className="w-full border border-stone/30 rounded-sm px-3 py-2 text-sm outline-none focus:border-gold-deep"
               >
-                <option value="">— Select seller —</option>
+                <option value="">{tu("selectSeller")}</option>
                 {sellers.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.store_name ?? s.name}

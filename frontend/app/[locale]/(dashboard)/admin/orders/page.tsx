@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { Alert, Button, Modal, OrderStatusBadge, PageHeader, Spinner } from "@/components/ui";
+import { formatDate, formatPrice } from "@/lib/i18n-helpers";
 
 interface OrderItem { id: number; product_name: string; quantity: number; unit_price: string; }
 interface Order {
@@ -16,6 +17,7 @@ interface Order {
 type Tab = "all"|"pending"|"confirmed"|"shipped"|"delivered"|"cancelled";
 
 export default function AdminOrdersPage() {
+  const tu = useTranslations("ui");
   const t = useTranslations("admin");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +31,7 @@ export default function AdminOrdersPage() {
     const p: Record<string,string> = {};
     if (tb !== "all") p.status = tb;
     try { const { data } = await api.get("/admin/orders",{params:p}); setOrders(data.data??data); }
-    catch { setError("Failed to load."); }
+    catch { setError(tu("failedLoad")); }
     setLoading(false);
   };
 
@@ -43,8 +45,8 @@ export default function AdminOrdersPage() {
   useEffect(() => { load("all"); }, []);
 
   const tabs: {key:Tab;label:string}[] = [
-    {key:"all",label:t("all")},{key:"pending",label:t("pending")},{key:"confirmed",label:"Confirmed"},
-    {key:"shipped",label:"Shipped"},{key:"delivered",label:"Delivered"},{key:"cancelled",label:"Cancelled"},
+    {key:"all",label:t("all")},{key:"pending",label:t("pending")},{key:"confirmed",label:tu("statusConfirmed")},
+    {key:"shipped",label:tu("statusShipped")},{key:"delivered",label:tu("statusDelivered")},{key:"cancelled",label:tu("statusCancelled")},
   ];
   const cls = (a: boolean) => "px-3 py-1.5 rounded-sm text-sm transition-colors " + (a ? "bg-white text-ink shadow-sm font-medium" : "text-stone hover:text-ink");
 
@@ -67,9 +69,9 @@ export default function AdminOrdersPage() {
                   <OrderStatusBadge status={o.status} />
                 </div>
                 <p className="text-xs text-stone truncate">{o.customer?.name ?? "?"} to {o.seller?.store_name ?? "?"}</p>
-                <p className="text-xs text-stone/60">{new Date(o.created_at).toLocaleDateString()}</p>
+                <p className="text-xs text-stone/60">{formatDate(o.created_at)}</p>
               </div>
-              <span className="text-sm font-semibold text-ink shrink-0 hidden sm:block">{Number(o.total_price).toLocaleString()} MAD</span>
+              <span className="text-sm font-semibold text-ink shrink-0 hidden sm:block">{formatPrice(o.total_price)}</span>
               <Button size="sm" variant="secondary" onClick={() => openDetail(o.id)}>{t("view")}</Button>
             </div>
           ))}
@@ -83,9 +85,9 @@ export default function AdminOrdersPage() {
             <div className="grid grid-cols-2 gap-3">
               <div><p className="text-xs text-stone">{t("customer")}</p><p className="font-medium">{detail.customer?.name}</p><p className="text-xs text-stone">{detail.customer?.email}</p></div>
               <div><p className="text-xs text-stone">{t("seller")}</p><p className="font-medium">{detail.seller?.store_name}</p></div>
-              <div><p className="text-xs text-stone">Status</p><OrderStatusBadge status={detail.status} /></div>
-              <div><p className="text-xs text-stone">{t("amount")}</p><p className="font-semibold">{Number(detail.total_price).toLocaleString()} MAD</p></div>
-              {detail.tracking_number && <div className="col-span-2"><p className="text-xs text-stone">Tracking</p><p className="font-mono">{detail.tracking_number}</p></div>}
+              <div><p className="text-xs text-stone">{tu("status")}</p><OrderStatusBadge status={detail.status} /></div>
+              <div><p className="text-xs text-stone">{t("amount")}</p><p className="font-semibold">{formatPrice(detail.total_price)}</p></div>
+              {detail.tracking_number && <div className="col-span-2"><p className="text-xs text-stone">{tu("tracking")}</p><p className="font-mono">{detail.tracking_number}</p></div>}
               <div className="col-span-2"><p className="text-xs text-stone">{t("shippingAddress")}</p><p className="text-stone">{detail.shipping_address}</p></div>
             </div>
             {(detail.items??[]).length > 0 && (
@@ -96,7 +98,7 @@ export default function AdminOrdersPage() {
                     <div key={item.id} className="flex items-center gap-3 px-3 py-2.5">
                       <p className="flex-1 text-sm">{item.product_name}</p>
                       <span className="text-xs text-stone">{t("qty")}: {item.quantity}</span>
-                      <span className="text-sm font-medium">{Number(item.unit_price).toLocaleString()} MAD</span>
+                      <span className="text-sm font-medium">{formatPrice(item.unit_price)}</span>
                     </div>
                   ))}
                 </div>

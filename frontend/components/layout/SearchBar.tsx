@@ -5,6 +5,7 @@ import { useLocale } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import Image from "next/image";
 import { getImageUrl } from "@/lib/image";
+import { formatPrice } from "@/lib/i18n-helpers";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 
@@ -140,7 +141,7 @@ export default function SearchBar({ onClose }: { onClose?: () => void }) {
                       <p className="text-sm font-medium text-ink truncate">{p.name}</p>
                       <p className="text-xs text-stone">{p.seller?.store_name}</p>
                     </div>
-                    <span className="text-sm font-bold text-gold-deep shrink-0">{Number(p.price).toLocaleString()} MAD</span>
+                    <span className="text-sm font-bold text-gold-deep shrink-0">{formatPrice(p.price)}</span>
                   </button>
                 );
               })}

@@ -11,7 +11,7 @@ class ReviewController extends Controller
     public function index(Request $request)
     {
         $seller = $request->user()->seller;
-        abort_if(!$seller, 404, 'No store found.');
+        abort_if(!$seller, 404, __('No store found.'));
 
         $reviews = Review::where('seller_id', $seller->id)
             ->with([

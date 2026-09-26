@@ -11,7 +11,7 @@ class EnsureUserIsSeller
     public function handle(Request $request, Closure $next): Response
     {
         if (!$request->user() || $request->user()->role !== 'seller') {
-            return response()->json(['message' => 'Forbidden. Seller access required.'], 403);
+            return response()->json(['message' => __('Forbidden. Seller access required.')], 403);
         }
 
         return $next($request);

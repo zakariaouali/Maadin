@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { getImageUrl } from "@/lib/image";
 import { Alert, Button, EmptyState, OrderStatusBadge, PageHeader, Spinner } from "@/components/ui";
+import { formatDate, formatPrice } from "@/lib/i18n-helpers";
 
 interface OrderItem {
   id: number;
@@ -39,6 +40,7 @@ const TRANSITIONS: Record<string, string[]> = {
 };
 
 export default function SellerOrdersPage() {
+  const tu = useTranslations("ui");
   const t = useTranslations("seller");
   const tCommon = useTranslations("common");
 
@@ -92,12 +94,10 @@ export default function SellerOrdersPage() {
           <span className="text-xl">🔔</span>
           <div>
             <p className="font-semibold text-amber-800 text-sm">
-              {pendingOrders.length === 1
-                ? "You have 1 new order waiting for confirmation!"
-                : `You have ${pendingOrders.length} new orders waiting for confirmation!`}
+              {tu("newOrdersBanner", { count: pendingOrders.length })}
             </p>
             <p className="text-xs text-amber-700 mt-0.5">
-              Confirm them below so customers know their order is being processed.
+              {tu("confirmBelowNote")}
             </p>
           </div>
         </div>
@@ -121,7 +121,7 @@ export default function SellerOrdersPage() {
                   <div>
                     <Link href={`/seller/orders/${order.id}`} className="font-mono text-sm font-medium text-ink hover:text-gold-deep transition-colors">{order.order_number}</Link>
                     <span className="text-xs text-stone ms-3">
-                      {new Date(order.created_at).toLocaleDateString()}
+                      {formatDate(order.created_at)}
                     </span>
                   </div>
                   <OrderStatusBadge status={order.status} />
@@ -156,14 +156,14 @@ export default function SellerOrdersPage() {
                         <span className="flex-1 text-ink">
                           {item.product_name} <span className="text-stone">×{item.quantity}</span>
                         </span>
-                        <span className="text-stone shrink-0">{item.price_at_purchase} MAD</span>
+                        <span className="text-stone shrink-0">{formatPrice(item.price_at_purchase)}</span>
                       </div>
                     ))}
                   </div>
 
                   {/* Total */}
                   <div className="flex justify-end">
-                    <span className="text-sm font-semibold text-ink">{order.total_price} MAD</span>
+                    <span className="text-sm font-semibold text-ink">{formatPrice(order.total_price)}</span>
                   </div>
 
                   {/* Tracking input when about to ship */}

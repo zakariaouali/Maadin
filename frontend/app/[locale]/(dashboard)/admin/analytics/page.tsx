@@ -8,6 +8,7 @@ import api from "@/lib/api";
 import { Spinner, OrderStatusBadge } from "@/components/ui";
 import { getImageUrl } from "@/lib/image";
 import Image from "next/image";
+import { currencyLabel, formatAmount, formatPrice, timeAgo } from "@/lib/i18n-helpers";
 
 interface Dashboard {
   total_users: number; total_customers: number; total_sellers: number;
@@ -27,27 +28,9 @@ const STATUS_COLORS: Record<string, string> = {
   delivered: "#22c55e", cancelled: "#8c2f1b",
 };
 
-function timeAgo(dateStr: string, locale: string) {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (locale === "ar") {
-    if (diff < 60) return "الآن";
-    if (diff < 3600) return `منذ ${Math.floor(diff / 60)} د`;
-    if (diff < 86400) return `منذ ${Math.floor(diff / 3600)} س`;
-    return `منذ ${Math.floor(diff / 86400)} ي`;
-  }
-  if (locale === "fr") {
-    if (diff < 60) return "à l'instant";
-    if (diff < 3600) return `il y a ${Math.floor(diff / 60)} min`;
-    if (diff < 86400) return `il y a ${Math.floor(diff / 3600)} h`;
-    return `il y a ${Math.floor(diff / 86400)} j`;
-  }
-  if (diff < 60) return "just now";
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
-}
 
 export default function AdminDashboard() {
+  const tu = useTranslations("ui");
   const t = useTranslations("admin");
   const locale = useLocale();
   const [data, setData] = useState<Dashboard | null>(null);
@@ -93,7 +76,7 @@ export default function AdminDashboard() {
           </p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-semibold text-ink">{Number(data.total_revenue).toLocaleString()} <span className="text-sm font-normal text-stone">MAD</span></p>
+          <p className="text-2xl font-semibold text-ink">{formatAmount(data.total_revenue)} <span className="text-sm font-normal text-stone">{currencyLabel()}</span></p>
           <p className="text-xs text-stone">{t("totalRevenueStat")}</p>
         </div>
       </div>
@@ -157,7 +140,7 @@ export default function AdminDashboard() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0ebe0" />
                   <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#8b8378" }} />
                   <YAxis tick={{ fontSize: 11, fill: "#8b8378" }} />
-                  <Tooltip formatter={(v) => [`${Number(v).toLocaleString()} MAD`, t("revenueLabel")]} />
+                  <Tooltip formatter={(v) => [formatPrice(Number(v)), t("revenueLabel")]} />
                   <Area type="monotone" dataKey="revenue" stroke="#c9a227" strokeWidth={2} fill="url(#goldGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -210,7 +193,7 @@ export default function AdminDashboard() {
                       <p className="text-[11px] text-stone truncate">{o.seller?.store_name ?? "—"}</p>
                     </div>
                     <OrderStatusBadge status={o.status} />
-                    <span className="text-xs font-semibold text-ink shrink-0">{Number(o.total_price).toLocaleString()} MAD</span>
+                    <span className="text-xs font-semibold text-ink shrink-0">{formatPrice(o.total_price)}</span>
                   </div>
                 ))}
               </div>
@@ -235,7 +218,7 @@ export default function AdminDashboard() {
                           : <span className="text-xs font-bold text-gold-deep">{(c.buyer?.name ?? "?").charAt(0).toUpperCase()}</span>}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-ink truncate">{c.buyer?.name ?? "Unknown"}</p>
+                        <p className="text-xs font-semibold text-ink truncate">{c.buyer?.name ?? tu("unknown")}</p>
                         {c.product && <p className="text-[11px] text-stone truncate">{c.product.name}</p>}
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
@@ -272,7 +255,7 @@ export default function AdminDashboard() {
                   <p className="text-xs font-semibold text-ink line-clamp-1">{s.store_name}</p>
                   <p className="text-[10px] text-stone">{t("ordersCount", { count: s.orders_count })}</p>
                   <p className="text-xs font-semibold text-gold-deep">
-                    {s.orders_sum_total_price ? `${Number(s.orders_sum_total_price).toLocaleString()}` : "—"} MAD
+                    {s.orders_sum_total_price ? formatPrice(s.orders_sum_total_price) : "—"}
                   </p>
                 </div>
               ))}

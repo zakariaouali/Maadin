@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import api from "@/lib/api";
 import { getImageUrl } from "@/lib/image";
 import { Button, EmptyState, PageHeader, Spinner } from "@/components/ui";
+import { formatPrice } from "@/lib/i18n-helpers";
 
 interface WishlistItem {
   id: number;
@@ -22,6 +23,7 @@ interface WishlistItem {
 }
 
 export default function WishlistPage() {
+  const tu = useTranslations("ui");
   const t = useTranslations("nav");
   const tCommon = useTranslations("common");
   const tWish = useTranslations("wishlist");
@@ -94,13 +96,13 @@ export default function WishlistPage() {
                   {item.product.seller && (
                     <p className="text-xs text-stone">{item.product.seller.store_name}</p>
                   )}
-                  <p className="text-sm font-semibold text-ink mt-auto pt-1">{item.product.price} MAD</p>
+                  <p className="text-sm font-semibold text-ink mt-auto pt-1">{formatPrice(item.product.price)}</p>
                 </div>
 
                 {/* Actions */}
                 <div className="px-3 pb-3 flex gap-2">
                   <Link href={`/products/${item.product.slug}`} className="flex-1">
-                    <Button variant="primary" size="sm" className="w-full">View</Button>
+                    <Button variant="primary" size="sm" className="w-full">{tu("view")}</Button>
                   </Link>
                   <Button
                     variant="ghost"

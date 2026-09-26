@@ -5,6 +5,8 @@ import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { getImageUrl } from "@/lib/image";
 import { useCartStore } from "@/store/cartStore";
+import { useLocale, useTranslations } from "next-intl";
+import { currencyLabel, formatAmount } from "@/lib/i18n-helpers";
 
 interface ProductCardProps {
   id: number;
@@ -25,6 +27,8 @@ export function ProductCard({
   id, slug, name, price, rating, storeName, storeSlug, storeLogoPath,
   categoryName, imagePath, sellerId, stockQuantity = 0,
 }: ProductCardProps) {
+  const tu = useTranslations("ui");
+  const locale = useLocale();
   const imageUrl = getImageUrl(imagePath);
   const logoUrl  = getImageUrl(storeLogoPath);
   const addItem  = useCartStore(s => s.addItem);
@@ -92,7 +96,7 @@ export function ProductCard({
                   : "bg-ink/90 hover:bg-gold-deep text-white"
               }`}
           >
-            {added ? "✓ Added!" : stockQuantity === 0 ? "Out of stock" : "Add to cart"}
+            {added ? tu("addedToCart") : stockQuantity === 0 ? tu("outOfStock") : tu("addToCart")}
           </button>
         </div>
       </Link>
@@ -132,8 +136,8 @@ export function ProductCard({
         {/* Price + rating */}
         <div className="flex items-center justify-between mt-1.5 pt-2 border-t border-stone/10">
           <span className="font-semibold text-ink text-sm">
-            {Number(price).toLocaleString()}
-            <span className="text-[10px] text-stone font-normal ms-1">MAD</span>
+            {formatAmount(price, locale)}
+            <span className="text-[10px] text-stone font-normal ms-1">{currencyLabel(locale)}</span>
           </span>
           {rating && Number(rating) > 0 && (
             <span className="flex items-center gap-1 text-[11px] text-stone">
@@ -148,7 +152,7 @@ export function ProductCard({
         {/* Quick add to cart (always visible below fold) */}
         {inCart && (
           <Link href="/cart" className="mt-1 text-center text-[11px] font-medium text-gold-deep hover:underline">
-            In cart — view →
+            {tu("inCartView")}
           </Link>
         )}
       </div>
