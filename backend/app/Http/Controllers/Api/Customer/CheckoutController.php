@@ -100,7 +100,11 @@ class CheckoutController extends Controller
                 $order = Order::create([
                     'customer_id' => $userId,
                     'seller_id' => $sellerId,
-                    'order_number' => 'ORD-' . now()->format('Y') . '-' . str_pad((string) (Order::max('id') + 1), 6, '0', STR_PAD_LEFT),
+                    // Temporary unique value; replaced right below with a number built
+                    // from the row's own id. Building it from "highest id + 1" collided
+                    // with soft-deleted orders (the max query ignores them but the
+                    // unique index does not) and made every checkout fail with a 500.
+                    'order_number' => 'TMP-' . (string) \Illuminate\Support\Str::uuid(),
                     'status' => 'pending',
                     'total_price' => $total,
                     'shipping_address' => $validated['shipping_address'],
@@ -110,6 +114,10 @@ class CheckoutController extends Controller
                     'payment_method' => 'cash',
                     'payment_status' => 'pending',
                     'notes' => $validated['notes'] ?? null,
+                ]);
+
+                $order->update([
+                    'order_number' => 'ORD-' . now()->format('Y') . '-' . str_pad((string) $order->id, 6, '0', STR_PAD_LEFT),
                 ]);
 
                 foreach ($items as $item) {
