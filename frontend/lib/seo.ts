@@ -6,7 +6,7 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:30
  * shares (WhatsApp, Facebook) lose their preview picture.
  */
 export const DEFAULT_OG_IMAGES = [
-  { url: "/logo.png", width: 1991, height: 1163, alt: "Marrakech Maadine" },
+  { url: "/og-image.png", width: 1200, height: 630, alt: "Martisana" },
 ];
 
 /** Canonical URL plus the same page in every language, for one path ("" = home). */

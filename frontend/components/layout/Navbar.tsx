@@ -155,28 +155,16 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-18 py-3">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="relative w-10 h-10 sm:w-12 sm:h-12">
-              <Image
-                src="/logo.png"
-                alt="Marrakech Maadine"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
-            {/* Compact wordmark on mobile — just the name, no subtitle, to fit alongside the other header icons */}
-            <span className="sm:hidden font-display text-base text-ink group-hover:text-gold-deep transition-colors">
-              Maadine
-            </span>
-            <div className="hidden sm:flex flex-col leading-none">
-              <span className="font-display text-xl text-ink group-hover:text-gold-deep transition-colors">
-                Marrakech Maadine
-              </span>
-              <span className="text-[10px] text-stone tracking-widest uppercase">
-                {locale === "ar" ? "سوق الحرفيين" : locale === "fr" ? "Marché artisanal" : "Artisan Marketplace"}
-              </span>
-            </div>
+          {/* The approved lockup (drop + MARTISANA + Arabic name) is one image, so no text beside it */}
+          <Link href="/" className="shrink-0" aria-label="Martisana">
+            <Image
+              src="/logo-lockup-gold-deep.png"
+              alt="Martisana"
+              width={900}
+              height={246}
+              className="h-8 min-[370px]:h-10 sm:h-14 w-auto"
+              priority
+            />
           </Link>
 
           {/* Desktop search bar */}

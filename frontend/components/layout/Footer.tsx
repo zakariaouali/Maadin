@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 
 export default function Footer() {
@@ -11,7 +12,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="md:col-span-1">
-            <p className="font-display text-2xl text-white mb-2">Marrakech Maadine</p>
+            <Image
+              src="/logo-lockup-gold.png"
+              alt="Martisana"
+              width={900}
+              height={246}
+              className="h-16 w-auto mb-3"
+            />
             <p className="text-sm text-white/50 leading-relaxed max-w-xs">
               {t("tagline")}
             </p>

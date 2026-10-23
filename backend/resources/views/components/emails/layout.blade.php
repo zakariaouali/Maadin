@@ -34,10 +34,8 @@
         {{-- Quiet logo lockup — no banner, no card, sits directly on the page --}}
         <tr>
           <td align="center" style="padding-bottom:48px;">
-            <img src="https://res.cloudinary.com/dsoukycbj/image/upload/v1782562030/maadin/logo.png" alt="" width="64" style="display:block;margin:0 auto 14px;" />
-            <span style="font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;font-size:18px;font-weight:700;color:#1f1b16;letter-spacing:0.4px;">
-              {{ $locale === 'ar' ? 'مراكش معادن' : 'Marrakech Maadine' }}
-            </span>
+            {{-- The approved lockup already carries the name (Latin + Arabic), so no text under it --}}
+            <img src="https://res.cloudinary.com/dsoukycbj/image/upload/v1792780891/maadin/brand/martisana-lockup-ink.png" alt="Martisana" width="240" style="display:block;margin:0 auto;border:0;height:auto;" />
           </td>
         </tr>
 

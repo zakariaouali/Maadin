@@ -42,8 +42,6 @@ def cut_drop(src):
 
 gold_drop = cut_drop("martisana-logo-gold.png")
 ink_drop = cut_drop("martisana-logo-black.png")
-gold_drop.save(HERE / "martisana-drop-gold.png")
-ink_drop.save(HERE / "martisana-drop-ink.png")
 
 
 # ---------------------------------------------------------------- 2. lockups
@@ -74,8 +72,6 @@ def lockup(drop_file, color, out):
         b.close()
 
 
-lockup("martisana-drop-gold.png", "#D4AF5A", "martisana-lockup-gold.png")
-lockup("martisana-drop-ink.png", "#1F1B16", "martisana-lockup-ink.png")
 
 
 # ---------------------------------------------------------------- 3. icons
@@ -121,13 +117,6 @@ def drawn_drop_icon(size):
     return t.resize((size, size), Image.LANCZOS)
 
 
-for s in (512, 180):
-    real_drop_icon(s).save(HERE / f"martisana-icon-{s}.png")
-for s in (96, 48, 32, 16):
-    drawn_drop_icon(s).save(HERE / f"martisana-icon-{s}.png")
-real_drop_icon(512).save(HERE / "martisana-icon.png")
-small = [Image.open(HERE / f"martisana-icon-{s}.png") for s in (48, 32, 16)]
-small[0].save(HERE / "favicon.ico", sizes=[(48, 48), (32, 32), (16, 16)], append_images=small[1:])
 
 
 # ---------------------------------------------------------------- 4. preview sheet
@@ -155,5 +144,21 @@ def preview():
     sh.save(HERE / "martisana-brand-preview.png")
 
 
-preview()
-print("ok")
+def main():
+    gold_drop.save(HERE / "martisana-drop-gold.png")
+    ink_drop.save(HERE / "martisana-drop-ink.png")
+    lockup("martisana-drop-gold.png", "#D4AF5A", "martisana-lockup-gold.png")
+    lockup("martisana-drop-ink.png", "#1F1B16", "martisana-lockup-ink.png")
+    for s in (512, 180):
+        real_drop_icon(s).save(HERE / f"martisana-icon-{s}.png")
+    for s in (96, 48, 32, 16):
+        drawn_drop_icon(s).save(HERE / f"martisana-icon-{s}.png")
+    real_drop_icon(512).save(HERE / "martisana-icon.png")
+    small = [Image.open(HERE / f"martisana-icon-{s}.png") for s in (48, 32, 16)]
+    small[0].save(HERE / "favicon.ico", sizes=[(48, 48), (32, 32), (16, 16)], append_images=small[1:])
+    preview()
+    print("ok")
+
+
+if __name__ == "__main__":
+    main()
