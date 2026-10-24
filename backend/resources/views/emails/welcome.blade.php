@@ -1,4 +1,4 @@
-<x-emails.layout :locale="$locale" :title="$locale === 'fr' ? 'Bienvenue sur Marrakech Maadine' : ($locale === 'ar' ? 'مرحباً بك في مراكش معادن' : 'Welcome to Marrakech Maadine')">
+<x-emails.layout :locale="$locale" :title="$locale === 'fr' ? 'Bienvenue sur Martisana' : ($locale === 'ar' ? 'مرحباً بك في مارتيسانا' : 'Welcome to Martisana')">
 
   {{-- Greeting --}}
   <p style="margin:0 0 4px;font-size:14px;color:#8a7d67;text-align:{{ $locale === 'ar' ? 'right' : 'left' }};">
@@ -11,14 +11,14 @@
   {{-- Headline --}}
   <h1 style="margin:0 0 16px;font-size:26px;font-weight:700;color:#1f1b16;line-height:1.3;text-align:{{ $locale === 'ar' ? 'right' : 'left' }};">
     @if($role === 'seller')
-      @if($locale === 'fr') Bienvenue chez les artisans Maadine
-      @elseif($locale === 'ar') مرحباً بك بين حرفيي معادن
-      @else Welcome to the Maadine artisans
+      @if($locale === 'fr') Bienvenue chez les artisans Martisana
+      @elseif($locale === 'ar') مرحباً بك بين حرفيي مارتيسانا
+      @else Welcome to the Martisana artisans
       @endif
     @else
-      @if($locale === 'fr') Bienvenue sur Marrakech Maadine
-      @elseif($locale === 'ar') مرحباً بك في مراكش معادن
-      @else Welcome to Marrakech Maadine
+      @if($locale === 'fr') Bienvenue sur Martisana
+      @elseif($locale === 'ar') مرحباً بك في مارتيسانا
+      @else Welcome to Martisana
       @endif
     @endif
   </h1>

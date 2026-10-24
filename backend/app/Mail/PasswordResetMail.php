@@ -22,9 +22,9 @@ class PasswordResetMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         $subjects = [
-            'en' => 'Reset your Marrakech Maadine password',
-            'fr' => 'Réinitialisez votre mot de passe Marrakech Maadine',
-            'ar' => 'إعادة تعيين كلمة مرور مراكش معادن',
+            'en' => 'Reset your Martisana password',
+            'fr' => 'Réinitialisez votre mot de passe Martisana',
+            'ar' => 'إعادة تعيين كلمة مرور مارتيسانا',
         ];
 
         return new Envelope(

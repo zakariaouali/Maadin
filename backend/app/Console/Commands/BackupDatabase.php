@@ -20,7 +20,7 @@ class BackupDatabase extends Command
 
         $sql = $this->dumpDatabase($database);
 
-        $filename = 'maadin-backup-' . now()->format('Y-m-d_His') . '.sql.gz';
+        $filename = 'martisana-backup-' . now()->format('Y-m-d_His') . '.sql.gz';
         $path = storage_path('app/' . $filename);
         file_put_contents($path, gzencode($sql, 9));
 
@@ -42,7 +42,7 @@ class BackupDatabase extends Command
         $tables = collect(DB::select('SHOW TABLES'))
             ->map(fn($row) => array_values((array) $row)[0]);
 
-        $sql = "-- Marrakech Maadine database backup\n";
+        $sql = "-- Martisana database backup\n";
         $sql .= "-- Generated: " . now()->toDateTimeString() . "\n";
         $sql .= "-- Database: {$database}\n\n";
         $sql .= "SET FOREIGN_KEY_CHECKS=0;\n\n";

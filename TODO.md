@@ -5,7 +5,7 @@ Open items, newest first. Each one says what is wrong today and what has to be d
 ## 1. Admin cannot process orders (and cannot talk to customers) for managed stores
 
 **Reported 2026-10-23.** Checkout works. The order for the managed store
-("Maadine Marrakech") appears in Admin > Managed accounts, but the admin can
+("Martisana") appears in Admin > Managed accounts, but the admin can
 only look at it. Nobody can process it.
 
 ### What is missing today (verified in the code)

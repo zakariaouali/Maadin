@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!data) return {};
   const { store } = data;
   return {
-    title: `${store.store_name} – Marrakech Maadine`,
+    title: `${store.store_name} – Martisana`,
     description: store.store_description ?? `Browse handmade products by ${store.store_name}.`,
     alternates: pageAlternates(locale, `/stores/${slug}`),
     openGraph: {

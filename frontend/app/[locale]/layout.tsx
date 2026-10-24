@@ -37,9 +37,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const titles: Record<string, string> = {
-    en: "Marrakech Maadine - Moroccan Artisan Marketplace",
-    fr: "Marrakech Maadine - Marché des artisans marocains",
-    ar: "مراكش معادن - سوق الحرفيين المغاربة",
+    en: "Martisana - Moroccan Artisan Marketplace",
+    fr: "Martisana - Marché des artisans marocains",
+    ar: "مارتيسانا - سوق الحرفيين المغاربة",
   };
   const descriptions: Record<string, string> = {
     en: "Discover authentic Moroccan artisan products directly from creators in Marrakesh.",
@@ -60,10 +60,10 @@ export async function generateMetadata({
     title,
     description,
     keywords: keywords[locale] ?? keywords.en,
-    applicationName: "Marrakech Maadine",
+    applicationName: "Martisana",
     openGraph: {
       type: "website",
-      siteName: "Marrakech Maadine",
+      siteName: "Martisana",
       title,
       description,
       url: `${siteUrl}/${locale}`,
@@ -104,7 +104,7 @@ export default async function LocaleLayout({
       {
         "@type": "Organization",
         "@id": `${siteUrl}/#organization`,
-        name: "Marrakech Maadine",
+        name: "Martisana",
         url: siteUrl,
         logo: `${siteUrl}/logo.png`,
         description:
@@ -114,7 +114,7 @@ export default async function LocaleLayout({
         "@type": "WebSite",
         "@id": `${siteUrl}/#website`,
         url: siteUrl,
-        name: "Marrakech Maadine",
+        name: "Martisana",
         publisher: { "@id": `${siteUrl}/#organization` },
         inLanguage: locale,
         potentialAction: {

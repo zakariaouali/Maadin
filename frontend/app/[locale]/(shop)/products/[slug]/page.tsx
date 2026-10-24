@@ -74,7 +74,7 @@ export async function generateMetadata({
   const ogImage = primaryImage ? getImageUrl(primaryImage.image_path)! : undefined;
 
   return {
-    title: `${product.name} | Marrakech Maadine`,
+    title: `${product.name} | Martisana`,
     description,
     alternates: {
       canonical: `${SITE_URL}/${locale}/products/${slug}`,
@@ -88,7 +88,7 @@ export async function generateMetadata({
       title: product.name,
       description,
       url: `${SITE_URL}/${locale}/products/${slug}`,
-      siteName: "Marrakech Maadine",
+      siteName: "Martisana",
       type: "website",
       images: ogImage ? [{ url: ogImage, alt: product.name }] : [],
     },

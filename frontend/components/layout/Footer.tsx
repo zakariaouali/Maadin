@@ -40,7 +40,7 @@ export default function Footer() {
                 {t("login")}
               </Link>
               <Link href="/plans" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
-                {tu("sellOnMaadine")}
+                {tu("sellOnMartisana")}
               </Link>
               <Link href="/support" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
                 {t("support")}
@@ -69,8 +69,8 @@ export default function Footer() {
               {tu("contact")}
             </p>
             <div className="flex flex-col gap-2.5">
-              <a href="mailto:contact@maadinemarrakech.com" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
-                contact@maadinemarrakech.com
+              <a href="mailto:contact@martisana.com" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
+                contact@martisana.com
               </a>
               <a href="tel:+212661686140" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors" dir="ltr">
                 +212 661-686140
@@ -83,7 +83,7 @@ export default function Footer() {
       {/* Bottom bar */}
       <div className="border-t border-white/10">
         <div className="mx-auto max-w-7xl px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-white/30">
-          <p>&copy; {new Date().getFullYear()} Marrakech Maadine. {tu("rightsReserved")}</p>
+          <p>&copy; {new Date().getFullYear()} Martisana. {tu("rightsReserved")}</p>
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="inline-block py-2 hover:text-white/60 transition-colors">{t("privacy")}</Link>
             <span>·</span>

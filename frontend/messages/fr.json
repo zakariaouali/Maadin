@@ -17,7 +17,7 @@
     "featuredProducts": "Pièces en vedette",
     "viewAll": "Voir tout",
     "noProducts": "Nouveautés à venir prochainement.",
-    "metaTitle": "Marrakech Maadine – Marché de l'artisanat marocain authentique",
+    "metaTitle": "Martisana – Marché de l'artisanat marocain authentique",
     "metaDescription": "Découvrez des produits artisanaux marocains faits main directement auprès des créateurs à Marrakech. Poterie, maroquinerie, textiles, bijoux et plus encore.",
     "artisanatEyebrow": "Héritage & Savoir-faire",
     "artisanatTitle": "Cinq Siècles d'Artisanat Marocain",
@@ -28,7 +28,7 @@
   },
   "common": {
     "skipToContent": "Aller au contenu principal",
-    "siteName": "Marrakech Maadine",
+    "siteName": "Martisana",
     "loading": "Chargement...",
     "save": "Enregistrer",
     "cancel": "Annuler",
@@ -96,7 +96,7 @@
   },
   "products": {
     "title": "Produits",
-    "metaTitle": "Produits artisanaux marocains | Marrakech Maadine",
+    "metaTitle": "Produits artisanaux marocains | Martisana",
     "metaDescription": "Parcourez des produits marocains authentiques faits main — poterie, maroquinerie, textiles, bijoux et plus encore, proposés par des artisans vérifiés à Marrakech.",
     "searchPlaceholder": "Rechercher des produits...",
     "allCategories": "Toutes les catégories",
@@ -577,7 +577,7 @@
     "support": "Support"
   },
   "support": {
-    "metaTitle": "Aide et support — Marrakech Maadine",
+    "metaTitle": "Aide et support — Martisana",
     "metaDescription": "Obtenez de l'aide pour vos commandes, votre compte, la facturation ou signalez un problème.",
     "supportBadge": "Équipe support en ligne",
     "heroTitle": "Comment pouvons-nous vous aider ?",
@@ -779,7 +779,7 @@
     "account": "Compte",
     "openMenu": "Ouvrir le menu",
     "explore": "Explorer",
-    "sellOnMaadine": "Vendre sur Maadine",
+    "sellOnMartisana": "Vendre sur Martisana",
     "contact": "Contact",
     "wishlist": "Favoris",
     "cart": "Panier",
@@ -808,15 +808,15 @@
     "legal": "Mentions légales"
   },
   "privacy": {
-    "metaTitle": "Politique de Confidentialité — Marrakech Maadine",
-    "metaDescription": "Découvrez comment Marrakech Maadine collecte, utilise et protège vos données personnelles conformément à la loi marocaine et au RGPD."
+    "metaTitle": "Politique de Confidentialité — Martisana",
+    "metaDescription": "Découvrez comment Martisana collecte, utilise et protège vos données personnelles conformément à la loi marocaine et au RGPD."
   },
   "terms": {
-    "metaTitle": "Conditions Générales d'Utilisation — Marrakech Maadine",
-    "metaDescription": "Lisez les conditions générales d'utilisation régissant l'usage de la marketplace artisanale Marrakech Maadine."
+    "metaTitle": "Conditions Générales d'Utilisation — Martisana",
+    "metaDescription": "Lisez les conditions générales d'utilisation régissant l'usage de la marketplace artisanale Martisana."
   },
   "plans": {
-    "metaTitle": "Forfaits vendeur — Marrakech Maadine",
+    "metaTitle": "Forfaits vendeur — Martisana",
     "headline": "Commencez à vendre votre artisanat",
     "sub": "Choisissez le forfait qui vous convient. Sans frais cachés, résiliation à tout moment.",
     "starterName": "Starter",

@@ -17,7 +17,7 @@
     "featuredProducts": "Featured pieces",
     "viewAll": "View all",
     "noProducts": "New arrivals coming soon.",
-    "metaTitle": "Marrakech Maadine – Authentic Moroccan Artisan Marketplace",
+    "metaTitle": "Martisana – Authentic Moroccan Artisan Marketplace",
     "metaDescription": "Discover handmade Moroccan artisan products directly from the creators in Marrakesh. Pottery, leather, textiles, jewellery and more.",
     "artisanatEyebrow": "Heritage & Craftsmanship",
     "artisanatTitle": "Five Centuries of Moroccan Artisanat",
@@ -28,7 +28,7 @@
   },
   "common": {
     "skipToContent": "Skip to main content",
-    "siteName": "Marrakech Maadine",
+    "siteName": "Martisana",
     "loading": "Loading...",
     "save": "Save",
     "cancel": "Cancel",
@@ -96,7 +96,7 @@
   },
   "products": {
     "title": "Products",
-    "metaTitle": "Moroccan Artisan Products | Marrakech Maadine",
+    "metaTitle": "Moroccan Artisan Products | Martisana",
     "metaDescription": "Browse authentic handmade Moroccan products — pottery, leather goods, textiles, jewellery and more from verified artisans in Marrakesh.",
     "searchPlaceholder": "Search products...",
     "allCategories": "All Categories",
@@ -577,7 +577,7 @@
     "support": "Support"
   },
   "support": {
-    "metaTitle": "Help & Support — Marrakech Maadine",
+    "metaTitle": "Help & Support — Martisana",
     "metaDescription": "Get help with your orders, account, billing, or report a problem. Our support team is here to help.",
     "supportBadge": "Support team online",
     "heroTitle": "How can we help you?",
@@ -779,7 +779,7 @@
     "account": "Account",
     "openMenu": "Open menu",
     "explore": "Explore",
-    "sellOnMaadine": "Sell on Maadine",
+    "sellOnMartisana": "Sell on Martisana",
     "contact": "Contact",
     "wishlist": "Wishlist",
     "cart": "Cart",
@@ -808,15 +808,15 @@
     "legal": "Legal"
   },
   "privacy": {
-    "metaTitle": "Privacy Policy — Marrakech Maadine",
-    "metaDescription": "Read how Marrakech Maadine collects, uses, and protects your personal data in compliance with Moroccan law and GDPR."
+    "metaTitle": "Privacy Policy — Martisana",
+    "metaDescription": "Read how Martisana collects, uses, and protects your personal data in compliance with Moroccan law and GDPR."
   },
   "terms": {
-    "metaTitle": "Terms of Service — Marrakech Maadine",
-    "metaDescription": "Read the Marrakech Maadine Terms of Service governing the use of our artisan marketplace platform."
+    "metaTitle": "Terms of Service — Martisana",
+    "metaDescription": "Read the Martisana Terms of Service governing the use of our artisan marketplace platform."
   },
   "plans": {
-    "metaTitle": "Seller Plans — Marrakech Maadine",
+    "metaTitle": "Seller Plans — Martisana",
     "headline": "Start selling your craft",
     "sub": "Choose the plan that fits your needs. No hidden fees, cancel any time.",
     "starterName": "Starter",

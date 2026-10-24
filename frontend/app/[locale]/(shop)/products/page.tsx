@@ -89,7 +89,7 @@ export async function generateMetadata({
       title,
       description: t("metaDescription"),
       url: `${SITE_URL}/${locale}/products`,
-      siteName: "Marrakech Maadine",
+      siteName: "Martisana",
       type: "website",
       images: DEFAULT_OG_IMAGES,
     },

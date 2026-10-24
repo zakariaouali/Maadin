@@ -51,7 +51,7 @@
           <td style="padding-top:56px;">
             <div style="height:1px;background:#e8e2d3;margin-bottom:24px;"></div>
             <p style="margin:0 0 4px;font-size:12px;color:#a89b82;text-align:{{ $locale === 'ar' ? 'right' : 'left' }};">
-              © {{ date('Y') }} Marrakech Maadine
+              © {{ date('Y') }} Martisana
             </p>
             <p style="margin:0;font-size:11px;color:#c2b8a3;text-align:{{ $locale === 'ar' ? 'right' : 'left' }};">
               @if($locale === 'fr') Marrakech, Maroc

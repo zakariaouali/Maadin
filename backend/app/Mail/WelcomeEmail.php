@@ -22,9 +22,9 @@ class WelcomeEmail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         $subjects = [
-            'en' => 'Welcome to Marrakech Maadine',
-            'fr' => 'Bienvenue sur Marrakech Maadine',
-            'ar' => 'مرحباً بك في مراكش معادن',
+            'en' => 'Welcome to Martisana',
+            'fr' => 'Bienvenue sur Martisana',
+            'ar' => 'مرحباً بك في مارتيسانا',
         ];
 
         return new Envelope(

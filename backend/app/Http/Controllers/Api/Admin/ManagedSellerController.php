@@ -250,7 +250,7 @@ class ManagedSellerController extends Controller
 
     // ── Admin adds a product to a managed/premium seller's store ─────────────
     // (Premium: the team lists everything. Managed: sellers add their own, but
-    // the team can also list on their behalf, e.g. our own Maadine store.)
+    // the team can also list on their behalf, e.g. our own Martisana store.)
     public function createProduct(Request $request, string $userId)
     {
         $user   = User::findOrFail($userId);

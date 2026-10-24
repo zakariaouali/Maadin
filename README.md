@@ -1,4 +1,4 @@
-# Marrakech Maadine — Moroccan Artisan Marketplace
+# Martisana — Moroccan Artisan Marketplace
 
 A full-stack SaaS e-commerce marketplace connecting Moroccan artisans directly with customers worldwide. Built with Laravel 12 (backend API) and Next.js 16 (frontend), with support for English, French, and Arabic (RTL).
 
@@ -22,7 +22,7 @@ A full-stack SaaS e-commerce marketplace connecting Moroccan artisans directly w
 
 ## Project Overview
 
-Marrakech Maadine is a multi-vendor artisan marketplace inspired by the craftsmanship of Marrakesh. Sellers create verified stores, list handmade products with images, and manage orders. Customers browse, purchase (Cash on Delivery), review products, and message sellers — all in their preferred language.
+Martisana is a multi-vendor artisan marketplace inspired by the craftsmanship of Marrakesh. Sellers create verified stores, list handmade products with images, and manage orders. Customers browse, purchase (Cash on Delivery), review products, and message sellers — all in their preferred language.
 
 ---
 
@@ -78,13 +78,13 @@ Make sure the following are installed before you begin:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/marrakech-maadine.git
-cd marrakech-maadine
+git clone https://github.com/your-username/martisana.git
+cd martisana
 ```
 
 The repository contains two folders:
 ```
-marrakech-maadine/
+martisana/
 ├── backend/       ← Laravel API
 └── frontend/      ← Next.js app
 ```
@@ -109,7 +109,7 @@ cp .env.example .env
 Open `.env` and update the following:
 
 ```env
-APP_NAME=MarrakechMaadine
+APP_NAME=Martisana
 APP_URL=http://localhost:8000
 
 DB_CONNECTION=mysql
@@ -276,7 +276,7 @@ exit
 ## Project structure
 
 ```
-marrakech-maadine/
+martisana/
 ├── backend/
 │   ├── app/
 │   │   ├── Http/Controllers/Api/

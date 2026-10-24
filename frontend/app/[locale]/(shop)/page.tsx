@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       title: t("metaTitle"),
       description: t("metaDescription"),
       url: `${SITE_URL}/${locale}`,
-      siteName: "Marrakech Maadine",
+      siteName: "Martisana",
       type: "website",
       images: DEFAULT_OG_IMAGES,
     },
@@ -515,7 +515,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             {locale === "ar"
               ? "أنت حرفي؟ ابدأ البيع اليوم"
               : locale === "fr"
-              ? "Vous êtes artisan ? Vendez sur Maadine"
+              ? "Vous êtes artisan ? Vendez sur Martisana"
               : "Are you an artisan? Start selling today"}
           </h2>
           <p className="text-white/60 mb-8 max-w-md mx-auto relative text-sm leading-relaxed">

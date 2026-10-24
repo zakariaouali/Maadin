@@ -32,12 +32,12 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
     title: "Terms of Service",
     updated: "Last updated: June 28, 2026",
     intro:
-      "These Terms of Service ('Terms') govern your access to and use of the Marrakech Maadine platform ('Platform'), operated by Marrakech Maadine ('we', 'us'). By creating an account, placing an order, or listing a product, you agree to these Terms in full. If you do not agree, you must not use the Platform.",
+      "These Terms of Service ('Terms') govern your access to and use of the Martisana platform ('Platform'), operated by Martisana ('we', 'us'). By creating an account, placing an order, or listing a product, you agree to these Terms in full. If you do not agree, you must not use the Platform.",
     sections: [
       {
         heading: "1. Definitions",
         body:
-          "• **Platform**: the Marrakech Maadine website and all associated services.\n• **User**: any person accessing the Platform, whether registered or as a guest.\n• **Buyer**: a User who purchases products through the Platform.\n• **Seller**: a User who lists and sells products through the Platform.\n• **Admin**: a Platform employee or authorised representative.\n• **Listing**: a product or service offered for sale on the Platform.\n• **Order**: a confirmed purchase transaction between a Buyer and a Seller facilitated by the Platform.",
+          "• **Platform**: the Martisana website and all associated services.\n• **User**: any person accessing the Platform, whether registered or as a guest.\n• **Buyer**: a User who purchases products through the Platform.\n• **Seller**: a User who lists and sells products through the Platform.\n• **Admin**: a Platform employee or authorised representative.\n• **Listing**: a product or service offered for sale on the Platform.\n• **Order**: a confirmed purchase transaction between a Buyer and a Seller facilitated by the Platform.",
       },
       {
         heading: "2. Eligibility",
@@ -47,7 +47,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "3. Account Registration",
         body:
-          "To access full platform functionality, you must register an account. You agree to:\n\n• Provide accurate, current, and complete information during registration.\n• Keep your login credentials confidential and not share them with third parties.\n• Notify us immediately at contact@maadinemarrakech.com if you suspect unauthorised access to your account.\n• Be solely responsible for all activity that occurs under your account.\n\nWe reserve the right to suspend or terminate accounts that provide false information or violate these Terms.",
+          "To access full platform functionality, you must register an account. You agree to:\n\n• Provide accurate, current, and complete information during registration.\n• Keep your login credentials confidential and not share them with third parties.\n• Notify us immediately at contact@martisana.com if you suspect unauthorised access to your account.\n• Be solely responsible for all activity that occurs under your account.\n\nWe reserve the right to suspend or terminate accounts that provide false information or violate these Terms.",
       },
       {
         heading: "4. Seller Accounts & Subscriptions",
@@ -72,7 +72,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "8. Intellectual Property",
         body:
-          "All content on the Platform — including the Marrakech Maadine name, logo, design, software, and editorial content — is the property of Marrakech Maadine and protected by Moroccan and international intellectual property law.\n\nSellers retain ownership of the content they upload (product photos, descriptions). By uploading content, you grant Marrakech Maadine a non-exclusive, royalty-free licence to display, reproduce, and promote that content for the purpose of operating and marketing the Platform.\n\nYou must not scrape, copy, or reproduce Platform content without our written permission.",
+          "All content on the Platform — including the Martisana name, logo, design, software, and editorial content — is the property of Martisana and protected by Moroccan and international intellectual property law.\n\nSellers retain ownership of the content they upload (product photos, descriptions). By uploading content, you grant Martisana a non-exclusive, royalty-free licence to display, reproduce, and promote that content for the purpose of operating and marketing the Platform.\n\nYou must not scrape, copy, or reproduce Platform content without our written permission.",
       },
       {
         heading: "9. Prohibited Conduct",
@@ -107,7 +107,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "15. Contact",
         body:
-          "For any questions about these Terms, contact us at contact@maadinemarrakech.com or write to Marrakech Maadine, Médina, Marrakech, Morocco.",
+          "For any questions about these Terms, contact us at contact@martisana.com or write to Martisana, Médina, Marrakech, Morocco.",
       },
     ],
   },
@@ -116,12 +116,12 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
     title: "Conditions Générales d'Utilisation",
     updated: "Dernière mise à jour : 28 juin 2026",
     intro:
-      "Les présentes Conditions Générales d'Utilisation (« CGU ») régissent votre accès et votre utilisation de la plateforme Marrakech Maadine (« Plateforme »), exploitée par Marrakech Maadine (« nous »). En créant un compte, en passant une commande ou en publiant un produit, vous acceptez pleinement ces CGU. Si vous ne les acceptez pas, vous ne devez pas utiliser la Plateforme.",
+      "Les présentes Conditions Générales d'Utilisation (« CGU ») régissent votre accès et votre utilisation de la plateforme Martisana (« Plateforme »), exploitée par Martisana (« nous »). En créant un compte, en passant une commande ou en publiant un produit, vous acceptez pleinement ces CGU. Si vous ne les acceptez pas, vous ne devez pas utiliser la Plateforme.",
     sections: [
       {
         heading: "1. Définitions",
         body:
-          "• **Plateforme** : le site web Marrakech Maadine et tous les services associés.\n• **Utilisateur** : toute personne accédant à la Plateforme, qu'elle soit inscrite ou en tant qu'invité.\n• **Acheteur** : un Utilisateur qui achète des produits via la Plateforme.\n• **Vendeur** : un Utilisateur qui propose et vend des produits via la Plateforme.\n• **Administrateur** : un employé ou représentant autorisé de la Plateforme.\n• **Annonce** : un produit ou service proposé à la vente sur la Plateforme.\n• **Commande** : une transaction d'achat confirmée entre un Acheteur et un Vendeur facilitée par la Plateforme.",
+          "• **Plateforme** : le site web Martisana et tous les services associés.\n• **Utilisateur** : toute personne accédant à la Plateforme, qu'elle soit inscrite ou en tant qu'invité.\n• **Acheteur** : un Utilisateur qui achète des produits via la Plateforme.\n• **Vendeur** : un Utilisateur qui propose et vend des produits via la Plateforme.\n• **Administrateur** : un employé ou représentant autorisé de la Plateforme.\n• **Annonce** : un produit ou service proposé à la vente sur la Plateforme.\n• **Commande** : une transaction d'achat confirmée entre un Acheteur et un Vendeur facilitée par la Plateforme.",
       },
       {
         heading: "2. Conditions d'Accès",
@@ -131,7 +131,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "3. Inscription et Compte",
         body:
-          "Pour accéder à toutes les fonctionnalités, vous devez créer un compte. Vous acceptez de :\n\n• Fournir des informations exactes, à jour et complètes lors de l'inscription.\n• Maintenir la confidentialité de vos identifiants de connexion et ne pas les partager avec des tiers.\n• Nous informer immédiatement à contact@maadinemarrakech.com en cas d'accès non autorisé à votre compte.\n• Être seul responsable de toutes les activités réalisées depuis votre compte.\n\nNous nous réservons le droit de suspendre ou résilier les comptes fournissant des informations inexactes ou violant ces CGU.",
+          "Pour accéder à toutes les fonctionnalités, vous devez créer un compte. Vous acceptez de :\n\n• Fournir des informations exactes, à jour et complètes lors de l'inscription.\n• Maintenir la confidentialité de vos identifiants de connexion et ne pas les partager avec des tiers.\n• Nous informer immédiatement à contact@martisana.com en cas d'accès non autorisé à votre compte.\n• Être seul responsable de toutes les activités réalisées depuis votre compte.\n\nNous nous réservons le droit de suspendre ou résilier les comptes fournissant des informations inexactes ou violant ces CGU.",
       },
       {
         heading: "4. Comptes Vendeur & Abonnements",
@@ -156,7 +156,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "8. Propriété Intellectuelle",
         body:
-          "Tout le contenu de la Plateforme — y compris le nom Marrakech Maadine, le logo, le design, le logiciel et le contenu éditorial — est la propriété de Marrakech Maadine et protégé par le droit marocain et international de la propriété intellectuelle.\n\nLes Vendeurs conservent la propriété du contenu qu'ils publient (photos de produits, descriptions). En publiant du contenu, vous accordez à Marrakech Maadine une licence non exclusive et gratuite pour afficher, reproduire et promouvoir ce contenu aux fins d'exploitation et de marketing de la Plateforme.\n\nIl est interdit de scraper, copier ou reproduire le contenu de la Plateforme sans notre autorisation écrite.",
+          "Tout le contenu de la Plateforme — y compris le nom Martisana, le logo, le design, le logiciel et le contenu éditorial — est la propriété de Martisana et protégé par le droit marocain et international de la propriété intellectuelle.\n\nLes Vendeurs conservent la propriété du contenu qu'ils publient (photos de produits, descriptions). En publiant du contenu, vous accordez à Martisana une licence non exclusive et gratuite pour afficher, reproduire et promouvoir ce contenu aux fins d'exploitation et de marketing de la Plateforme.\n\nIl est interdit de scraper, copier ou reproduire le contenu de la Plateforme sans notre autorisation écrite.",
       },
       {
         heading: "9. Comportements Interdits",
@@ -191,7 +191,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "15. Contact",
         body:
-          "Pour toute question relative à ces CGU, contactez-nous à contact@maadinemarrakech.com ou écrivez à Marrakech Maadine, Médina, Marrakech, Maroc.",
+          "Pour toute question relative à ces CGU, contactez-nous à contact@martisana.com ou écrivez à Martisana, Médina, Marrakech, Maroc.",
       },
     ],
   },
@@ -200,12 +200,12 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
     title: "شروط الاستخدام",
     updated: "آخر تحديث: 28 يونيو 2026",
     intro:
-      "تحكم شروط الاستخدام هذه («الشروط») وصولكم إلى منصة مراكش معادن («المنصة») واستخدامكم لها، والتي تُشغّلها مراكش معادن («نحن»). بإنشاء حساب أو تقديم طلب أو نشر منتج، فإنكم توافقون على هذه الشروط بالكامل. في حال عدم الموافقة، يتعيّن عليكم عدم استخدام المنصة.",
+      "تحكم شروط الاستخدام هذه («الشروط») وصولكم إلى منصة مارتيسانا («المنصة») واستخدامكم لها، والتي تُشغّلها مارتيسانا («نحن»). بإنشاء حساب أو تقديم طلب أو نشر منتج، فإنكم توافقون على هذه الشروط بالكامل. في حال عدم الموافقة، يتعيّن عليكم عدم استخدام المنصة.",
     sections: [
       {
         heading: "١. التعريفات",
         body:
-          "• **المنصة**: موقع مراكش معادن الإلكتروني وجميع الخدمات المرتبطة به.\n• **المستخدم**: أي شخص يصل إلى المنصة، سواء أكان مسجّلاً أم زائراً.\n• **المشتري**: مستخدم يشتري منتجات عبر المنصة.\n• **البائع**: مستخدم يعرض منتجات ويبيعها عبر المنصة.\n• **المشرف**: موظف في المنصة أو ممثل مفوّض عنها.\n• **الإدراج**: منتج أو خدمة معروض للبيع على المنصة.\n• **الطلب**: معاملة شراء مؤكّدة بين مشترٍ وبائع تيسّرها المنصة.",
+          "• **المنصة**: موقع مارتيسانا الإلكتروني وجميع الخدمات المرتبطة به.\n• **المستخدم**: أي شخص يصل إلى المنصة، سواء أكان مسجّلاً أم زائراً.\n• **المشتري**: مستخدم يشتري منتجات عبر المنصة.\n• **البائع**: مستخدم يعرض منتجات ويبيعها عبر المنصة.\n• **المشرف**: موظف في المنصة أو ممثل مفوّض عنها.\n• **الإدراج**: منتج أو خدمة معروض للبيع على المنصة.\n• **الطلب**: معاملة شراء مؤكّدة بين مشترٍ وبائع تيسّرها المنصة.",
       },
       {
         heading: "٢. شروط الأهلية",
@@ -215,7 +215,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "٣. تسجيل الحساب",
         body:
-          "للوصول إلى كامل وظائف المنصة، يجب إنشاء حساب. أنتم توافقون على:\n\n• تقديم معلومات دقيقة وحديثة وكاملة عند التسجيل.\n• الحفاظ على سرية بيانات تسجيل الدخول وعدم مشاركتها مع أطراف ثالثة.\n• إخطارنا فوراً على contact@maadinemarrakech.com في حال الاشتباه في وصول غير مصرّح لحسابكم.\n• تحمّل المسؤولية الكاملة عن جميع الأنشطة التي تتم من خلال حسابكم.\n\nنحتفظ بالحق في تعليق أو إنهاء الحسابات التي تُقدّم معلومات كاذبة أو تنتهك هذه الشروط.",
+          "للوصول إلى كامل وظائف المنصة، يجب إنشاء حساب. أنتم توافقون على:\n\n• تقديم معلومات دقيقة وحديثة وكاملة عند التسجيل.\n• الحفاظ على سرية بيانات تسجيل الدخول وعدم مشاركتها مع أطراف ثالثة.\n• إخطارنا فوراً على contact@martisana.com في حال الاشتباه في وصول غير مصرّح لحسابكم.\n• تحمّل المسؤولية الكاملة عن جميع الأنشطة التي تتم من خلال حسابكم.\n\nنحتفظ بالحق في تعليق أو إنهاء الحسابات التي تُقدّم معلومات كاذبة أو تنتهك هذه الشروط.",
       },
       {
         heading: "٤. حسابات البائعين والاشتراكات",
@@ -240,7 +240,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "٨. الملكية الفكرية",
         body:
-          "جميع محتويات المنصة — بما فيها اسم مراكش معادن والشعار والتصميم والبرمجيات والمحتوى التحريري — هي ملك لمراكش معادن ومحمية بموجب قانون الملكية الفكرية المغربي والدولي.\n\nيحتفظ البائعون بملكية المحتوى الذي ينشرونه (صور المنتجات، الأوصاف). بنشر المحتوى، تمنحون مراكش معادن ترخيصاً غير حصري وبلا مقابل لعرض هذا المحتوى وإعادة إنتاجه وترويجه بهدف تشغيل المنصة والتسويق لها.\n\nيُحظر استخراج محتوى المنصة أو نسخه أو إعادة إنتاجه دون إذن كتابي منّا.",
+          "جميع محتويات المنصة — بما فيها اسم مارتيسانا والشعار والتصميم والبرمجيات والمحتوى التحريري — هي ملك لمارتيسانا ومحمية بموجب قانون الملكية الفكرية المغربي والدولي.\n\nيحتفظ البائعون بملكية المحتوى الذي ينشرونه (صور المنتجات، الأوصاف). بنشر المحتوى، تمنحون مارتيسانا ترخيصاً غير حصري وبلا مقابل لعرض هذا المحتوى وإعادة إنتاجه وترويجه بهدف تشغيل المنصة والتسويق لها.\n\nيُحظر استخراج محتوى المنصة أو نسخه أو إعادة إنتاجه دون إذن كتابي منّا.",
       },
       {
         heading: "٩. السلوكيات المحظورة",
@@ -275,7 +275,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "١٥. التواصل",
         body:
-          "لأي أسئلة بشأن هذه الشروط، تواصلوا معنا على: contact@maadinemarrakech.com أو راسلوا: مراكش معادن، المدينة العتيقة، مراكش، المغرب.",
+          "لأي أسئلة بشأن هذه الشروط، تواصلوا معنا على: contact@martisana.com أو راسلوا: مارتيسانا، المدينة العتيقة، مراكش، المغرب.",
       },
     ],
   },
@@ -325,7 +325,7 @@ export default async function TermsPage({
       {/* Hero */}
       <div className="bg-[#1f1b16] text-white py-16 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-[10px] uppercase tracking-[0.4em] text-[#c9a96e] mb-3">Marrakech Maadine</p>
+          <p className="text-[10px] uppercase tracking-[0.4em] text-[#c9a96e] mb-3">Martisana</p>
           <h1 className="font-display text-4xl sm:text-5xl text-white mb-3">{content.title}</h1>
           <p className="text-white/40 text-sm">{content.updated}</p>
         </div>
@@ -371,7 +371,7 @@ export default async function TermsPage({
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
             </svg>
-            {locale === "ar" ? "هذه الشروط ملزمة قانونياً وتحكم استخدامكم لمنصة مراكش معادن." : locale === "fr" ? "Ces CGU sont juridiquement contraignantes et régissent votre utilisation de Marrakech Maadine." : "These Terms are legally binding and govern your use of the Marrakech Maadine platform."}
+            {locale === "ar" ? "هذه الشروط ملزمة قانونياً وتحكم استخدامكم لمنصة مارتيسانا." : locale === "fr" ? "Ces CGU sont juridiquement contraignantes et régissent votre utilisation de Martisana." : "These Terms are legally binding and govern your use of the Martisana platform."}
           </div>
         </div>
       </div>
