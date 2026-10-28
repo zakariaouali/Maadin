@@ -20,6 +20,24 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
+  // 301s so search engines move the old domain's rankings to martisana.com
+  // (keep these for at least a year) and www never competes with the bare domain.
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "(www\\.)?maadinemarrakech\\.com" }],
+        destination: "https://martisana.com/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www\\.martisana\\.com" }],
+        destination: "https://martisana.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   turbopack: {
     root: __dirname,
   },
