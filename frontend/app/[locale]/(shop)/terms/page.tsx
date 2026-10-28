@@ -47,7 +47,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "3. Account Registration",
         body:
-          "To access full platform functionality, you must register an account. You agree to:\n\n• Provide accurate, current, and complete information during registration.\n• Keep your login credentials confidential and not share them with third parties.\n• Notify us immediately at contact@martisana.com if you suspect unauthorised access to your account.\n• Be solely responsible for all activity that occurs under your account.\n\nWe reserve the right to suspend or terminate accounts that provide false information or violate these Terms.",
+          "To access full platform functionality, you must register an account. You agree to:\n\n• Provide accurate, current, and complete information during registration.\n• Keep your login credentials confidential and not share them with third parties.\n• Notify us immediately at contact@maadinemarrakech.com if you suspect unauthorised access to your account.\n• Be solely responsible for all activity that occurs under your account.\n\nWe reserve the right to suspend or terminate accounts that provide false information or violate these Terms.",
       },
       {
         heading: "4. Seller Accounts & Subscriptions",
@@ -107,7 +107,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "15. Contact",
         body:
-          "For any questions about these Terms, contact us at contact@martisana.com or write to Martisana, Médina, Marrakech, Morocco.",
+          "For any questions about these Terms, contact us at contact@maadinemarrakech.com or write to Martisana, Médina, Marrakech, Morocco.",
       },
     ],
   },
@@ -131,7 +131,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "3. Inscription et Compte",
         body:
-          "Pour accéder à toutes les fonctionnalités, vous devez créer un compte. Vous acceptez de :\n\n• Fournir des informations exactes, à jour et complètes lors de l'inscription.\n• Maintenir la confidentialité de vos identifiants de connexion et ne pas les partager avec des tiers.\n• Nous informer immédiatement à contact@martisana.com en cas d'accès non autorisé à votre compte.\n• Être seul responsable de toutes les activités réalisées depuis votre compte.\n\nNous nous réservons le droit de suspendre ou résilier les comptes fournissant des informations inexactes ou violant ces CGU.",
+          "Pour accéder à toutes les fonctionnalités, vous devez créer un compte. Vous acceptez de :\n\n• Fournir des informations exactes, à jour et complètes lors de l'inscription.\n• Maintenir la confidentialité de vos identifiants de connexion et ne pas les partager avec des tiers.\n• Nous informer immédiatement à contact@maadinemarrakech.com en cas d'accès non autorisé à votre compte.\n• Être seul responsable de toutes les activités réalisées depuis votre compte.\n\nNous nous réservons le droit de suspendre ou résilier les comptes fournissant des informations inexactes ou violant ces CGU.",
       },
       {
         heading: "4. Comptes Vendeur & Abonnements",
@@ -191,7 +191,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "15. Contact",
         body:
-          "Pour toute question relative à ces CGU, contactez-nous à contact@martisana.com ou écrivez à Martisana, Médina, Marrakech, Maroc.",
+          "Pour toute question relative à ces CGU, contactez-nous à contact@maadinemarrakech.com ou écrivez à Martisana, Médina, Marrakech, Maroc.",
       },
     ],
   },
@@ -215,7 +215,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "٣. تسجيل الحساب",
         body:
-          "للوصول إلى كامل وظائف المنصة، يجب إنشاء حساب. أنتم توافقون على:\n\n• تقديم معلومات دقيقة وحديثة وكاملة عند التسجيل.\n• الحفاظ على سرية بيانات تسجيل الدخول وعدم مشاركتها مع أطراف ثالثة.\n• إخطارنا فوراً على contact@martisana.com في حال الاشتباه في وصول غير مصرّح لحسابكم.\n• تحمّل المسؤولية الكاملة عن جميع الأنشطة التي تتم من خلال حسابكم.\n\nنحتفظ بالحق في تعليق أو إنهاء الحسابات التي تُقدّم معلومات كاذبة أو تنتهك هذه الشروط.",
+          "للوصول إلى كامل وظائف المنصة، يجب إنشاء حساب. أنتم توافقون على:\n\n• تقديم معلومات دقيقة وحديثة وكاملة عند التسجيل.\n• الحفاظ على سرية بيانات تسجيل الدخول وعدم مشاركتها مع أطراف ثالثة.\n• إخطارنا فوراً على contact@maadinemarrakech.com في حال الاشتباه في وصول غير مصرّح لحسابكم.\n• تحمّل المسؤولية الكاملة عن جميع الأنشطة التي تتم من خلال حسابكم.\n\nنحتفظ بالحق في تعليق أو إنهاء الحسابات التي تُقدّم معلومات كاذبة أو تنتهك هذه الشروط.",
       },
       {
         heading: "٤. حسابات البائعين والاشتراكات",
@@ -275,7 +275,7 @@ const CONTENT: Record<string, { title: string; updated: string; intro: string; s
       {
         heading: "١٥. التواصل",
         body:
-          "لأي أسئلة بشأن هذه الشروط، تواصلوا معنا على: contact@martisana.com أو راسلوا: مارتيسانا، المدينة العتيقة، مراكش، المغرب.",
+          "لأي أسئلة بشأن هذه الشروط، تواصلوا معنا على: contact@maadinemarrakech.com أو راسلوا: مارتيسانا، المدينة العتيقة، مراكش، المغرب.",
       },
     ],
   },

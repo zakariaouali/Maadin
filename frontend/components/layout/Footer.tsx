@@ -69,8 +69,8 @@ export default function Footer() {
               {tu("contact")}
             </p>
             <div className="flex flex-col gap-2.5">
-              <a href="mailto:contact@martisana.com" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
-                contact@martisana.com
+              <a href="mailto:contact@maadinemarrakech.com" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors">
+                contact@maadinemarrakech.com
               </a>
               <a href="tel:+212661686140" className="inline-block py-1.5 text-sm text-white/60 hover:text-gold transition-colors" dir="ltr">
                 +212 661-686140
