@@ -22,13 +22,14 @@ interface Product {
   slug: string;
   price: string;
   stock_quantity: number;
+  is_made_to_order?: boolean;
   is_active: boolean;
   is_approved: boolean;
   category?: { id: number; name: string };
   images?: ProductImage[];
 }
 
-const emptyForm = { name: "", description: "", price: "", stock: "", category_id: "", sku: "", is_active: true };
+const emptyForm = { name: "", description: "", price: "", stock: "", made_to_order: false, category_id: "", sku: "", is_active: true };
 
 export default function SellerProductsPage() {
   const tu = useTranslations("ui");
@@ -110,6 +111,7 @@ export default function SellerProductsPage() {
       description: "",
       price: p.price,
       stock: String(p.stock_quantity),
+      made_to_order: !!p.is_made_to_order,
       category_id: String(p.category?.id ?? ""),
       sku: "",
       is_active: p.is_active,
@@ -129,7 +131,8 @@ export default function SellerProductsPage() {
       name: form.name,
       description: form.description,
       price: Number(form.price),
-      stock_quantity: Number(form.stock),
+      stock_quantity: form.made_to_order ? 0 : Number(form.stock),
+      is_made_to_order: form.made_to_order,
       category_id: Number(form.category_id),
       sku: form.sku || undefined,
       is_active: form.is_active,
@@ -373,8 +376,15 @@ export default function SellerProductsPage() {
             <Input label={t("productPrice")} id="p_price" type="number" step="0.01" min="0.01"
               value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))} required />
             <Input label={t("productStock")} id="p_stock" type="number" min="0"
-              value={form.stock} onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))} required />
+              value={form.made_to_order ? "" : form.stock} disabled={form.made_to_order}
+              onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))} required={!form.made_to_order} />
           </div>
+
+          <label className="flex items-center gap-2 text-sm text-ink cursor-pointer">
+            <input type="checkbox" checked={form.made_to_order}
+              onChange={(e) => setForm((f) => ({ ...f, made_to_order: e.target.checked }))} className="accent-gold-deep" />
+            <span>{tu("madeToOrderLabel")}</span>
+          </label>
 
           <Input label={t("productSku")} id="p_sku" value={form.sku}
             onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))} />

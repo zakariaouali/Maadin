@@ -261,6 +261,7 @@ export default async function StorePage({ params }: { params: Promise<{ slug: st
                     imagePath={primaryImage?.image_path}
                     sellerId={product.seller_id ?? 0}
                     stockQuantity={product.stock_quantity ?? 0}
+                    isMadeToOrder={!!product.is_made_to_order}
                   />
                 );
               })}

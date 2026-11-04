@@ -16,6 +16,7 @@ interface Product {
   price: string;
   rating: string;
   stock_quantity: number;
+  is_made_to_order?: boolean;
   primary_image?: { image_path: string };
   seller?: { id: number; store_name: string; store_slug: string; logo_path: string | null };
   category?: { name: string; localised_name?: string };
@@ -161,6 +162,7 @@ export default async function ProductsPage({
               imagePath={p.primary_image?.image_path}
               sellerId={p.seller?.id ?? 0}
               stockQuantity={p.stock_quantity ?? 0}
+              isMadeToOrder={!!p.is_made_to_order}
             />
           ))}
         </div>

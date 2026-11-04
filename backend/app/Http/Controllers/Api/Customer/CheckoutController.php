@@ -82,7 +82,8 @@ class CheckoutController extends Controller
                     ]);
                 }
 
-                if ($product->stock_quantity < $cartItem['quantity']) {
+                // "Sur commande" products are made after the order: no stock to run out of
+                if (!$product->is_made_to_order && $product->stock_quantity < $cartItem['quantity']) {
                     throw ValidationException::withMessages([
                         'items' => __('Only :count left of ":name".', ['count' => $product->stock_quantity, 'name' => $product->name]),
                     ]);
@@ -130,7 +131,9 @@ class CheckoutController extends Controller
                         'product_name' => $item['product']->name,
                     ]);
 
-                    $item['product']->decrement('stock_quantity', $item['quantity']);
+                    if (!$item['product']->is_made_to_order) {
+                        $item['product']->decrement('stock_quantity', $item['quantity']);
+                    }
                     $item['product']->increment('total_sales', $item['quantity']);
                 }
 

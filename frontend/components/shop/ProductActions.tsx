@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { useCartStore } from "@/store/cartStore";
+import { MADE_TO_ORDER_MAX, useCartStore } from "@/store/cartStore";
 import api from "@/lib/api";
 import { Button, Alert } from "@/components/ui";
 
@@ -15,6 +15,7 @@ interface ProductActionsProps {
     slug: string;
     price: string;
     stock_quantity: number;
+    is_made_to_order?: boolean;
     seller?: { id: number; user_id: number; store_name: string };
     primaryImagePath?: string;
   };
@@ -35,7 +36,7 @@ export function ProductActions({ product, initialInWishlist }: ProductActionsPro
   const [messageSending, setMessageSending] = useState(false);
   const [messageError, setMessageError] = useState("");
 
-  const outOfStock = product.stock_quantity === 0;
+  const outOfStock = !product.is_made_to_order && product.stock_quantity === 0;
 
   const handleAddToCart = () => {
     addItem({
@@ -46,7 +47,8 @@ export function ProductActions({ product, initialInWishlist }: ProductActionsPro
       image_path: product.primaryImagePath ?? null,
       seller_id: product.seller?.id ?? 0,
       seller_name: product.seller?.store_name ?? "",
-      stock_quantity: product.stock_quantity,
+      stock_quantity: product.is_made_to_order ? MADE_TO_ORDER_MAX : product.stock_quantity,
+      made_to_order: !!product.is_made_to_order,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { getImageUrl } from "@/lib/image";
-import { useCartStore } from "@/store/cartStore";
+import { MADE_TO_ORDER_MAX, useCartStore } from "@/store/cartStore";
 import { useLocale, useTranslations } from "next-intl";
 import { currencyLabel, formatAmount } from "@/lib/i18n-helpers";
 
@@ -21,11 +21,13 @@ interface ProductCardProps {
   imagePath?: string;
   sellerId: number;
   stockQuantity?: number;
+  /** "Sur commande": made after the order, so it is never out of stock */
+  isMadeToOrder?: boolean;
 }
 
 export function ProductCard({
   id, slug, name, price, rating, storeName, storeSlug, storeLogoPath,
-  categoryName, imagePath, sellerId, stockQuantity = 0,
+  categoryName, imagePath, sellerId, stockQuantity = 0, isMadeToOrder = false,
 }: ProductCardProps) {
   const tu = useTranslations("ui");
   const locale = useLocale();
@@ -36,6 +38,7 @@ export function ProductCard({
   const [added, setAdded]   = useState(false);
 
   const inCart = items.some(i => i.product_id === id);
+  const soldOut = !isMadeToOrder && stockQuantity === 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -48,7 +51,8 @@ export function ProductCard({
       image_path:     imagePath ?? null,
       seller_id:      sellerId,
       seller_name:    storeName ?? "",
-      stock_quantity: stockQuantity,
+      stock_quantity: isMadeToOrder ? MADE_TO_ORDER_MAX : stockQuantity,
+      made_to_order:  isMadeToOrder,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
@@ -83,20 +87,26 @@ export function ProductCard({
             </span>
           )}
 
+          {isMadeToOrder && (
+            <span className="absolute top-2.5 end-2.5 bg-ink/85 text-white text-[11px] tracking-wide px-2 py-0.5 rounded-sm">
+              {tu("madeToOrder")}
+            </span>
+          )}
+
           {/* Add to cart overlay */}
           <button
             onClick={handleAddToCart}
-            disabled={stockQuantity === 0}
+            disabled={soldOut}
             className={`absolute bottom-0 inset-x-0 py-2.5 text-xs font-semibold tracking-wide transition-all duration-300
               translate-y-full group-hover:translate-y-0
               ${added
                 ? "bg-green-600 text-white"
-                : stockQuantity === 0
+                : soldOut
                   ? "bg-stone/80 text-white cursor-not-allowed"
                   : "bg-ink/90 hover:bg-gold-deep text-white"
               }`}
           >
-            {added ? tu("addedToCart") : stockQuantity === 0 ? tu("outOfStock") : tu("addToCart")}
+            {added ? tu("addedToCart") : soldOut ? tu("outOfStock") : tu("addToCart")}
           </button>
         </div>
       </Link>

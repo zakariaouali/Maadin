@@ -55,7 +55,7 @@ class ManagedSellerController extends Controller
             $data['products'] = Product::where('seller_id', $seller->id)
                 ->with('primaryImage')
                 ->orderByDesc('created_at')
-                ->get(['id', 'name', 'price', 'is_active', 'is_approved', 'stock_quantity', 'created_at']);
+                ->get(['id', 'name', 'price', 'is_active', 'is_approved', 'stock_quantity', 'is_made_to_order', 'created_at']);
 
             $data['conversations'] = Conversation::where('seller_id', $seller->id)
                 ->with(['buyer:id,name,avatar_path', 'product:id,name'])
@@ -267,6 +267,7 @@ class ManagedSellerController extends Controller
             'description'       => 'required|string',
             'price'          => 'required|numeric|min:0.01|max:99999.99',
             'stock_quantity' => 'required|integer|min:0',
+            'is_made_to_order' => 'sometimes|boolean',
             'sku'            => 'nullable|string|max:100|unique:products,sku',
             'images'         => 'nullable|array|max:5',
             'images.*'       => 'file|mimetypes:image/jpeg,image/png,image/webp|max:5120',

@@ -18,7 +18,7 @@ interface Category { id: number; name: string; }
 interface ProductImage { id: number; image_path: string; is_primary: boolean; }
 
 interface ProductDetail {
-  id: number; name: string; price: string; stock_quantity: number;
+  id: number; name: string; price: string; stock_quantity: number; is_made_to_order?: boolean;
   description: string; short_description: string | null; sku: string | null;
   is_active: boolean; is_approved: boolean; created_at: string;
   images: ProductImage[];
@@ -37,7 +37,7 @@ interface AccountDetail {
     products_count: number; orders_count: number;
   } | null;
   orders: { id: number; status: string; total_price: string; created_at: string; customer: { name: string } | null }[];
-  products: { id: number; name: string; price: string; is_active: boolean; is_approved: boolean; stock_quantity: number; created_at: string; primary_image?: { image_path: string } | null }[];
+  products: { id: number; name: string; price: string; is_active: boolean; is_approved: boolean; stock_quantity: number; is_made_to_order?: boolean; created_at: string; primary_image?: { image_path: string } | null }[];
   conversations: { id: number; unread_count: number; last_message_at: string; buyer: { name: string; avatar_path: string | null }; product: { name: string } | null }[];
 }
 
@@ -69,6 +69,7 @@ function ProductEditModal({
     description: initial.description,
     price: initial.price,
     stock_quantity: String(initial.stock_quantity),
+    is_made_to_order: !!initial.is_made_to_order,
     sku: initial.sku ?? "",
     category_id: String(initial.category.id),
     is_active: initial.is_active,
@@ -90,7 +91,7 @@ function ProductEditModal({
       const { data } = await api.put(`/admin/products/${initial.id}`, {
         ...form,
         price: parseFloat(form.price),
-        stock_quantity: parseInt(form.stock_quantity),
+        stock_quantity: form.is_made_to_order ? 0 : parseInt(form.stock_quantity),
         category_id: parseInt(form.category_id),
         sku: form.sku || null,
         short_description: form.short_description || null,
@@ -153,8 +154,12 @@ function ProductEditModal({
         </div>
         <div>
           <label className="text-xs font-semibold text-stone uppercase tracking-wide mb-1 block">{t("stock")}</label>
-          <input className={field} type="number" min="0" value={form.stock_quantity} onChange={(e) => set("stock_quantity", e.target.value)} />
+          <input className={field} type="number" min="0" value={form.is_made_to_order ? "" : form.stock_quantity} disabled={form.is_made_to_order} onChange={(e) => set("stock_quantity", e.target.value)} />
         </div>
+        <label className=" flex items-center gap-2 text-sm text-ink cursor-pointer">
+          <input type="checkbox" checked={form.is_made_to_order} onChange={(e) => set("is_made_to_order", e.target.checked)} className="accent-gold-deep" />
+          <span>{tu("madeToOrderLabel")}</span>
+        </label>
         <div>
           <label className="text-xs font-semibold text-stone uppercase tracking-wide mb-1 block">{t("categories")}</label>
           <select className={field} value={form.category_id} onChange={(e) => set("category_id", e.target.value)}>
@@ -478,13 +483,14 @@ function AddProductModal({
   onCreated: (productId: number) => void;
 }) {
   const t = useTranslations("admin");
+  const tu = useTranslations("ui");
   const [form, setForm] = useState({
-    name: "", short_description: "", description: "", price: "", stock_quantity: "99", sku: "",
+    name: "", short_description: "", description: "", price: "", stock_quantity: "99", is_made_to_order: false, sku: "",
     category_id: categories[0] ? String(categories[0].id) : "",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const set = (k: string, v: string | boolean) => setForm((f) => ({ ...f, [k]: v }));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -493,7 +499,7 @@ function AddProductModal({
       const { data } = await api.post(`/admin/managed-sellers/${userId}/products`, {
         ...form,
         price: parseFloat(form.price),
-        stock_quantity: parseInt(form.stock_quantity),
+        stock_quantity: form.is_made_to_order ? 0 : parseInt(form.stock_quantity),
         category_id: parseInt(form.category_id),
         sku: form.sku || null,
         short_description: form.short_description || null,
@@ -525,8 +531,12 @@ function AddProductModal({
         </div>
         <div>
           <label className={label}>{t("stock")} *</label>
-          <input className={field} type="number" min="0" value={form.stock_quantity} onChange={(e) => set("stock_quantity", e.target.value)} required />
+          <input className={field} type="number" min="0" value={form.is_made_to_order ? "" : form.stock_quantity} disabled={form.is_made_to_order} onChange={(e) => set("stock_quantity", e.target.value)} required={!form.is_made_to_order} />
         </div>
+        <label className="sm:col-span-2 flex items-center gap-2 text-sm text-ink cursor-pointer">
+          <input type="checkbox" checked={form.is_made_to_order} onChange={(e) => set("is_made_to_order", e.target.checked)} className="accent-gold-deep" />
+          <span>{tu("madeToOrderLabel")}</span>
+        </label>
         <div>
           <label className={label}>{t("categories")} *</label>
           <select className={field} value={form.category_id} onChange={(e) => set("category_id", e.target.value)} required>
@@ -595,6 +605,7 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
         name: updated.name,
         price: updated.price,
         stock_quantity: updated.stock_quantity,
+        is_made_to_order: updated.is_made_to_order,
         is_active: updated.is_active,
         is_approved: updated.is_approved,
       } : p),

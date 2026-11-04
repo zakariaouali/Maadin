@@ -25,7 +25,8 @@ class ProductController extends Controller
             'description'     => 'sometimes|required|string',
             'price'           => 'sometimes|required|numeric|min:0.01|max:99999.99',
             'stock_quantity'  => 'sometimes|required|integer|min:0',
-            'sku'             => 'nullable|string|max:100|unique:products,sku,' . $product->id,
+            'is_made_to_order' => 'sometimes|boolean',
+            'sku'            => 'nullable|string|max:100|unique:products,sku,' . $product->id,
             'is_active'       => 'sometimes|boolean',
         ]);
 

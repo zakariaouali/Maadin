@@ -13,7 +13,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api";
 
 interface Product {
   id: number; name: string; slug: string; price: string; rating: string;
-  seller_id: number; stock_quantity: number;
+  seller_id: number; stock_quantity: number; is_made_to_order?: boolean;
   primary_image?: { image_path: string } | null;
   seller?: { store_name: string; store_slug: string; logo_path: string | null } | null;
   category?: { name: string; localised_name?: string } | null;
@@ -162,6 +162,7 @@ function SearchPageInner() {
                     storeLogoPath={p.seller?.logo_path ?? undefined}
                     sellerId={p.seller_id ?? 0}
                     stockQuantity={p.stock_quantity ?? 0}
+                    isMadeToOrder={!!p.is_made_to_order}
                   />
                 ))}
               </div>

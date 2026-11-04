@@ -29,6 +29,7 @@ interface ProductDetail {
   short_description?: string;
   price: string;
   stock_quantity: number;
+  is_made_to_order?: boolean;
   rating: string;
   total_reviews: number;
   images: ProductImage[];
@@ -115,7 +116,8 @@ export default async function ProductDetailPage({
 
   const primaryImage = product.images.find((i) => i.is_primary) ?? product.images[0];
 
-  const inStock = product.stock_quantity > 0;
+  const madeToOrder = !!product.is_made_to_order;
+  const inStock = madeToOrder || product.stock_quantity > 0;
 
   // JSON-LD: Product structured data
   const jsonLd = {
@@ -132,9 +134,11 @@ export default async function ProductDetailPage({
       "@type": "Offer",
       price: product.price,
       priceCurrency: "MAD",
-      availability: inStock
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
+      availability: madeToOrder
+        ? "https://schema.org/MadeToOrder"
+        : inStock
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
       seller: product.seller
         ? { "@type": "Organization", name: product.seller.store_name }
         : undefined,
@@ -227,9 +231,10 @@ export default async function ProductDetailPage({
 
             {/* Stock */}
             <div className="flex items-center gap-2">
-              <Badge variant={inStock ? "success" : "danger"}>
-                {inStock ? `${product.stock_quantity} ${t("stock")}` : t("outOfStock")}
+              <Badge variant={madeToOrder ? "info" : inStock ? "success" : "danger"}>
+                {madeToOrder ? tu("madeToOrder") : inStock ? `${product.stock_quantity} ${t("stock")}` : t("outOfStock")}
               </Badge>
+              {madeToOrder && <span className="text-xs text-stone">{tu("madeToOrderHint")}</span>}
             </div>
 
             {/* Description */}
@@ -268,6 +273,7 @@ export default async function ProductDetailPage({
                 slug: product.slug,
                 price: product.price,
                 stock_quantity: product.stock_quantity,
+                is_made_to_order: madeToOrder,
                 seller: product.seller,
                 primaryImagePath: primaryImage?.image_path,
               }}

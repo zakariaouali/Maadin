@@ -18,6 +18,7 @@ interface ProductDetail {
   slug: string;
   price: string;
   stock_quantity: number;
+  is_made_to_order?: boolean;
   rating: string;
   total_reviews: number;
   is_active: boolean;
@@ -87,6 +88,7 @@ function EditForm({
     description: product.description,
     price: product.price,
     stock_quantity: String(product.stock_quantity),
+    is_made_to_order: !!product.is_made_to_order,
     sku: product.sku ?? "",
     category_id: String(product.category.id),
     is_active: product.is_active,
@@ -110,7 +112,7 @@ function EditForm({
       const payload = {
         ...form,
         price: parseFloat(form.price),
-        stock_quantity: parseInt(form.stock_quantity),
+        stock_quantity: form.is_made_to_order ? 0 : parseInt(form.stock_quantity),
         category_id: parseInt(form.category_id),
         sku: form.sku || null,
         short_description: form.short_description || null,
@@ -182,8 +184,13 @@ function EditForm({
 
         <div>
           <label className="text-xs font-medium text-stone uppercase tracking-wide mb-1 block">{t("stock")}</label>
-          <input className={field} type="number" min="0" value={form.stock_quantity} onChange={(e) => set("stock_quantity", e.target.value)} />
+          <input className={field} type="number" min="0" value={form.is_made_to_order ? "" : form.stock_quantity} disabled={form.is_made_to_order} onChange={(e) => set("stock_quantity", e.target.value)} />
         </div>
+
+        <label className=" flex items-center gap-2 text-sm text-ink cursor-pointer">
+          <input type="checkbox" checked={form.is_made_to_order} onChange={(e) => set("is_made_to_order", e.target.checked)} className="accent-gold-deep" />
+          <span>{tu("madeToOrderLabel")}</span>
+        </label>
 
         <div>
           <label className="text-xs font-medium text-stone uppercase tracking-wide mb-1 block">{t("categories")}</label>

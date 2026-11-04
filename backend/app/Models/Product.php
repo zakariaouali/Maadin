@@ -12,7 +12,7 @@ class Product extends Model
 
     protected $fillable = [
         'seller_id', 'category_id', 'name', 'slug', 'description',
-        'short_description', 'price', 'cost', 'stock_quantity', 'sku',
+        'short_description', 'price', 'cost', 'stock_quantity', 'is_made_to_order', 'sku',
         'rating', 'total_reviews', 'total_sales', 'is_active', 'is_approved',
     ];
 
@@ -22,6 +22,7 @@ class Product extends Model
         'rating' => 'decimal:2',
         'is_active' => 'boolean',
         'is_approved' => 'boolean',
+        'is_made_to_order' => 'boolean',
     ];
 
     public function seller()
@@ -66,6 +67,6 @@ class Product extends Model
 
     public function scopeInStock($query)
     {
-        return $query->where('stock_quantity', '>', 0);
+        return $query->where(fn ($q) => $q->where('stock_quantity', '>', 0)->orWhere('is_made_to_order', true));
     }
 }

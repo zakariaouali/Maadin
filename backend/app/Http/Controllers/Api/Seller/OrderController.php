@@ -141,7 +141,9 @@ class OrderController extends Controller
         foreach ($order->items as $item) {
             $product = $item->product()->lockForUpdate()->first();
             if ($product) {
-                $product->increment('stock_quantity', $item->quantity);
+                if (!$product->is_made_to_order) {
+                    $product->increment('stock_quantity', $item->quantity);
+                }
                 $product->decrement('total_sales', $item->quantity);
             }
         }

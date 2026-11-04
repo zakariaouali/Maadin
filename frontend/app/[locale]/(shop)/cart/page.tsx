@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import Image from "next/image";
 import { getImageUrl } from "@/lib/image";
@@ -12,6 +12,7 @@ import { formatPrice } from "@/lib/i18n-helpers";
 
 export default function CartPage() {
   const locale = useLocale();
+  const tu = useTranslations("ui");
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   const { items, removeItem, updateQuantity, clearCart, totalPrice } = useCartStore();
@@ -84,6 +85,7 @@ export default function CartPage() {
                         </Link>
                         <p className="text-sm font-bold text-gold-deep mt-0.5">{formatPrice(item.price * item.quantity, locale)}</p>
                         <p className="text-xs text-stone">{formatPrice(item.price, locale)} {label("each", "chacun", "للواحدة")}</p>
+                        {item.made_to_order && <p className="text-xs text-gold-deep mt-0.5">{tu("madeToOrder")}</p>}
                       </div>
 
                       {/* Quantity controls */}

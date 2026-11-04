@@ -32,7 +32,7 @@ class ProductController extends Controller
             ->active()
             ->with(['category:id,name,name_fr,name_ar', 'primaryImage:id,product_id,image_path', 'seller:id,user_id,store_name,store_slug,logo_path,level'])
             ->whereHas('seller', fn($q) => $q->where('status', 'verified'))
-            ->select(['id','seller_id','category_id','name','slug','price','rating','stock_quantity','total_sales','created_at']);
+            ->select(['id','seller_id','category_id','name','slug','price','rating','stock_quantity','is_made_to_order','total_sales','created_at']);
 
         // Query values can arrive as arrays (?x[]=1) or junk (?per_page=abc);
         // read them through typed accessors so they can never cause a 500.
@@ -94,7 +94,7 @@ class ProductController extends Controller
 
         $products = Product::whereIn('id', $validated['product_ids'])
             ->with('seller:id,user_id,status')
-            ->get(['id', 'seller_id', 'price', 'stock_quantity', 'is_active', 'is_approved']);
+            ->get(['id', 'seller_id', 'price', 'stock_quantity', 'is_made_to_order', 'is_active', 'is_approved']);
 
         $userId = $request->user('sanctum')?->id;
 
@@ -103,6 +103,7 @@ class ProductController extends Controller
                 'id'             => $p->id,
                 'price'          => (float) $p->price,
                 'stock_quantity' => $p->stock_quantity,
+                'is_made_to_order' => $p->is_made_to_order,
                 // same rule checkout enforces: active, approved, verified store,
                 // and not the customer's own store
                 'available'      => $p->is_active

@@ -25,7 +25,7 @@ class StoreController extends Controller
             ->where('is_approved', true)
             ->with(['images' => fn($q) => $q->where('is_primary', true), 'category:id,name,name_fr,name_ar'])
             ->orderBy('created_at', 'desc')
-            ->get(['id', 'seller_id', 'category_id', 'name', 'slug', 'price', 'stock_quantity', 'rating', 'total_reviews', 'short_description']);
+            ->get(['id', 'seller_id', 'category_id', 'name', 'slug', 'price', 'stock_quantity', 'is_made_to_order', 'rating', 'total_reviews', 'short_description']);
 
         $products->each(function ($product) use ($locale) {
             if ($product->category) {
