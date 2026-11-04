@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { use } from "react";
 import { useTranslations } from "next-intl";
-import api from "@/lib/api";
+import api, { apiErrorMessage } from "@/lib/api";
 import { Alert, Button, Modal, OrderStatusBadge, Spinner } from "@/components/ui";
 import Image from "next/image";
 import { getImageUrl } from "@/lib/image";
@@ -121,7 +121,7 @@ function ProductEditModal({
     try {
       await api.put(`/admin/products/${initial.id}/images/${imageId}/primary`);
       setImages((prev) => prev.map((img) => ({ ...img, is_primary: img.id === imageId })));
-    } catch (e: any) { setError(e.response?.data?.message ?? t("failedUpdate")); }
+    } catch (e) { setError(apiErrorMessage(e, t("failedUpdate"))); }
   };
 
   const deleteImage = async (imageId: number) => {
@@ -132,7 +132,7 @@ function ProductEditModal({
       const wasPrimary = images.find((i) => i.id === imageId)?.is_primary;
       if (wasPrimary && updated.length > 0) updated = updated.map((img, idx) => ({ ...img, is_primary: idx === 0 }));
       setImages(updated);
-    } catch (e: any) { setError(e.response?.data?.message ?? t("failedUpdate")); }
+    } catch (e) { setError(apiErrorMessage(e, t("failedUpdate"))); }
     setDeleting(null);
   };
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import api from "@/lib/api";
+import api, { apiErrorMessage } from "@/lib/api";
 import { Alert, Badge, Button, PageHeader, Spinner } from "@/components/ui";
 import { formatDate } from "@/lib/i18n-helpers";
 import { RoleName } from "@/components/ui/RoleName";
@@ -43,7 +43,7 @@ export default function AdminUsersPage() {
     try {
       await api.put(`/admin/users/${id}/status`, { status });
       setSuccess(t("statusUpdated")); load(st, rf, search);
-    } catch (e: any) { setError(e.response?.data?.message || t("failedAction")); }
+    } catch (e) { setError(apiErrorMessage(e, t("failedAction"))); }
     setActing(null);
   };
 

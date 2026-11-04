@@ -27,4 +27,13 @@ export const getCsrfCookie = () =>
     withCredentials: true,
   });
 
+/** The message the API sent back for a failed request, or the fallback (typed replacement for `catch (e: any)`) */
+export function apiErrorMessage(error: unknown, fallback: string): string {
+  if (axios.isAxiosError(error)) {
+    const message = (error.response?.data as { message?: unknown } | undefined)?.message;
+    if (typeof message === "string" && message) return message;
+  }
+  return fallback;
+}
+
 export default api;

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import api from "@/lib/api";
+import api, { apiErrorMessage } from "@/lib/api";
 import { getImageUrl } from "@/lib/image";
 import { Alert, Badge, Button, Modal, PageHeader, Spinner } from "@/components/ui";
 import { formatDate } from "@/lib/i18n-helpers";
@@ -76,7 +76,7 @@ export default function AdminSellersPage() {
       setSuccess(msg);
       setReviewing(null);
       load(tab, search);
-    } catch (e: any) { setError(e.response?.data?.message || t("failedAction")); }
+    } catch (e) { setError(apiErrorMessage(e, t("failedAction"))); }
     setActing(null);
   };
 

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import api from "@/lib/api";
+import api, { apiErrorMessage } from "@/lib/api";
 import { getImageUrl } from "@/lib/image";
 import { Alert, Badge, Button, Modal, PageHeader, Spinner } from "@/components/ui";
 import { CategoryOptions } from "@/components/shop/CategoryOptions";
@@ -146,7 +146,7 @@ function EditForm({
     try {
       await api.put(`/admin/products/${product.id}/images/${imageId}/primary`);
       setImages((prev) => prev.map((img) => ({ ...img, is_primary: img.id === imageId })));
-    } catch (e: any) { setError(e.response?.data?.message ?? t("failedUpdate")); }
+    } catch (e) { setError(apiErrorMessage(e, t("failedUpdate"))); }
   };
 
   const deleteImage = async (imageId: number) => {
@@ -159,7 +159,7 @@ function EditForm({
         updated = updated.map((img, idx) => ({ ...img, is_primary: idx === 0 }));
       }
       setImages(updated);
-    } catch (e: any) { setError(e.response?.data?.message ?? t("failedUpdate")); }
+    } catch (e) { setError(apiErrorMessage(e, t("failedUpdate"))); }
     setDeleting(null);
   };
 
