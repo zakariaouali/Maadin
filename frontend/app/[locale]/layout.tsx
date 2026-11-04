@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { Cormorant_Garamond, Inter, Cairo } from "next/font/google";
-import Script from "next/script";
 import NextTopLoader from "nextjs-toploader";
 import { routing } from "@/i18n/routing";
 import { Providers } from "@/components/Providers";
+import { CookieConsent } from "@/components/CookieConsent";
 import "../globals.css";
 
 const display = Cormorant_Garamond({
@@ -141,25 +141,10 @@ export default async function LocaleLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: jsonLdString(jsonLd) }}
         />
-        {gaId && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-              strategy="afterInteractive"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${gaId}');
-              `}
-            </Script>
-          </>
-        )}
         <NextTopLoader color="#c9a227" height={3} showSpinner={false} />
         <NextIntlClientProvider>
           <Providers>{children}</Providers>
+          <CookieConsent gaId={gaId} />
         </NextIntlClientProvider>
       </body>
     </html>

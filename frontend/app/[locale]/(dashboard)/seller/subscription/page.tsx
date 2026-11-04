@@ -35,7 +35,7 @@ export default function SellerSubscriptionPage() {
     try {
       const res = await api.get("/seller/subscription");
       setData(res.data);
-    } catch {}
+    } catch { setError(t("failedLoad")); }
     setLoading(false);
   };
 

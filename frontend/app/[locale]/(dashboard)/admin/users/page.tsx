@@ -33,7 +33,7 @@ export default function AdminUsersPage() {
     if (s !== "all") p.status = s;
     if (r !== "all") p.role = r;
     if (q) p.search = q;
-    try { const { data } = await api.get("/admin/users", { params: p }); setUsers(data.data ?? data); } catch {}
+    try { const { data } = await api.get("/admin/users", { params: p }); setUsers(data.data ?? data); } catch { setError(tu("failedLoad")); }
     setLoading(false);
   };
   useEffect(() => { load("all","all",""); }, []);
@@ -43,7 +43,7 @@ export default function AdminUsersPage() {
     try {
       await api.put(`/admin/users/${id}/status`, { status });
       setSuccess(t("statusUpdated")); load(st, rf, search);
-    } catch (e: any) { setError(e.response?.data?.message || "Failed."); }
+    } catch (e: any) { setError(e.response?.data?.message || t("failedAction")); }
     setActing(null);
   };
 

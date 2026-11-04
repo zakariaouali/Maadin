@@ -38,7 +38,7 @@ export default function AdminOrdersPage() {
   const openDetail = async (id: number) => {
     setDetailLoading(true);
     setDetail({id,status:"",total_price:"0",shipping_address:"",created_at:""});
-    try { const { data } = await api.get(`/admin/orders/${id}`); setDetail(data); } catch {}
+    try { const { data } = await api.get(`/admin/orders/${id}`); setDetail(data); } catch { setDetail(null); setError(tu("failedLoadOrder")); }
     setDetailLoading(false);
   };
 

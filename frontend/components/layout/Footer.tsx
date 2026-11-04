@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
+import CookieSettingsLink from "@/components/layout/CookieSettingsLink";
 
 export default function Footer() {
   const tu = useTranslations("ui");
@@ -88,6 +89,8 @@ export default function Footer() {
             <Link href="/privacy" className="inline-block py-2 hover:text-white/60 transition-colors">{t("privacy")}</Link>
             <span>·</span>
             <Link href="/terms" className="inline-block py-2 hover:text-white/60 transition-colors">{t("terms")}</Link>
+            <span>·</span>
+            <CookieSettingsLink />
           </div>
         </div>
       </div>

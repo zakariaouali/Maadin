@@ -41,6 +41,7 @@ function daysLeft(dateStr: string | null) {
 
 export default function AdminSubscriptionsPage() {
   const tu = useTranslations("ui");
+  const t = useTranslations("admin");
   const [tab, setTab] = useState<Tab>("subscriptions");
   const [sellers, setSellers] = useState<ManagedSeller[]>([]);
   const [requests, setRequests] = useState<UpgradeRequest[]>([]);
@@ -58,7 +59,7 @@ export default function AdminSubscriptionsPage() {
       ]);
       setSellers(sRes.data);
       setRequests(rRes.data);
-    } catch {}
+    } catch { setError(tu("failedLoad")); }
     setLoading(false);
   };
 
@@ -73,7 +74,7 @@ export default function AdminSubscriptionsPage() {
       setSuccess(tu("paymentMarked"));
       load();
     } catch (e: any) {
-      setError(e.response?.data?.message ?? "Failed.");
+      setError(e.response?.data?.message ?? t("failedAction"));
     }
     setActing(null);
   };
@@ -87,7 +88,7 @@ export default function AdminSubscriptionsPage() {
       setSuccess(`Request ${action}d successfully.`);
       load();
     } catch (e: any) {
-      setError(e.response?.data?.message ?? "Failed.");
+      setError(e.response?.data?.message ?? t("failedAction"));
     }
     setActing(null);
   };

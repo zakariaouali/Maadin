@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
-import { Badge, Button, PageHeader, Spinner } from "@/components/ui";
+import { Alert, Badge, Button, PageHeader, Spinner } from "@/components/ui";
 import { CategoryIcon } from "@/components/support/CategoryIcon";
 import { timeAgo } from "@/lib/i18n-helpers";
 import { RoleName } from "@/components/ui/RoleName";
@@ -50,9 +50,11 @@ export default function AdminSupportPage() {
   const [reply, setReply] = useState("");
   const [notes, setNotes] = useState("");
   const [replyStatus, setReplyStatus] = useState<"open" | "in_progress" | "resolved" | "closed">("in_progress");
+  const [error, setError] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError("");
     const params: Record<string, string> = {};
     if (filters.status)   params.status   = filters.status;
     if (filters.category) params.category = filters.category;
@@ -65,7 +67,7 @@ export default function AdminSupportPage() {
       ]);
       setTickets(ticketsRes.data.data ?? ticketsRes.data);
       setStats(statsRes.data);
-    } catch {}
+    } catch { setError(t("errorFallback")); }
     setLoading(false);
   }, [filters]);
 
@@ -81,6 +83,7 @@ export default function AdminSupportPage() {
   const save = async () => {
     if (!selected) return;
     setSaving(true);
+    setError("");
     try {
       const { data } = await api.put(`/admin/support/${selected.id}`, {
         admin_reply: reply || null,
@@ -90,7 +93,7 @@ export default function AdminSupportPage() {
       setSelected(data);
       setTickets(ts => ts.map(t => t.id === data.id ? data : t));
       setStats(s => s ? { ...s, open: s.open + (data.status !== "open" && selected.status === "open" ? -1 : 0) } : s);
-    } catch {}
+    } catch { setError(t("errorFallback")); }
     setSaving(false);
   };
 
@@ -104,6 +107,7 @@ export default function AdminSupportPage() {
   return (
     <div className="space-y-5">
       <PageHeader title={t("adminTitle")} />
+      {error && <Alert type="error">{error}</Alert>}
 
       {/* Stats */}
       {stats && (

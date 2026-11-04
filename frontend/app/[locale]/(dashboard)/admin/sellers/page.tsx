@@ -43,6 +43,7 @@ const InfoRow = ({ label, value }: { label: string; value?: string | null }) => 
 
 export default function AdminSellersPage() {
   const t = useTranslations("admin");
+  const tu = useTranslations("ui");
 
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +62,7 @@ export default function AdminSellersPage() {
     try {
       const { data } = await api.get("/admin/sellers", { params });
       setSellers(data.data ?? data);
-    } catch {}
+    } catch { setError(tu("failedLoad")); }
     setLoading(false);
   }, []);
 
@@ -75,7 +76,7 @@ export default function AdminSellersPage() {
       setSuccess(msg);
       setReviewing(null);
       load(tab, search);
-    } catch (e: any) { setError(e.response?.data?.message || "Failed."); }
+    } catch (e: any) { setError(e.response?.data?.message || t("failedAction")); }
     setActing(null);
   };
 

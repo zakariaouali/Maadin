@@ -146,7 +146,7 @@ function EditForm({
     try {
       await api.put(`/admin/products/${product.id}/images/${imageId}/primary`);
       setImages((prev) => prev.map((img) => ({ ...img, is_primary: img.id === imageId })));
-    } catch {}
+    } catch (e: any) { setError(e.response?.data?.message ?? t("failedUpdate")); }
   };
 
   const deleteImage = async (imageId: number) => {
@@ -159,7 +159,7 @@ function EditForm({
         updated = updated.map((img, idx) => ({ ...img, is_primary: idx === 0 }));
       }
       setImages(updated);
-    } catch {}
+    } catch (e: any) { setError(e.response?.data?.message ?? t("failedUpdate")); }
     setDeleting(null);
   };
 
@@ -505,7 +505,7 @@ export default function AdminProductsPage() {
     try {
       const { data } = await api.get(`/admin/products/${id}`);
       setReviewing(data);
-    } catch {}
+    } catch { setError(tu("failedLoad")); }
     setLoadingDetail(false);
   };
 
