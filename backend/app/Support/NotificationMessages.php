@@ -35,6 +35,13 @@ class NotificationMessages
             'ar' => ['❌ تم إلغاء الطلب',     'تم إلغاء طلبك {number} من قِبل البائع.'],
         ],
 
+        // ── Order cancelled by the customer (to seller) ──────────────────────
+        'order.cancelled_by_customer' => [
+            'en' => ['❌ Order cancelled by the customer', 'Order {number} was cancelled by the customer. No action is needed.'],
+            'fr' => ['❌ Commande annulée par le client',  'La commande {number} a été annulée par le client. Aucune action n\'est nécessaire.'],
+            'ar' => ['❌ ألغى العميل الطلب',               'ألغى العميل الطلب {number}. لا يلزمك أي إجراء.'],
+        ],
+
         // ── Review received (to seller) ───────────────────────────────────────
         'review.received' => [
             'en' => ['⭐ New review on {product}', 'A customer left a {rating}-star review on your product.'],
