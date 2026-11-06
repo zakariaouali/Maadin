@@ -24,6 +24,12 @@ class AuthController extends Controller
     // REGISTER
     public function register(Request $request)
     {
+        // Bot traps, checked first so a bot costs us nothing: `website` is a hidden field real people never
+        // see or fill, and the form measures how long the person took (people need more than 3 seconds).
+        if ($request->filled('website') || (int) $request->input('fill_seconds', 0) < 3) {
+            return response()->json(['message' => __('Please try again in a moment.')], 422);
+        }
+
         $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|string|email|unique:users',
@@ -49,8 +55,12 @@ class AuthController extends Controller
             'locale'   => $locale,
         ]);
 
-        Auth::login($user);
-        $request->session()->regenerate();
+        // Only the website (which sends its Origin) gets a session. A request without one, such as a script
+        // calling the API directly, used to crash here with a 500; now it just is not signed in.
+        if ($request->hasSession()) {
+            Auth::login($user);
+            $request->session()->regenerate();
+        }
 
         Mail::to($user->email)->send(new WelcomeEmail($user->name, $role, $locale));
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Pager } from "@/components/ui/Pager";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { Alert, Badge, Button, Modal, OrderStatusBadge, PageHeader, Spinner } from "@/components/ui";
@@ -19,17 +20,19 @@ export default function AdminOrdersPage() {
   const tu = useTranslations("ui");
   const t = useTranslations("admin");
   const [orders, setOrders] = useState<Order[]>([]);
+  const [pg, setPg] = useState({ page: 1, last: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("all");
   const [openId, setOpenId] = useState<number|null>(null);
   const [error, setError] = useState("");
 
-  const load = async (tb: Tab) => {
+  const load = async (tb: Tab, page = 1) => {
     setLoading(true);
     const p: Record<string,string> = {};
+    p.page = String(page);
     if (tb === "hold") p.on_hold = "1";
     else if (tb !== "all") p.status = tb;
-    try { const { data } = await api.get("/admin/orders",{params:p}); setOrders(data.data??data); }
+    try { const { data } = await api.get("/admin/orders",{params:p}); setOrders(data.data??data); setPg({ page: data.current_page ?? 1, last: data.last_page ?? 1, total: data.total ?? 0 }); }
     catch { setError(tu("failedLoad")); }
     setLoading(false);
   };
@@ -70,9 +73,10 @@ export default function AdminOrdersPage() {
           ))}
         </div>
       )}
+      <Pager page={pg.page} lastPage={pg.last} total={pg.total} onChange={(p) => load(tab, p)} />
       <Modal open={openId!==null} onClose={() => setOpenId(null)}
         title={openId ? t("ordTitle", { id: openId }) : "..."} maxWidth="max-w-xl">
-        {openId !== null && <OrderPanel key={openId} orderId={openId} onChanged={() => load(tab)} />}
+        {openId !== null && <OrderPanel key={openId} orderId={openId} onChanged={() => load(tab, pg.page)} />}
       </Modal>
     </div>
   );

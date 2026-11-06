@@ -282,5 +282,7 @@
     "This store manages its own orders.": "هذا المتجر يدير طلباته بنفسه.",
     "The customer account no longer exists.": "حساب العميل لم يعد موجوداً.",
     "You can save up to :count addresses.": "يمكنكم حفظ ما يصل إلى :count عناوين.",
-    "Address deleted": "تم حذف العنوان"
+    "Address deleted": "تم حذف العنوان",
+    "Please try again in a moment.": "يرجى المحاولة مرة أخرى بعد قليل.",
+    "Verification failed. Please try again.": "فشل التحقق. يرجى المحاولة مرة أخرى."
 }

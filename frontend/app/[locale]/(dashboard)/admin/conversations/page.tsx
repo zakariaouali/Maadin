@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState, useCallback } from "react";
+import { Pager } from "@/components/ui/Pager";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import api, { apiErrorMessage } from "@/lib/api";
@@ -45,6 +46,8 @@ function AdminConversations() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pg, setPg] = useState({ last: 1, total: 0 });
 
   // The thread being read. Opened from the list, or straight from an alert link (?open=ID).
   const [openId, setOpenId] = useState<number | null>(() => Number(params.get("open")) || null);
@@ -64,14 +67,15 @@ function AdminConversations() {
     setError(null);
     try {
       const query = tab === "flagged" ? { flagged_only: true } : {};
-      const res = await api.get("/admin/conversations", { params: query });
+      const res = await api.get("/admin/conversations", { params: { ...query, page } });
       setConversations(res.data?.data ?? res.data ?? []);
+      setPg({ last: res.data?.last_page ?? 1, total: res.data?.total ?? 0 });
     } catch {
       setError(tu("failedLoadConversations"));
     } finally {
       setLoading(false);
     }
-  }, [tab, tu]);
+  }, [tab, page, tu]);
 
   useEffect(() => {
     fetchConversations();
@@ -138,7 +142,7 @@ function AdminConversations() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="bg-sand rounded-sm p-1 flex gap-1 w-fit">
           <button
-            onClick={() => setTab("all")}
+            onClick={() => { setTab("all"); setPage(1); }}
             className={`px-4 py-1.5 rounded-sm text-sm transition-all ${
               tab === "all"
                 ? "bg-white text-ink shadow-sm font-medium"
@@ -148,7 +152,7 @@ function AdminConversations() {
             {t("all")}
           </button>
           <button
-            onClick={() => setTab("flagged")}
+            onClick={() => { setTab("flagged"); setPage(1); }}
             className={`px-4 py-1.5 rounded-sm text-sm transition-all ${
               tab === "flagged"
                 ? "bg-white text-ink shadow-sm font-medium"
@@ -229,6 +233,8 @@ function AdminConversations() {
           </table>
         )}
       </div>
+
+      <Pager page={page} lastPage={pg.last} total={pg.total} onChange={setPage} />
 
       {/* Thread Modal */}
       <Modal

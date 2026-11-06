@@ -16,6 +16,9 @@ interface AuthContextType {
     phone?: string;
     role?: "customer" | "seller";
     plan?: "starter" | "managed" | "premium";
+    website?: string;
+    fill_seconds?: number;
+    turnstile_token?: string;
   }) => Promise<void>;
   logout: () => Promise<void>;
   refetchUser: () => Promise<void>;
@@ -57,6 +60,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     phone?: string;
     role?: "customer" | "seller";
     plan?: "starter" | "managed" | "premium";
+    // bot defences (see the register page)
+    website?: string;
+    fill_seconds?: number;
+    turnstile_token?: string;
   }) => {
     await getCsrfCookie();
     await api.post("/register", data);

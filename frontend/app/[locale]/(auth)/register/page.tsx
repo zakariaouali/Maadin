@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { TurnstileBox, TURNSTILE_ENABLED } from "@/components/auth/TurnstileBox";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 
 const planMeta: Record<string, { color: string; badge: string }> = {
@@ -32,6 +33,13 @@ function RegisterForm() {
   const [error, setError] = useState("");
   const [emailTaken, setEmailTaken] = useState(false);
   const [loading, setLoading] = useState(false);
+  // Bot defences: a hidden field only bots fill, how long the person took, and the optional Turnstile check
+  const [trap, setTrap] = useState("");
+  const startedAt = useRef<number | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileReset, setTurnstileReset] = useState(0);
+  const onTurnstileToken = useCallback((token: string) => setTurnstileToken(token), []);
+  const startTimer = () => { if (startedAt.current === null) startedAt.current = Date.now(); };
 
   useEffect(() => {
     const r = searchParams.get("role");
@@ -44,9 +52,18 @@ function RegisterForm() {
     e.preventDefault();
     setError("");
     setEmailTaken(false);
+    if (TURNSTILE_ENABLED && !turnstileToken) {
+      setError(t("humanCheck"));
+      return;
+    }
     setLoading(true);
     try {
-      await register({ name, email, password, phone, role, plan: role === "seller" ? plan : undefined });
+      await register({
+        name, email, password, phone, role, plan: role === "seller" ? plan : undefined,
+        website: trap,
+        fill_seconds: startedAt.current === null ? 0 : Math.round((Date.now() - startedAt.current) / 1000),
+        turnstile_token: turnstileToken || undefined,
+      });
       // A new seller's next step is their store, not the home page
       router.push(role === "seller" ? (plan === "starter" ? "/seller/store" : "/seller/subscription") : "/");
     } catch (err: any) {
@@ -56,6 +73,8 @@ function RegisterForm() {
         setLoading(false);
         return;
       }
+      setTurnstileReset((n) => n + 1); // a Turnstile token works once: get a fresh one for the next try
+      setTurnstileToken("");
       const firstError = errors ? Object.values(errors)[0] : null;
       setError(
         (Array.isArray(firstError) ? firstError[0] : firstError) ||
@@ -80,7 +99,13 @@ function RegisterForm() {
         {t("registerTitle")}
       </h1>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} onFocusCapture={startTimer} className="flex flex-col gap-4">
+        {/* Trap for bots: invisible and unreachable for people, so only a script fills it */}
+        <input
+          type="text" name="website" value={trap} onChange={(e) => setTrap(e.target.value)}
+          tabIndex={-1} autoComplete="off" aria-hidden="true"
+          className="absolute -left-[9999px] h-0 w-0 opacity-0"
+        />
         <div>
           <label htmlFor="name" className="block text-sm text-stone mb-1">
             {t("name")}
@@ -207,6 +232,8 @@ function RegisterForm() {
             </Link>
           </p>
         )}
+
+        <TurnstileBox onToken={onTurnstileToken} resetKey={turnstileReset} />
 
         <button
           type="submit"

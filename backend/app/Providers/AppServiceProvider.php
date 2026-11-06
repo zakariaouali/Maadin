@@ -36,6 +36,13 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(20)->by('login-ip|' . $request->ip()),
         ]);
 
+        // Sign-up creates an account and sends a welcome email to whatever address was typed, so bots
+        // use it to spam strangers. A real person registers once; a few attempts per hour is plenty.
+        RateLimiter::for('register', fn (Request $request) => [
+            Limit::perHour(5)->by('register-hour|' . $request->ip()),
+            Limit::perDay(15)->by('register-day|' . $request->ip()),
+        ]);
+
         // "Forgot password" sends an email, so without a per-address limit anyone
         // could flood a victim's inbox with reset links.
         RateLimiter::for('password-reset', fn (Request $request) => [

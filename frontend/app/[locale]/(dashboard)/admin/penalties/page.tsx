@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { Pager } from "@/components/ui/Pager";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { Badge, Button, Modal, PageHeader, Spinner, Alert } from "@/components/ui";
@@ -41,6 +42,8 @@ export default function AdminPenaltiesPage() {
   const t = useTranslations("admin");
 
   const [penalties, setPenalties] = useState<Penalty[]>([]);
+  const [page, setPage] = useState(1);
+  const [pg, setPg] = useState({ last: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -62,14 +65,15 @@ export default function AdminPenaltiesPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get("/admin/penalties");
+      const res = await api.get("/admin/penalties", { params: { page } });
       setPenalties(res.data?.data ?? res.data ?? []);
+      setPg({ last: res.data?.last_page ?? 1, total: res.data?.total ?? 0 });
     } catch {
       setError(tu("failedLoadPenalties"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page]);
 
   useEffect(() => {
     fetchPenalties();
@@ -177,6 +181,8 @@ export default function AdminPenaltiesPage() {
           </table>
         )}
       </div>
+
+      <Pager page={page} lastPage={pg.last} total={pg.total} onChange={setPage} />
 
       {/* Issue Penalty Modal */}
       <Modal

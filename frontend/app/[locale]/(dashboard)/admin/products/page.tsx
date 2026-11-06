@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Pager } from "@/components/ui/Pager";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import api, { apiErrorMessage } from "@/lib/api";
@@ -476,20 +477,23 @@ export default function AdminProductsPage() {
   const [tab, setTab] = useState<Tab>("pending");
   const [search, setSearch] = useState("");
   const [acting, setActing] = useState<number | null>(null);
+  const [pg, setPg] = useState({ page: 1, last: 1, total: 0 });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [reviewing, setReviewing] = useState<ProductDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
-  const load = async (currentTab = tab, currentSearch = search) => {
+  const load = async (currentTab = tab, currentSearch = search, page = 1) => {
     setLoading(true);
     const params: Record<string, string> = {};
     if (currentSearch) params.search = currentSearch;
+    params.page = String(page);
     if (currentTab === "pending") params.is_approved = "false";
     if (currentTab === "approved") params.is_approved = "true";
     try {
       const { data } = await api.get("/admin/products", { params });
       setProducts(data.data);
+      setPg({ page: data.current_page ?? 1, last: data.last_page ?? 1, total: data.total ?? 0 });
     } catch (e) {
       setError(apiErrorMessage(e, tu("failedLoad")));
     }
@@ -636,6 +640,8 @@ export default function AdminProductsPage() {
           ))}
         </div>
       )}
+
+      <Pager page={pg.page} lastPage={pg.last} total={pg.total} onChange={(p) => load(tab, search, p)} />
 
       <Modal
         open={reviewing !== null || loadingDetail}

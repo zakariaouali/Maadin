@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Pager } from "@/components/ui/Pager";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import api, { apiErrorMessage } from "@/lib/api";
@@ -20,6 +21,7 @@ export default function AdminUsersPage() {
   const tu = useTranslations("ui");
   const t = useTranslations("admin");
   const [users, setUsers] = useState<User[]>([]);
+  const [pg, setPg] = useState({ page: 1, last: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [st, setSt] = useState<StatusTab>("all");
   const [rf, setRf] = useState<RoleFilter>("all");
@@ -28,13 +30,14 @@ export default function AdminUsersPage() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
-  const load = async (s: StatusTab, r: RoleFilter, q: string) => {
+  const load = async (s: StatusTab, r: RoleFilter, q: string, page = 1) => {
     setLoading(true);
     const p: Record<string,string> = {};
     if (s !== "all") p.status = s;
     if (r !== "all") p.role = r;
     if (q) p.search = q;
-    try { const { data } = await api.get("/admin/users", { params: p }); setUsers(data.data ?? data); } catch { setError(tu("failedLoad")); }
+    p.page = String(page);
+    try { const { data } = await api.get("/admin/users", { params: p }); setUsers(data.data ?? data); setPg({ page: data.current_page ?? 1, last: data.last_page ?? 1, total: data.total ?? 0 }); } catch { setError(tu("failedLoad")); }
     setLoading(false);
   };
   useEffect(() => { load("all","all",""); }, []);
@@ -99,6 +102,7 @@ export default function AdminUsersPage() {
           ))}
         </div>
       )}
+      <Pager page={pg.page} lastPage={pg.last} total={pg.total} onChange={(p) => load(st, rf, search, p)} />
     </div>
   );
 }

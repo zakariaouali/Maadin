@@ -282,5 +282,7 @@
     "This store manages its own orders.": "Cette boutique gère elle-même ses commandes.",
     "The customer account no longer exists.": "Le compte du client n'existe plus.",
     "You can save up to :count addresses.": "Vous pouvez enregistrer jusqu'à :count adresses.",
-    "Address deleted": "Adresse supprimée"
+    "Address deleted": "Adresse supprimée",
+    "Please try again in a moment.": "Veuillez réessayer dans un instant.",
+    "Verification failed. Please try again.": "La vérification a échoué. Veuillez réessayer."
 }

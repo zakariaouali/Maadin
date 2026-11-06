@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { Pager } from "@/components/ui/Pager";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { Alert, Badge, Button, PageHeader, Spinner } from "@/components/ui";
@@ -51,6 +52,10 @@ export default function AdminSupportPage() {
   const [notes, setNotes] = useState("");
   const [replyStatus, setReplyStatus] = useState<"open" | "in_progress" | "resolved" | "closed">("in_progress");
   const [error, setError] = useState("");
+  const filtersKey = JSON.stringify(filters);
+  const [pageState, setPageState] = useState({ key: "", page: 1 });
+  const page = pageState.key === filtersKey ? pageState.page : 1; // a new filter means page 1
+  const [pg, setPg] = useState({ last: 1, total: 0 });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -60,16 +65,18 @@ export default function AdminSupportPage() {
     if (filters.category) params.category = filters.category;
     if (filters.priority) params.priority = filters.priority;
     if (filters.search)   params.search   = filters.search;
+    params.page = String(page);
     try {
       const [ticketsRes, statsRes] = await Promise.all([
         api.get("/admin/support", { params }),
         api.get("/admin/support/stats"),
       ]);
       setTickets(ticketsRes.data.data ?? ticketsRes.data);
+      setPg({ last: ticketsRes.data.last_page ?? 1, total: ticketsRes.data.total ?? 0 });
       setStats(statsRes.data);
     } catch { setError(t("errorFallback")); }
     setLoading(false);
-  }, [filters]);
+  }, [filters, page]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -178,6 +185,7 @@ export default function AdminSupportPage() {
               ))}
             </div>
           )}
+          <Pager page={page} lastPage={pg.last} total={pg.total} onChange={(p) => setPageState({ key: filtersKey, page: p })} />
         </div>
 
         {/* ── Detail / Reply panel ── */}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { Pager } from "@/components/ui/Pager";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import api, { apiErrorMessage } from "@/lib/api";
@@ -50,18 +51,21 @@ export default function AdminSellersPage() {
   const [tab, setTab] = useState<Tab>("pending");
   const [search, setSearch] = useState("");
   const [acting, setActing] = useState<number | null>(null);
+  const [pg, setPg] = useState({ page: 1, last: 1, total: 0 });
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [reviewing, setReviewing] = useState<Seller | null>(null);
 
-  const load = useCallback(async (currentTab: Tab, q: string) => {
+  const load = useCallback(async (currentTab: Tab, q: string, page = 1) => {
     setLoading(true);
     const params: Record<string, string> = {};
     if (currentTab !== "all") params.status = currentTab;
     if (q) params.search = q;
+    params.page = String(page);
     try {
       const { data } = await api.get("/admin/sellers", { params });
       setSellers(data.data ?? data);
+      setPg({ page: data.current_page ?? 1, last: data.last_page ?? 1, total: data.total ?? 0 });
     } catch { setError(tu("failedLoad")); }
     setLoading(false);
   }, []);
@@ -75,7 +79,7 @@ export default function AdminSellersPage() {
       await api[method](`/admin/sellers/${id}/${action}`);
       setSuccess(msg);
       setReviewing(null);
-      load(tab, search);
+      load(tab, search, pg.page);
     } catch (e) { setError(apiErrorMessage(e, t("failedAction"))); }
     setActing(null);
   };
@@ -155,6 +159,8 @@ export default function AdminSellersPage() {
           ))}
         </div>
       )}
+
+      <Pager page={pg.page} lastPage={pg.last} total={pg.total} onChange={(p) => load(tab, search, p)} />
 
       {/* ── Full profile review modal ── */}
       <Modal

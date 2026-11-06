@@ -42,8 +42,11 @@ Route::middleware('throttle:120,1')->group(function () {
 });
 
 // ===== Auth =====
+// Sign-up has its own, much stricter limit and the optional human check (see AppServiceProvider / VerifyTurnstile)
+Route::post('/register', [AuthController::class, 'register'])
+    ->middleware(['throttle:register', \App\Http\Middleware\VerifyTurnstile::class]);
+
 Route::middleware('throttle:10,1')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:password-reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);

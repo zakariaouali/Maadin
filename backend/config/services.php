@@ -18,6 +18,11 @@ return [
         'key' => env('POSTMARK_API_KEY'),
     ],
 
+    // Cloudflare Turnstile (free bot check). Leave TURNSTILE_SECRET empty to run without it.
+    'turnstile' => [
+        'secret' => env('TURNSTILE_SECRET'),
+    ],
+
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],

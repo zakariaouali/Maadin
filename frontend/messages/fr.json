@@ -54,6 +54,7 @@
     "support": "Support"
   },
   "auth": {
+    "humanCheck": "Veuillez compléter la vérification ci-dessous pour montrer que vous êtes une personne.",
     "invalidCredentials": "E-mail ou mot de passe incorrect.",
     "accountBanned": "Ce compte a été banni. Contactez le support si vous pensez que c'est une erreur.",
     "accountSuspended": "Ce compte est suspendu. Contactez le support pour obtenir de l'aide.",
