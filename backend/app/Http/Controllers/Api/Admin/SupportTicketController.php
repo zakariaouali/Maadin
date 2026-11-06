@@ -7,6 +7,7 @@ use App\Mail\SupportReplyMail;
 use App\Models\Notification;
 use App\Models\SupportTicket;
 use Illuminate\Http\Request;
+use App\Support\AdminAudit;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
@@ -68,6 +69,11 @@ class SupportTicketController extends Controller
         }
 
         $ticket->update($validated);
+        AdminAudit::record($request, 'update_support_ticket', 'support_ticket', $ticket->id, array_filter([
+            'status' => $validated['status'] ?? null,
+            'priority' => $validated['priority'] ?? null,
+            'replied' => $isNewReply ?: null,
+        ]));
 
         if ($isNewReply) {
             $recipientEmail = $ticket->user->email ?? $ticket->guest_email;

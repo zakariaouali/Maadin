@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\Admin\SellerController as AdminSellerController;
 use App\Http\Controllers\Api\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Api\Admin\AuditLogController as AdminAuditLogController;
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Customer\AddressController as CustomerAddressController;
 use App\Http\Controllers\Api\Admin\ConversationController as AdminConversationController;
@@ -137,6 +138,7 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureAccountIsActive::c
         Route::put('/products/{id}/images/{imageId}/primary', [AdminProductController::class, 'setPrimaryImage']);
         Route::delete('/products/{id}/images/{imageId}', [AdminProductController::class, 'destroyImage']);
 
+        Route::get('/audit-logs', [AdminAuditLogController::class, 'index']);
         Route::get('/orders', [AdminOrderController::class, 'index']);
         Route::get('/orders/{id}', [AdminOrderController::class, 'show']);
         Route::put('/orders/{id}/status', [AdminOrderController::class, 'updateStatus']);

@@ -288,6 +288,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               {navLink("/admin/conversations", tAdmin("conversations"), badges.unread_messages)}
               {navLink("/admin/penalties", tAdmin("penalties"))}
               {navLink("/admin/support", tAdmin("support"), badges.support_tickets)}
+              {navLink("/admin/audit", tAdmin("auditLog"))}
             </>
           )}
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
+use App\Support\AdminAudit;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
@@ -46,6 +47,7 @@ class CategoryController extends Controller
         unset($validated['image'], $validated['icon_url']);
 
         $category = Category::create($validated);
+        AdminAudit::record($request, 'create_category', 'category', $category->id, ['name' => $category->name]);
 
         return response()->json($category, 201);
     }
@@ -87,11 +89,12 @@ class CategoryController extends Controller
         unset($validated['image'], $validated['icon_url']);
 
         $category->update($validated);
+        AdminAudit::record($request, 'update_category', 'category', $category->id, ['name' => $category->name]);
 
         return response()->json($category);
     }
 
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         $category = Category::findOrFail($id);
 
@@ -106,6 +109,7 @@ class CategoryController extends Controller
         }
 
         $category->delete();
+        AdminAudit::record($request, 'delete_category', 'category', $category->id, ['name' => $category->name]);
 
         return response()->json(['message' => __('Category deleted')]);
     }

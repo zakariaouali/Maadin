@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Review;
 use Illuminate\Http\Request;
+use App\Support\AdminAudit;
 
 class ReviewController extends Controller
 {
@@ -32,25 +33,28 @@ class ReviewController extends Controller
         return response()->json($reviews);
     }
 
-    public function approve(Review $review)
+    public function approve(Request $request, Review $review)
     {
         $review->restore(); // in case soft-deleted
         $review->update(['status' => 'approved']);
         $this->recalculate($review);
+        AdminAudit::record($request, 'approve_review', 'review', $review->id, ['product_id' => $review->product_id]);
         return response()->json(['message' => __('Review approved.')]);
     }
 
-    public function reject(Review $review)
+    public function reject(Request $request, Review $review)
     {
         $review->update(['status' => 'rejected']);
         $this->recalculate($review);
+        AdminAudit::record($request, 'reject_review', 'review', $review->id, ['product_id' => $review->product_id]);
         return response()->json(['message' => __('Review rejected.')]);
     }
 
-    public function destroy(Review $review)
+    public function destroy(Request $request, Review $review)
     {
         $review->delete();
         $this->recalculate($review);
+        AdminAudit::record($request, 'remove_review', 'review', $review->id, ['product_id' => $review->product_id]);
         return response()->json(['message' => __('Review deleted.')]);
     }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import api, { apiErrorMessage } from "@/lib/api";
 import { Alert, Badge, Button, PageHeader, Spinner } from "@/components/ui";
 import { formatDate } from "@/lib/i18n-helpers";
@@ -81,7 +82,7 @@ export default function AdminUsersPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <p className="text-sm font-medium text-ink">{u.name}</p>
+                    <Link href={`/admin/users/${u.id}`} className="text-sm font-medium text-ink hover:text-gold-deep hover:underline">{u.name}</Link>
                     <Badge variant={u.role==="seller"?"gold":"default"} ><RoleName role={u.role} /></Badge>
                     <Badge variant={SV[u.status]??"default"}>{u.status}</Badge>
                   </div>
@@ -92,7 +93,7 @@ export default function AdminUsersPage() {
               <div className="flex flex-wrap gap-1.5 mt-2 ms-12">
                 {u.status!=="active" && <Button size="sm" variant="primary" loading={acting===u.id} onClick={() => updateStatus(u.id,"active")}>{t("activate")}</Button>}
                 {u.status==="active" && <Button size="sm" variant="secondary" loading={acting===u.id} onClick={() => updateStatus(u.id,"suspended")}>{t("suspend")}</Button>}
-                {u.status!=="banned" && <Button size="sm" variant="danger" loading={acting===u.id} onClick={() => { if(window.confirm("Ban this user?")) updateStatus(u.id,"banned"); }}>{t("ban")}</Button>}
+                {u.status!=="banned" && <Button size="sm" variant="danger" loading={acting===u.id} onClick={() => { if(window.confirm(t("banConfirm"))) updateStatus(u.id,"banned"); }}>{t("ban")}</Button>}
               </div>
             </div>
           ))}

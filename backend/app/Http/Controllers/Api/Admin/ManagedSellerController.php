@@ -12,6 +12,7 @@ use App\Models\ProductImage;
 use App\Models\Seller;
 use App\Models\User;
 use App\Services\ImageService;
+use App\Support\AdminAudit;
 use App\Support\NotificationMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -78,6 +79,7 @@ class ManagedSellerController extends Controller
         ]);
 
         $user->update($validated);
+        AdminAudit::record($request, 'update_subscription', 'user', $user->id, $validated);
 
         // Reactivate store if it was suspended due to expired subscription
         if ($user->seller && $user->seller->status === 'suspended_subscription') {
@@ -96,6 +98,7 @@ class ManagedSellerController extends Controller
         $newExpiry = ($current->isPast() ? now() : $current)->addMonth();
 
         $user->update(['subscription_expires_at' => $newExpiry->toDateString()]);
+        AdminAudit::record($request, 'mark_subscription_paid', 'user', $user->id, ['new_expiry' => $newExpiry->toDateString()]);
 
         // Reactivate store if suspended
         if ($user->seller && $user->seller->status === 'suspended_subscription') {
@@ -138,6 +141,7 @@ class ManagedSellerController extends Controller
 
         $req->update(['status' => 'approved', 'admin_notes' => $request->input('notes')]);
         $user->update(['plan' => $req->to_plan]);
+        AdminAudit::record($request, 'approve_plan_upgrade', 'user', $user->id, ['to_plan' => $req->to_plan]);
 
         // Reactivate store if it was paused for upgrade
         if ($user->seller && $user->seller->status === 'upgrade_pending') {
@@ -160,6 +164,7 @@ class ManagedSellerController extends Controller
         $user = $req->user;
 
         $req->update(['status' => 'rejected', 'admin_notes' => $request->input('notes')]);
+        AdminAudit::record($request, 'reject_plan_upgrade', 'user', (int) $req->user_id, ['to_plan' => $req->to_plan]);
 
         // Reactivate if paused
         if ($user->seller && $user->seller->status === 'upgrade_pending') {
@@ -210,6 +215,7 @@ class ManagedSellerController extends Controller
             'banner_path'         => $bannerPath,
             'status'              => 'verified',
         ]);
+        AdminAudit::record($request, 'create_managed_store', 'seller', $seller->id, ['store_name' => $seller->store_name]);
 
         return response()->json($seller, 201);
     }
@@ -244,6 +250,7 @@ class ManagedSellerController extends Controller
 
         unset($validated['logo'], $validated['banner']);
         $seller->update($validated);
+        AdminAudit::record($request, 'update_managed_store', 'seller', $seller->id, ['fields' => array_keys($validated)]);
 
         return response()->json($seller->fresh());
     }
@@ -279,6 +286,7 @@ class ManagedSellerController extends Controller
         $validated['is_active']   = true;
 
         $product = Product::create($validated);
+        AdminAudit::record($request, 'create_managed_product', 'product', $product->id, ['name' => $product->name]);
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $i => $file) {

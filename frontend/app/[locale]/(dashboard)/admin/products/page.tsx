@@ -487,8 +487,12 @@ export default function AdminProductsPage() {
     if (currentSearch) params.search = currentSearch;
     if (currentTab === "pending") params.is_approved = "false";
     if (currentTab === "approved") params.is_approved = "true";
-    const { data } = await api.get("/admin/products", { params });
-    setProducts(data.data);
+    try {
+      const { data } = await api.get("/admin/products", { params });
+      setProducts(data.data);
+    } catch (e) {
+      setError(apiErrorMessage(e, tu("failedLoad")));
+    }
     setLoading(false);
   };
 
@@ -528,6 +532,16 @@ export default function AdminProductsPage() {
       setReviewing(null);
       await load();
     } catch (e: any) { setError(e.response?.data?.message || "Failed."); }
+    setActing(null);
+  };
+
+  const toggleVisible = async (id: number) => {
+    setActing(id); setError(""); setSuccess("");
+    try {
+      const { data } = await api.put(`/admin/products/${id}/toggle-active`);
+      setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, is_active: data.is_active } : p)));
+      setSuccess(data.is_active ? t("productShownNote") : t("productHiddenNote"));
+    } catch (e) { setError(apiErrorMessage(e, t("failedAction"))); }
     setActing(null);
   };
 
@@ -602,12 +616,16 @@ export default function AdminProductsPage() {
                 <Badge variant={p.is_approved ? "success" : "warning"}>
                   {p.is_approved ? t("approved") : t("pending")}
                 </Badge>
+                {p.is_approved && !p.is_active && <Badge variant="default">{t("hidden")}</Badge>}
               </div>
 
               <div className="flex gap-2 shrink-0">
                 <Button size="sm" variant="ghost" onClick={() => openDetail(p.id)}>{t("viewEdit")}</Button>
                 {!p.is_approved && (
                   <Button size="sm" variant="primary" loading={acting === p.id} onClick={() => approve(p.id)}>✓ {t("approve")}</Button>
+                )}
+                {p.is_approved && (
+                  <Button size="sm" variant="ghost" loading={acting === p.id} onClick={() => toggleVisible(p.id)}>{p.is_active ? t("hideProduct") : t("showProduct")}</Button>
                 )}
                 {p.is_approved && (
                   <Button size="sm" variant="secondary" loading={acting === p.id} onClick={() => reject(p.id)}>{t("revoke")}</Button>

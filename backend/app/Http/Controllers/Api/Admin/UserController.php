@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminAuditLog;
+use App\Models\Order;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -32,9 +35,30 @@ class UserController extends Controller
 
     public function show(string $id)
     {
-        $user = User::with('seller')->findOrFail($id);
+        $user = User::with('seller:id,user_id,store_name,store_slug,status,rating,total_orders')->findOrFail($id);
+        $seller = $user->seller;
 
-        return response()->json($user);
+        $data = $user->toArray();
+        $data['stats'] = [
+            'orders_count' => $user->orders()->count(),
+            'delivered_total' => (float) $user->orders()->where('status', 'delivered')->sum('total_price'),
+            'reviews_count' => $user->reviews()->count(),
+            'addresses_count' => $user->addresses()->count(),
+            'products_count' => $seller ? Product::where('seller_id', $seller->id)->count() : 0,
+            'store_orders_count' => $seller ? Order::where('seller_id', $seller->id)->count() : 0,
+        ];
+        $data['recent_orders'] = $user->orders()->latest('id')->limit(10)
+            ->get(['id', 'order_number', 'status', 'on_hold', 'total_price', 'created_at']);
+        // What the team did to this account (suspensions, plan changes...)
+        $data['history'] = AdminAuditLog::with('admin:id,name')
+            ->where('subject_type', 'user')->where('subject_id', $user->id)
+            ->orderByDesc('id')->limit(20)->get()
+            ->map(fn (AdminAuditLog $l) => [
+                'id' => $l->id, 'action' => $l->action, 'admin' => $l->admin?->name,
+                'changes' => $l->changes, 'at' => $l->created_at?->toIso8601String(),
+            ]);
+
+        return response()->json($data);
     }
 
     public function updateStatus(Request $request, string $id)

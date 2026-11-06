@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Penalty;
 use Illuminate\Http\Request;
+use App\Support\AdminAudit;
 
 class PenaltyController extends Controller
 {
@@ -47,6 +48,12 @@ class PenaltyController extends Controller
             $seller->update(['status' => 'suspended']);
             $seller->user->update(['status' => 'banned']);
         }
+
+        AdminAudit::record($request, 'issue_penalty', 'seller', (int) $validated['seller_id'], [
+            'penalty_type' => $validated['penalty_type'],
+            'reason' => $validated['reason'],
+            'duration_days' => $validated['duration_days'] ?? null,
+        ]);
 
         return response()->json($penalty, 201);
     }

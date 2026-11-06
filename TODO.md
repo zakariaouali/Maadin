@@ -38,8 +38,11 @@ Reported 2026-10-23: the admin could see an order for a managed store but not pr
   out to the seller (the 1st and 15th payouts in the terms). Ties into commission tracking.
 - **Store-side alerts** still go to the store user's own email, which may be a placeholder.
   Check what email the production managed store user has.
-- **Audit log viewer**: the entries are written but there is no screen listing all of them
-  (only the per-order history).
+- **Audit log**: done 2026-11-09. Admin > Activity log lists everything the team did, with
+  filters (action, kind of record, dates); the user detail page and the order panel show
+  their own history. New admin actions must call `App\Support\AdminAudit::record(...)` and be
+  added to `AUDIT_ACTIONS` + `messages/*.json` (`auditActions`) so they get a readable label.
+  Still not logged: seller-side actions (a seller editing their own store/products).
 - **Deployment**: the migration `2026_11_06_100000_add_hold_to_orders_table` is NOT run
   automatically in production (`AUTORUN_ENABLED=false`): run `php artisan migrate --force`
   in Coolify > maadin_backend > Terminal after the deploy.
