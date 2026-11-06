@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 export default function LoginPage() {
   const t = useTranslations("auth");
@@ -66,13 +67,12 @@ export default function LoginPage() {
               {t("forgotPassword")}
             </Link>
           </div>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full border border-stone/30 rounded-sm px-3 py-2 text-sm focus:border-gold-deep outline-none"
+            className="border border-stone/30 rounded-sm py-2 text-sm focus:border-gold-deep outline-none"
           />
         </div>
 

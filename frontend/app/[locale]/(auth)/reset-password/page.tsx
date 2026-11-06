@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Link, useRouter } from "@/i18n/navigation";
 import api from "@/lib/api";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 function ResetPasswordForm() {
   const t = useTranslations("auth");
@@ -85,14 +86,13 @@ function ResetPasswordForm() {
           <label htmlFor="password" className="block text-sm text-stone mb-1">
             {t("newPasswordLabel")}
           </label>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full border border-stone/30 rounded-sm px-3 py-2 text-sm focus:border-gold-deep outline-none"
+            className="border border-stone/30 rounded-sm py-2 text-sm focus:border-gold-deep outline-none"
           />
         </div>
 
@@ -100,13 +100,12 @@ function ResetPasswordForm() {
           <label htmlFor="confirm" className="block text-sm text-stone mb-1">
             {t("confirmNewPassword")}
           </label>
-          <input
+          <PasswordInput
             id="confirm"
-            type="password"
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required
-            className="w-full border border-stone/30 rounded-sm px-3 py-2 text-sm focus:border-gold-deep outline-none"
+            className="border border-stone/30 rounded-sm py-2 text-sm focus:border-gold-deep outline-none"
           />
         </div>
 

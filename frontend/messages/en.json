@@ -666,6 +666,8 @@
     "home": "Home",
     "verifiedArtisan": "Verified Artisan",
     "outOfStock": "Out of stock",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "cookieTitle": "Cookies on Martisana",
     "cookieBody": "We use analytics cookies to understand how the site is used and to improve it. They only start if you accept. Your choice is saved on this device and you can change it any time from the footer.",
     "cookieAccept": "Accept",

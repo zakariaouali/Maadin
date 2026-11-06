@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 const planMeta: Record<string, { color: string; badge: string }> = {
   starter: { color: "border-stone/30 bg-sand/50", badge: "bg-stone/10 text-stone" },
@@ -126,14 +127,13 @@ function RegisterForm() {
           <label htmlFor="password" className="block text-sm text-stone mb-1">
             {t("password")}
           </label>
-          <input
+          <PasswordInput
             id="password"
-            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full border border-stone/30 rounded-sm px-3 py-2 text-sm focus:border-gold-deep outline-none"
+            className="border border-stone/30 rounded-sm py-2 text-sm focus:border-gold-deep outline-none"
           />
         </div>
 

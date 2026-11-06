@@ -8,6 +8,7 @@ import { getImageUrl, normalizeImageFile } from "@/lib/image";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { Alert, Button, PageHeader, Spinner } from "@/components/ui";
 import { RoleName } from "@/components/ui/RoleName";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 export default function ProfilePage() {
   const t = useTranslations("admin");
@@ -154,18 +155,18 @@ export default function ProfilePage() {
         <form onSubmit={changePassword} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-stone uppercase tracking-wide">{t("currentPassword")}</label>
-            <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required
-              className="border border-stone/30 rounded-sm px-3 py-2 text-sm outline-none focus:border-gold-deep" />
+            <PasswordInput value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required
+              className="border border-stone/30 rounded-sm py-2 text-sm outline-none focus:border-gold-deep" />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-stone uppercase tracking-wide">{t("newPassword")}</label>
-            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8}
-              className="border border-stone/30 rounded-sm px-3 py-2 text-sm outline-none focus:border-gold-deep" />
+            <PasswordInput value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8}
+              className="border border-stone/30 rounded-sm py-2 text-sm outline-none focus:border-gold-deep" />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-stone uppercase tracking-wide">{t("confirmPassword")}</label>
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required
-              className="border border-stone/30 rounded-sm px-3 py-2 text-sm outline-none focus:border-gold-deep" />
+            <PasswordInput value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required
+              className="border border-stone/30 rounded-sm py-2 text-sm outline-none focus:border-gold-deep" />
           </div>
           <Button type="submit" variant="secondary" loading={pwSaving}>{t("changePassword")}</Button>
         </form>
