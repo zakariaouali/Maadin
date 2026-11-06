@@ -23,6 +23,11 @@ Reported 2026-10-23: the admin could see an order for a managed store but not pr
 - **History**: every admin action is written to `admin_audit_logs` and shown on the order.
 - **Alerts**: a new order on a managed/premium store now notifies every admin in the app and
   sends the email to `ADMIN_NOTIFICATION_EMAIL` (a failure there never blocks the checkout).
+- **Customer replies reach the team**: when a customer writes to a managed store, every admin
+  gets an in-app alert (and an email to `ADMIN_NOTIFICATION_EMAIL`) linking to
+  `/admin/conversations/{id}`, which opens that thread. The thread has a reply box that sends
+  as the store (`POST /admin/conversations/{id}/reply`); the customer's messages are then
+  marked read. Shared sender: `App\Services\StoreMessenger`. Tests: `CustomerRepliesTest`.
 - **Scope**: only stores on the `managed` or `premium` plan. For a store that runs its own
   orders the admin gets 403 on these actions (view only).
 - Tests: `backend/tests/Feature/AdminOrderHandlingTest.php`.
@@ -35,9 +40,6 @@ Reported 2026-10-23: the admin could see an order for a managed store but not pr
   Check what email the production managed store user has.
 - **Audit log viewer**: the entries are written but there is no screen listing all of them
   (only the per-order history).
-- **Admin cannot receive a reply in the admin inbox**: customer replies land in the store
-  user's conversation, which nobody logs into. Replies should reach the admin (read-only
-  `/admin/conversations` shows them, but there is no reply box and no notification).
 - **Deployment**: the migration `2026_11_06_100000_add_hold_to_orders_table` is NOT run
   automatically in production (`AUTORUN_ENABLED=false`): run `php artisan migrate --force`
   in Coolify > maadin_backend > Terminal after the deploy.

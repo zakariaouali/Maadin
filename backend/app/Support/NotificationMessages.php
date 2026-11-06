@@ -42,6 +42,13 @@ class NotificationMessages
             'ar' => ['🛒 طلب جديد للمعالجة',      '{number} · {store} · {amount} درهم'],
         ],
 
+        // ── Customer wrote to an admin-managed store (to the admins) ─────────
+        'message.managed_received' => [
+            'en' => ['💬 {sender} wrote to {store}', '{preview}'],
+            'fr' => ['💬 {sender} a écrit à {store}', '{preview}'],
+            'ar' => ['💬 {sender} راسل {store}', '{preview}'],
+        ],
+
         // ── Order cancelled by the customer (to seller) ──────────────────────
         'order.cancelled_by_customer' => [
             'en' => ['❌ Order cancelled by the customer', 'Order {number} was cancelled by the customer. No action is needed.'],

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import api from "@/lib/api";
+import { useSearchParams } from "next/navigation";
+import api, { apiErrorMessage } from "@/lib/api";
 import { Badge, Button, Modal, PageHeader, Spinner, Alert } from "@/components/ui";
 import { formatDate, formatDateTime } from "@/lib/i18n-helpers";
 
@@ -24,14 +25,19 @@ interface Message {
 }
 
 interface ConversationDetail {
+  id: number;
   buyer: { id: number; name: string };
-  seller: { id: number; name: string; store_name?: string };
+  seller: { id: number; name: string };
+  store_name: string | null;
+  /** true when the team runs this store and can answer for it */
+  can_reply: boolean;
   messages: Message[];
 }
 
-export default function AdminConversationsPage() {
+function AdminConversations() {
   const tu = useTranslations("ui");
   const t = useTranslations("admin");
+  const params = useSearchParams();
 
   const [tab, setTab] = useState<"all" | "flagged">("all");
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -40,9 +46,15 @@ export default function AdminConversationsPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
-  const [threadOpen, setThreadOpen] = useState(false);
-  const [threadLoading, setThreadLoading] = useState(false);
+  // The thread being read. Opened from the list, or straight from an alert link (?open=ID).
+  const [openId, setOpenId] = useState<number | null>(() => Number(params.get("open")) || null);
   const [thread, setThread] = useState<ConversationDetail | null>(null);
+  const [threadVersion, setThreadVersion] = useState(0);
+  const threadLoading = openId !== null && thread?.id !== openId;
+
+  const [reply, setReply] = useState("");
+  const [replying, setReplying] = useState(false);
+  const [replyError, setReplyError] = useState("");
 
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -51,33 +63,28 @@ export default function AdminConversationsPage() {
     setLoading(true);
     setError(null);
     try {
-      const params = tab === "flagged" ? { flagged_only: true } : {};
-      const res = await api.get("/admin/conversations", { params });
+      const query = tab === "flagged" ? { flagged_only: true } : {};
+      const res = await api.get("/admin/conversations", { params: query });
       setConversations(res.data?.data ?? res.data ?? []);
     } catch {
       setError(tu("failedLoadConversations"));
     } finally {
       setLoading(false);
     }
-  }, [tab]);
+  }, [tab, tu]);
 
   useEffect(() => {
     fetchConversations();
   }, [fetchConversations]);
 
-  const handleViewThread = async (id: number) => {
-    setThreadOpen(true);
-    setThread(null);
-    setThreadLoading(true);
-    try {
-      const res = await api.get(`/admin/conversations/${id}`);
-      setThread(res.data?.data ?? res.data);
-    } catch {
-      setThreadOpen(false);
-    } finally {
-      setThreadLoading(false);
-    }
-  };
+  useEffect(() => {
+    if (openId === null) return;
+    let alive = true;
+    api.get(`/admin/conversations/${openId}`)
+      .then((res) => { if (alive) setThread(res.data?.data ?? res.data); })
+      .catch(() => { if (alive) { setOpenId(null); setError(tu("failedLoadConversations")); } });
+    return () => { alive = false; };
+  }, [openId, threadVersion, tu]);
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -93,6 +100,23 @@ export default function AdminConversationsPage() {
       setDeleting(false);
     }
   };
+
+  const sendReply = async () => {
+    if (!thread || !reply.trim()) return;
+    setReplying(true);
+    setReplyError("");
+    try {
+      await api.post(`/admin/conversations/${thread.id}/reply`, { content: reply });
+      setReply("");
+      setThreadVersion((v) => v + 1);
+      fetchConversations();
+    } catch (e) {
+      setReplyError(apiErrorMessage(e, t("failedAction")));
+    }
+    setReplying(false);
+  };
+
+  const closeThread = () => { setOpenId(null); setReply(""); setReplyError(""); };
 
   const filtered = conversations.filter((c) => {
     if (!search) return true;
@@ -186,7 +210,7 @@ export default function AdminConversationsPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleViewThread(c.id)}
+                        onClick={() => setOpenId(c.id)}
                       >
                         {t("viewThread")}
                       </Button>
@@ -208,16 +232,16 @@ export default function AdminConversationsPage() {
 
       {/* Thread Modal */}
       <Modal
-        open={threadOpen}
-        onClose={() => setThreadOpen(false)}
+        open={openId !== null}
+        onClose={closeThread}
         title={t("viewThread")}
-        maxWidth="lg"
+        maxWidth="max-w-xl"
       >
-        {threadLoading ? (
+        {threadLoading || !thread ? (
           <div className="flex justify-center py-10">
             <Spinner size="lg" />
           </div>
-        ) : thread ? (
+        ) : (
           <div className="space-y-4">
             <div className="flex gap-6 text-sm text-stone border-b border-stone/20 pb-3">
               <span>
@@ -226,7 +250,7 @@ export default function AdminConversationsPage() {
               </span>
               <span>
                 <span className="font-medium text-ink">{t("seller")}:</span>{" "}
-                {thread.seller.store_name ?? thread.seller.name}
+                {thread.store_name ?? thread.seller.name}
               </span>
             </div>
             <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
@@ -249,7 +273,7 @@ export default function AdminConversationsPage() {
                           {tu("contactHidden")}
                         </span>
                       ) : (
-                        <p>{msg.content}</p>
+                        <p dir="auto">{msg.content}</p>
                       )}
                       <p className="text-stone text-xs">
                         {formatDateTime(msg.created_at)}
@@ -259,8 +283,31 @@ export default function AdminConversationsPage() {
                 );
               })}
             </div>
+
+            {thread.can_reply ? (
+              <div className="space-y-2 border-t border-stone/20 pt-4">
+                {replyError && <Alert type="error">{replyError}</Alert>}
+                <label htmlFor="conv-reply" className="block text-xs font-medium text-stone uppercase tracking-wide">
+                  {t("convReplyTitle", { store: thread.store_name ?? thread.seller.name })}
+                </label>
+                <textarea
+                  id="conv-reply"
+                  rows={3}
+                  maxLength={2000}
+                  value={reply}
+                  placeholder={t("convReplyPlaceholder")}
+                  onChange={(e) => setReply(e.target.value)}
+                  className="w-full border border-stone/30 rounded-sm px-3 py-2 text-sm outline-none focus:border-gold-deep resize-y"
+                />
+                <Button loading={replying} disabled={!reply.trim()} onClick={sendReply}>
+                  {t("ordSend")}
+                </Button>
+              </div>
+            ) : (
+              <p className="border-t border-stone/20 pt-4 text-xs text-stone">{t("convReadOnly")}</p>
+            )}
           </div>
-        ) : null}
+        )}
       </Modal>
 
       {/* Delete Confirm Modal */}
@@ -282,5 +329,13 @@ export default function AdminConversationsPage() {
         </div>
       </Modal>
     </div>
+  );
+}
+
+export default function AdminConversationsPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center py-16"><Spinner size="lg" /></div>}>
+      <AdminConversations />
+    </Suspense>
   );
 }

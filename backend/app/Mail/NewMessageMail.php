@@ -18,6 +18,7 @@ class NewMessageMail extends Mailable implements ShouldQueue
         public string $preview,
         public int $conversationId,
         public string $userLocale = 'en',
+        public ?string $path = null,
     ) {}
 
     public function envelope(): Envelope
@@ -41,6 +42,7 @@ class NewMessageMail extends Mailable implements ShouldQueue
                 'senderName'     => $this->senderName,
                 'preview'        => $this->preview,
                 'conversationId' => $this->conversationId,
+                'path'           => $this->path ?? 'messages/' . $this->conversationId,
                 'locale'         => $this->userLocale,
                 'siteUrl'        => config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000')),
             ],

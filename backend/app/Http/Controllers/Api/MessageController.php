@@ -9,6 +9,8 @@ use App\Models\Message;
 use App\Models\Notification;
 use App\Models\User;
 use App\Services\ContentFilterService;
+use App\Services\StoreMessenger;
+use App\Support\AdminNotifier;
 use App\Support\NotificationMessages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -143,6 +145,11 @@ class MessageController extends Controller
             Mail::to($receiver->email)->send(new NewMessageMail($sender->name, $preview, $conversation->id, $locale));
         }
 
+        // Nobody logs into a managed store's account, so the team gets the alert instead
+        if ($receiver && StoreMessenger::isManaged($receiver) && $sender->role !== 'admin') {
+            $this->alertAdmins($conversation, $sender, $receiver, $preview);
+        }
+
         return response()->json([
             'message' => $message,
             'conversation_id' => $conversation->id,
@@ -150,5 +157,33 @@ class MessageController extends Controller
                 ? 'Sharing contact information is not allowed. The relevant part of your message was hidden.'
                 : null,
         ], 201);
+    }
+
+    /** In-app + email alert to the admins; it must never make sending a message fail. */
+    private function alertAdmins(Conversation $conversation, User $customer, User $storeUser, string $preview): void
+    {
+        try {
+            $storeName = $storeUser->seller?->store_name ?? $storeUser->name;
+            foreach (User::where('role', 'admin')->where('status', 'active')->get(['id', 'locale']) as $admin) {
+                [$title, $body] = NotificationMessages::get('message.managed_received', $admin->locale ?? 'ar', [
+                    'sender' => $customer->name,
+                    'store' => $storeName,
+                    'preview' => $preview,
+                ]);
+                Notification::create([
+                    'user_id' => $admin->id,
+                    'type' => 'message',
+                    'title' => $title,
+                    'body' => $body,
+                    'link' => "/admin/conversations/{$conversation->id}",
+                    'data' => ['conversation_id' => $conversation->id, 'sender_id' => $customer->id],
+                ]);
+            }
+            Mail::to(AdminNotifier::email())->send(
+                new NewMessageMail($customer->name, $preview, $conversation->id, 'ar', "admin/conversations/{$conversation->id}")
+            );
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }

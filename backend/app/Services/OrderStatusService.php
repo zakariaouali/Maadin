@@ -53,8 +53,12 @@ class OrderStatusService
             }
             if ($status === 'cancelled') {
                 $this->reverseStockAndSales($order);
-                $update['on_hold'] = false;
-                $update['hold_reason'] = null;
+                // Only touch the hold columns when there is a hold to clear, so a normal cancel
+                // never depends on them (safe even before the hold migration has been run)
+                if ($order->on_hold) {
+                    $update['on_hold'] = false;
+                    $update['hold_reason'] = null;
+                }
             }
 
             $order->update($update);

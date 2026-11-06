@@ -144,6 +144,7 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureAccountIsActive::c
 
         Route::get('/conversations', [AdminConversationController::class, 'index']);
         Route::get('/conversations/{id}', [AdminConversationController::class, 'show']);
+        Route::post('/conversations/{id}/reply', [AdminConversationController::class, 'reply'])->middleware('throttle:30,1');
         Route::delete('/conversations/{id}', [AdminConversationController::class, 'destroy']);
 
         Route::get('/penalties', [AdminPenaltyController::class, 'index']);

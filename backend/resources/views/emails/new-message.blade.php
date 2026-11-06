@@ -21,7 +21,7 @@
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
     <tr>
       <td align="{{ $locale === 'ar' ? 'right' : 'left' }}">
-        <a href="{{ $siteUrl }}/{{ $locale }}/messages/{{ $conversationId }}"
+        <a href="{{ $siteUrl }}/{{ $locale }}/{{ $path }}"
            style="display:inline-block;background:#c9a227;color:#1f1b16;text-decoration:none;font-size:14px;font-weight:700;padding:14px 32px;border-radius:8px;">
           @if($locale === 'fr') Répondre
           @elseif($locale === 'ar') الرد

@@ -3,21 +3,15 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Mail\NewMessageMail;
 use App\Models\AdminAuditLog;
-use App\Models\Conversation;
-use App\Models\Message;
-use App\Models\Notification;
 use App\Models\Order;
 use App\Services\OrderStatusService;
-use App\Support\NotificationMessages;
+use App\Services\StoreMessenger;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
     /** Plans whose orders the team handles for the store */
-    private const MANAGED_PLANS = ['managed', 'premium'];
 
     public function index(Request $request)
     {
@@ -91,44 +85,17 @@ class OrderController extends Controller
     }
 
     /** Write to the customer as the store, inside the normal conversation. */
-    public function message(Request $request, string $id)
+    public function message(Request $request, string $id, StoreMessenger $messenger)
     {
         $order = $this->managedOrderOrFail($id);
         $validated = $request->validate(['content' => 'required|string|max:2000']);
 
         $customer = $order->customer;
-        $storeUser = $order->seller->user;
         abort_if(!$customer, 422, __('The customer account no longer exists.'));
 
-        $conversation = Conversation::firstOrCreate(
-            ['buyer_id' => $customer->id, 'seller_id' => $storeUser->id],
-            ['order_id' => $order->id]
+        [$message, $conversation] = $messenger->send(
+            $order->seller->user, $order->seller->store_name, $customer, $validated['content'], $order->id
         );
-        if (empty($conversation->order_id)) {
-            $conversation->update(['order_id' => $order->id]);
-        }
-
-        $message = Message::create([
-            'conversation_id' => $conversation->id,
-            'sender_id' => $storeUser->id,
-            'receiver_id' => $customer->id,
-            'content' => $validated['content'],
-        ]);
-        $conversation->update(['last_message_at' => now()]);
-
-        $locale = $customer->locale ?? 'en';
-        $preview = mb_substr(strip_tags($validated['content']), 0, 100);
-        $storeName = $order->seller->store_name;
-        [$title, $body] = NotificationMessages::get('message.received', $locale, ['sender' => $storeName, 'preview' => $preview]);
-        Notification::create([
-            'user_id' => $customer->id,
-            'type' => 'message',
-            'title' => $title,
-            'body' => $body,
-            'link' => "/messages/{$conversation->id}",
-            'data' => ['conversation_id' => $conversation->id, 'sender_id' => $storeUser->id],
-        ]);
-        Mail::to($customer->email)->send(new NewMessageMail($storeName, $preview, $conversation->id, $locale));
 
         $this->log($request, 'order_message_sent', $order, ['excerpt' => mb_substr($validated['content'], 0, 120)]);
 
@@ -145,7 +112,7 @@ class OrderController extends Controller
 
     private function isManaged(Order $order): bool
     {
-        return in_array($order->seller?->user?->plan, self::MANAGED_PLANS, true);
+        return StoreMessenger::isManaged($order->seller?->user);
     }
 
     /** What the team did on this order, newest first (from the audit log). */
