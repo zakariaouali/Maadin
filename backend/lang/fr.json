@@ -280,5 +280,7 @@
     "This order is on hold. Release the hold before moving it forward.": "Cette commande est en attente. Levez l'attente avant de la faire avancer.",
     "A :status order cannot be put on hold.": "Une commande « :status » ne peut pas être mise en attente.",
     "This store manages its own orders.": "Cette boutique gère elle-même ses commandes.",
-    "The customer account no longer exists.": "Le compte du client n'existe plus."
+    "The customer account no longer exists.": "Le compte du client n'existe plus.",
+    "You can save up to :count addresses.": "Vous pouvez enregistrer jusqu'à :count adresses.",
+    "Address deleted": "Adresse supprimée"
 }

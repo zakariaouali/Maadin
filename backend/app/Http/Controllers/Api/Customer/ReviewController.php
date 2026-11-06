@@ -40,7 +40,9 @@ class ReviewController extends Controller
             ], 422);
         }
 
-        $alreadyReviewed = Review::where('product_id', $validated['product_id'])
+        // Includes reviews an admin removed: the database allows one review per customer and
+        // product even for soft-deleted rows, so inserting another would crash with a 500.
+        $alreadyReviewed = Review::withTrashed()->where('product_id', $validated['product_id'])
             ->where('customer_id', $request->user()->id)
             ->exists();
 
@@ -105,7 +107,9 @@ class ReviewController extends Controller
         $productId = $review->product_id;
         $sellerId = $review->seller_id;
 
-        $review->delete();
+        // The customer removing their own review is permanent, so they can write a new one later
+        // (a soft delete would keep blocking them through the unique index).
+        $review->forceDelete();
 
         $this->recalculateProductRating($productId);
         $this->recalculateSellerRating($sellerId);

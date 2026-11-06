@@ -39,6 +39,7 @@ class OrderController extends Controller
             'items.product:id,slug',
         ])->findOrFail($id);
 
+        $order->makeVisible('hold_reason');
         $order->setAttribute('is_managed', $this->isManaged($order));
         $order->setAttribute('timeline', $this->timeline($order));
 

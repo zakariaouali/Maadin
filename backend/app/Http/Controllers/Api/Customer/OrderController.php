@@ -55,7 +55,7 @@ class OrderController extends Controller
                 }
             }
 
-            $order->update(['status' => 'cancelled']);
+            $order->update(['status' => 'cancelled'] + (Order::hasStatusDates() ? ['cancelled_at' => now()] : []));
 
             return $order;
         });

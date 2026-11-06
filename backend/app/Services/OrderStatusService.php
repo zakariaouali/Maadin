@@ -44,6 +44,14 @@ class OrderStatusService
             if ($trackingNumber !== null && $trackingNumber !== '') {
                 $update['tracking_number'] = $trackingNumber;
             }
+            if (Order::hasStatusDates()) {
+                if ($status === 'confirmed') {
+                    $update['confirmed_at'] = now();
+                }
+                if ($status === 'cancelled') {
+                    $update['cancelled_at'] = now();
+                }
+            }
             if ($status === 'shipped') {
                 $update['shipped_at'] = now();
             }

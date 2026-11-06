@@ -280,5 +280,7 @@
     "This order is on hold. Release the hold before moving it forward.": "هذا الطلب معلّق. ارفعوا التعليق قبل متابعة معالجته.",
     "A :status order cannot be put on hold.": "لا يمكن تعليق طلب حالته «:status».",
     "This store manages its own orders.": "هذا المتجر يدير طلباته بنفسه.",
-    "The customer account no longer exists.": "حساب العميل لم يعد موجوداً."
+    "The customer account no longer exists.": "حساب العميل لم يعد موجوداً.",
+    "You can save up to :count addresses.": "يمكنكم حفظ ما يصل إلى :count عناوين.",
+    "Address deleted": "تم حذف العنوان"
 }

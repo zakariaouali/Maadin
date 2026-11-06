@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\Admin\SellerController as AdminSellerController;
 use App\Http\Controllers\Api\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Api\Customer\AddressController as CustomerAddressController;
 use App\Http\Controllers\Api\Admin\ConversationController as AdminConversationController;
 use App\Http\Controllers\Api\Admin\PenaltyController as AdminPenaltyController;
 use App\Http\Controllers\Api\Admin\AnalyticsController as AdminAnalyticsController;
@@ -205,6 +206,10 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureAccountIsActive::c
 
     // --- Customer ---
     Route::prefix('customer')->group(function () {
+        Route::get('/addresses', [CustomerAddressController::class, 'index']);
+        Route::post('/addresses', [CustomerAddressController::class, 'store']);
+        Route::put('/addresses/{id}', [CustomerAddressController::class, 'update']);
+        Route::delete('/addresses/{id}', [CustomerAddressController::class, 'destroy']);
         Route::post('/checkout', [CheckoutController::class, 'store']);
         Route::get('/orders', [CustomerOrderController::class, 'index']);
         Route::get('/orders/{id}', [CustomerOrderController::class, 'show']);
