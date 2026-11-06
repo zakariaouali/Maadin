@@ -3,18 +3,17 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
-import { Alert, Button, Modal, OrderStatusBadge, PageHeader, Spinner } from "@/components/ui";
+import { Alert, Badge, Button, Modal, OrderStatusBadge, PageHeader, Spinner } from "@/components/ui";
 import { formatDate, formatPrice } from "@/lib/i18n-helpers";
+import { OrderPanel } from "@/components/admin/OrderPanel";
 
-interface OrderItem { id: number; product_name: string; quantity: number; unit_price: string; }
 interface Order {
-  id: number; status: string; total_price: string; shipping_address: string;
-  created_at: string; tracking_number?: string;
-  customer?: { name: string; email: string; phone?: string };
+  id: number; order_number?: string; status: string; on_hold?: boolean; is_managed?: boolean;
+  total_price: string; created_at: string;
+  customer?: { name: string; email: string };
   seller?: { store_name: string };
-  items?: OrderItem[];
 }
-type Tab = "all"|"pending"|"confirmed"|"shipped"|"delivered"|"cancelled";
+type Tab = "all"|"hold"|"pending"|"confirmed"|"shipped"|"delivered"|"cancelled";
 
 export default function AdminOrdersPage() {
   const tu = useTranslations("ui");
@@ -22,30 +21,23 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("all");
-  const [detail, setDetail] = useState<Order|null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
+  const [openId, setOpenId] = useState<number|null>(null);
   const [error, setError] = useState("");
 
   const load = async (tb: Tab) => {
     setLoading(true);
     const p: Record<string,string> = {};
-    if (tb !== "all") p.status = tb;
+    if (tb === "hold") p.on_hold = "1";
+    else if (tb !== "all") p.status = tb;
     try { const { data } = await api.get("/admin/orders",{params:p}); setOrders(data.data??data); }
     catch { setError(tu("failedLoad")); }
     setLoading(false);
   };
 
-  const openDetail = async (id: number) => {
-    setDetailLoading(true);
-    setDetail({id,status:"",total_price:"0",shipping_address:"",created_at:""});
-    try { const { data } = await api.get(`/admin/orders/${id}`); setDetail(data); } catch { setDetail(null); setError(tu("failedLoadOrder")); }
-    setDetailLoading(false);
-  };
-
   useEffect(() => { load("all"); }, []);
 
   const tabs: {key:Tab;label:string}[] = [
-    {key:"all",label:t("all")},{key:"pending",label:t("pending")},{key:"confirmed",label:tu("statusConfirmed")},
+    {key:"all",label:t("all")},{key:"hold",label:t("ordOnHold")},{key:"pending",label:t("pending")},{key:"confirmed",label:tu("statusConfirmed")},
     {key:"shipped",label:tu("statusShipped")},{key:"delivered",label:tu("statusDelivered")},{key:"cancelled",label:tu("statusCancelled")},
   ];
   const cls = (a: boolean) => "px-3 py-1.5 rounded-sm text-sm transition-colors " + (a ? "bg-white text-ink shadow-sm font-medium" : "text-stone hover:text-ink");
@@ -67,45 +59,20 @@ export default function AdminOrdersPage() {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-ink">#{o.id}</span>
                   <OrderStatusBadge status={o.status} />
+                  {o.on_hold && <Badge variant="warning">{t("ordOnHold")}</Badge>}
                 </div>
                 <p className="text-xs text-stone truncate">{o.customer?.name ?? "?"} to {o.seller?.store_name ?? "?"}</p>
                 <p className="text-xs text-stone/60">{formatDate(o.created_at)}</p>
               </div>
               <span className="text-sm font-semibold text-ink shrink-0 hidden sm:block">{formatPrice(o.total_price)}</span>
-              <Button size="sm" variant="secondary" onClick={() => openDetail(o.id)}>{t("view")}</Button>
+              <Button size="sm" variant="secondary" onClick={() => setOpenId(o.id)}>{o.is_managed ? t("ordProcess") : t("view")}</Button>
             </div>
           ))}
         </div>
       )}
-      <Modal open={detail!==null} onClose={() => setDetail(null)}
-        title={detail ? `Order #${detail.id}` : "..."} maxWidth="max-w-lg">
-        {detailLoading ? <div className="flex justify-center py-8"><Spinner /></div>
-        : detail && (
-          <div className="space-y-4 text-sm">
-            <div className="grid grid-cols-2 gap-3">
-              <div><p className="text-xs text-stone">{t("customer")}</p><p className="font-medium">{detail.customer?.name}</p><p className="text-xs text-stone">{detail.customer?.email}</p></div>
-              <div><p className="text-xs text-stone">{t("seller")}</p><p className="font-medium">{detail.seller?.store_name}</p></div>
-              <div><p className="text-xs text-stone">{tu("status")}</p><OrderStatusBadge status={detail.status} /></div>
-              <div><p className="text-xs text-stone">{t("amount")}</p><p className="font-semibold">{formatPrice(detail.total_price)}</p></div>
-              {detail.tracking_number && <div className="col-span-2"><p className="text-xs text-stone">{tu("tracking")}</p><p className="font-mono">{detail.tracking_number}</p></div>}
-              <div className="col-span-2"><p className="text-xs text-stone">{t("shippingAddress")}</p><p className="text-stone">{detail.shipping_address}</p></div>
-            </div>
-            {(detail.items??[]).length > 0 && (
-              <div>
-                <p className="text-xs font-medium text-stone uppercase tracking-wide mb-2">{t("orderItems")}</p>
-                <div className="divide-y divide-stone/10 border border-stone/20 rounded-sm">
-                  {(detail.items??[]).map(item => (
-                    <div key={item.id} className="flex items-center gap-3 px-3 py-2.5">
-                      <p className="flex-1 text-sm">{item.product_name}</p>
-                      <span className="text-xs text-stone">{t("qty")}: {item.quantity}</span>
-                      <span className="text-sm font-medium">{formatPrice(item.unit_price)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+      <Modal open={openId!==null} onClose={() => setOpenId(null)}
+        title={openId ? t("ordTitle", { id: openId }) : "..."} maxWidth="max-w-xl">
+        {openId !== null && <OrderPanel key={openId} orderId={openId} onChanged={() => load(tab)} />}
       </Modal>
     </div>
   );

@@ -2,65 +2,42 @@
 
 Open items, newest first. Each one says what is wrong today and what has to be decided.
 
-## 1. Admin cannot process orders (and cannot talk to customers) for managed stores
+## 1. Admin order handling for managed stores: DONE (2026-11-06), follow-ups below
 
-**Reported 2026-10-23.** Checkout works. The order for the managed store
-("Martisana") appears in Admin > Managed accounts, but the admin can
-only look at it. Nobody can process it.
+Reported 2026-10-23: the admin could see an order for a managed store but not process it.
 
-### What is missing today (verified in the code)
+### What exists now
 
-- **No actions on an order.** The admin routes are read-only:
-  `GET /admin/orders`, `GET /admin/orders/{id}`, and the order list inside
-  `GET /admin/managed-sellers/{userId}`. The only endpoint that confirms, ships,
-  delivers or cancels an order is `PUT /seller/orders/{id}/status`, and it sits
-  behind the `seller` middleware (`role === 'seller'`). An admin gets 403.
-- **No way to act as the store.** The managed store's user has a random
-  password by design, so the admin cannot log in as it either.
-- **No conversation with the customer.** `/admin/conversations` is read-only
-  (list, view, delete). The admin is not a participant of the customer's
-  conversation, and `POST /messages/send` only works inside a conversation the
-  sender belongs to. Also, a new-message email goes to the store user's address.
-- **Alerts go nowhere.** For an order on a managed store, the "new order" email
-  and notification are sent to the store user's email. If that is a placeholder
-  address nobody reads, nobody is told. (Check what email the production store
-  user has.)
-- **No order detail inside the managed account page.** The Orders tab shows only
-  number, customer name, status and total. No items, address, phone, notes.
+- **Admin screens** (Admin > Orders, and Admin > Managed accounts > Orders tab > "Process"):
+  one shared panel with the order details, the customer's phone with Call and WhatsApp
+  buttons, delivery address, customer notes and items.
+- **Status steps**: confirm, ship (with tracking number), deliver (cash received), cancel
+  (stock goes back, customer is told). Same rules as the seller screens: both call
+  `App\Services\OrderStatusService`, so they cannot drift apart.
+- **On hold ("en attente")**: a flag with a reason (`orders.on_hold`, `orders.hold_reason`).
+  A held order cannot be confirmed, shipped or delivered until released; cancelling is
+  still allowed and clears the hold. Stock stays reserved while on hold. Admin Orders has an
+  "On hold" filter.
+- **Message the customer**: written as the store, inside the normal conversation (tied to
+  the order); the customer gets the in-app notification and the email.
+- **History**: every admin action is written to `admin_audit_logs` and shown on the order.
+- **Alerts**: a new order on a managed/premium store now notifies every admin in the app and
+  sends the email to `ADMIN_NOTIFICATION_EMAIL` (a failure there never blocks the checkout).
+- **Scope**: only stores on the `managed` or `premium` plan. For a store that runs its own
+  orders the admin gets 403 on these actions (view only).
+- Tests: `backend/tests/Feature/AdminOrderHandlingTest.php`.
 
-### What the admin needs to be able to do (to design)
+### Still open
 
-1. Open the order: items, quantities, delivery address, phone, customer notes.
-2. Move it through the states: pending -> confirmed -> shipped -> delivered,
-   or cancelled (stock goes back, as the seller flow already does), with the
-   tracking number field.
-3. Put it **on hold** ("en attente"): a state or flag with a reason, for example
-   when the customer must be called first. (There is no hold state today.)
-4. Message or call the customer: write in the order's conversation as the store,
-   and show the customer's phone with a call / WhatsApp button.
-5. See an internal log of what was done (who changed what, when).
-6. Receive the "new order" alert as admin (email and in-app badge), not only the
-   store user.
-
-### Questions to settle first
-
-- Should the admin act **as the store** (same screens as a seller, shown inside
-  the managed account) or have **separate admin order screens**?
-  Reusing the seller order screens inside the managed account page is the
-  cheapest and keeps one set of rules.
-- Who is the sender of messages to the customer: the store name, or the admin?
-- Does "on hold" block stock, or release it?
-- Cash on delivery: who records that the cash was collected and later paid out
-  to the seller (ties into the twice-a-month payout process)?
-
-### Likely shape of the fix
-
-- **Backend:** admin routes `PUT /admin/orders/{id}/status` (same transitions
-  and stock/email side effects as the seller controller, extracted into one
-  shared service so the rules cannot diverge), an on-hold state plus reason,
-  an audit log entry per action (the `admin_audit_logs` table already exists),
-  and admin-initiated messages in a customer conversation.
-- **Frontend:** an order detail view and action buttons in Admin > Managed
-  accounts > Orders, plus a message box and call/WhatsApp buttons.
-- **Notifications:** route managed-store order alerts to the admin inbox too.
-- **Tests:** transition rules, stock restore on cancel, 403 for non-admins.
+- **Cash on delivery payouts**: nothing records that the cash was collected and later paid
+  out to the seller (the 1st and 15th payouts in the terms). Ties into commission tracking.
+- **Store-side alerts** still go to the store user's own email, which may be a placeholder.
+  Check what email the production managed store user has.
+- **Audit log viewer**: the entries are written but there is no screen listing all of them
+  (only the per-order history).
+- **Admin cannot receive a reply in the admin inbox**: customer replies land in the store
+  user's conversation, which nobody logs into. Replies should reach the admin (read-only
+  `/admin/conversations` shows them, but there is no reply box and no notification).
+- **Deployment**: the migration `2026_11_06_100000_add_hold_to_orders_table` is NOT run
+  automatically in production (`AUTORUN_ENABLED=false`): run `php artisan migrate --force`
+  in Coolify > maadin_backend > Terminal after the deploy.

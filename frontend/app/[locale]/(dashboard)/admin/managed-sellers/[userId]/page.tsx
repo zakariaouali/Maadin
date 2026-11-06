@@ -11,6 +11,7 @@ import { Link } from "@/i18n/navigation";
 import { CategoryOptions } from "@/components/shop/CategoryOptions";
 import { formatDate, formatPrice, timeAgo } from "@/lib/i18n-helpers";
 import { PlanName } from "@/components/ui/RoleName";
+import { OrderPanel } from "@/components/admin/OrderPanel";
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 interface Category { id: number; name: string; }
@@ -573,6 +574,7 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
   const [data, setData] = useState<AccountDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("Overview");
+  const [openOrderId, setOpenOrderId] = useState<number | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
 
   // Product edit modal
@@ -774,6 +776,7 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
                 <thead><tr className="border-b border-stone/10 text-[10px] uppercase tracking-wider text-stone">
                   <th className="text-left px-4 py-3">{tu("customer")}</th><th className="text-left px-4 py-3">{tu("status")}</th>
                   <th className="text-right px-4 py-3">{tu("amount")}</th><th className="text-right px-4 py-3">{tu("date")}</th>
+                  <th className="px-4 py-3"><span className="sr-only">{t("ordProcess")}</span></th>
                 </tr></thead>
                 <tbody className="divide-y divide-stone/10">
                   {orders.map(o => (
@@ -782,6 +785,9 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
                       <td className="px-4 py-3"><OrderStatusBadge status={o.status} /></td>
                       <td className="px-4 py-3 text-right font-semibold">{formatPrice(o.total_price)}</td>
                       <td className="px-4 py-3 text-right text-stone text-xs">{timeAgo(o.created_at)}</td>
+                      <td className="px-4 py-3 text-right">
+                        <Button size="sm" variant="secondary" onClick={() => setOpenOrderId(o.id)}>{t("ordProcess")}</Button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -868,6 +874,14 @@ export default function AccountDetailPage({ params }: { params: Promise<{ userId
       </div>
 
       {/* Add product modal */}
+      <Modal open={openOrderId !== null} onClose={() => setOpenOrderId(null)}
+        title={openOrderId ? t("ordTitle", { id: openOrderId }) : "..."} maxWidth="max-w-xl">
+        {openOrderId !== null && (
+          <OrderPanel key={openOrderId} orderId={openOrderId}
+            onChanged={() => api.get(`/admin/managed-sellers/${userId}`).then(r => setData(r.data)).catch(() => {})} />
+        )}
+      </Modal>
+
       <Modal open={showAdd} onClose={() => setShowAdd(false)} title={t("addProduct")} maxWidth="max-w-2xl" noPadding>
         <AddProductModal
           userId={userId}
