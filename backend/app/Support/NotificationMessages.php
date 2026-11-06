@@ -35,6 +35,13 @@ class NotificationMessages
             'ar' => ['❌ تم إلغاء الطلب',     'تم إلغاء طلبك {number} من قِبل البائع.'],
         ],
 
+        // ── New order on an admin-managed store (to the admins) ──────────────
+        'order.managed_new' => [
+            'en' => ['🛒 New order to process',  '{number} · {store} · {amount} MAD'],
+            'fr' => ['🛒 Nouvelle commande à traiter', '{number} · {store} · {amount} MAD'],
+            'ar' => ['🛒 طلب جديد للمعالجة',      '{number} · {store} · {amount} درهم'],
+        ],
+
         // ── Order cancelled by the customer (to seller) ──────────────────────
         'order.cancelled_by_customer' => [
             'en' => ['❌ Order cancelled by the customer', 'Order {number} was cancelled by the customer. No action is needed.'],

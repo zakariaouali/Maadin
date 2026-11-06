@@ -12,6 +12,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Seller;
+use App\Models\User;
+use App\Support\AdminNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -154,6 +156,12 @@ class CheckoutController extends Controller
 
                 // Confirmation email to the customer — one per seller order, matching the cart split
                 Mail::to($request->user()->email)->send(new OrderPlacedMail($order, $request->user()->locale ?? 'en'));
+
+                // The team processes orders for managed/premium stores, so they get their own alert
+                // (the store account's inbox may be one nobody reads). It must never break a checkout.
+                if ($store && in_array($store->user?->plan, ['managed', 'premium'], true)) {
+                    $this->alertAdmins($order, $store->store_name, $total);
+                }
             }
 
             // Record the idempotency key with the response, inside the same transaction
@@ -167,5 +175,22 @@ class CheckoutController extends Controller
         });
 
         return response()->json($orders, 201);
+    }
+
+    private function alertAdmins(Order $order, string $storeName, float|int|string $total): void
+    {
+        try {
+            foreach (User::where('role', 'admin')->where('status', 'active')->get(['id', 'locale']) as $admin) {
+                [$title, $body] = NotificationMessages::get('order.managed_new', $admin->locale ?? 'ar', [
+                    'number' => $order->order_number,
+                    'store' => $storeName,
+                    'amount' => number_format((float) $total, 2),
+                ]);
+                Notification::send($admin->id, 'order', $title, $body, '/admin/orders', ['order_id' => $order->id]);
+            }
+            Mail::to(AdminNotifier::email())->send(new OrderReceivedMail($order, 'ar'));
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 }

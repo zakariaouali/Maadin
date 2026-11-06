@@ -138,6 +138,9 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\EnsureAccountIsActive::c
 
         Route::get('/orders', [AdminOrderController::class, 'index']);
         Route::get('/orders/{id}', [AdminOrderController::class, 'show']);
+        Route::put('/orders/{id}/status', [AdminOrderController::class, 'updateStatus']);
+        Route::put('/orders/{id}/hold', [AdminOrderController::class, 'hold']);
+        Route::post('/orders/{id}/message', [AdminOrderController::class, 'message'])->middleware('throttle:30,1');
 
         Route::get('/conversations', [AdminConversationController::class, 'index']);
         Route::get('/conversations/{id}', [AdminConversationController::class, 'show']);

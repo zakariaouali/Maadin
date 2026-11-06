@@ -11,7 +11,7 @@ class Order extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'customer_id', 'seller_id', 'order_number', 'status', 'total_price',
+        'customer_id', 'seller_id', 'order_number', 'status', 'on_hold', 'hold_reason', 'total_price',
         'shipping_address', 'shipping_city', 'shipping_phone', 'shipping_postal_code',
         'payment_method', 'payment_status', 'notes', 'tracking_number',
         'shipped_at', 'delivered_at',
@@ -19,6 +19,7 @@ class Order extends Model
 
     protected $casts = [
         'total_price' => 'decimal:2',
+        'on_hold' => 'boolean',
         'shipped_at' => 'datetime',
         'delivered_at' => 'datetime',
     ];

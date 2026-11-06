@@ -276,5 +276,9 @@
     "\":name\" is no longer available.": "«:name» لم يعد متوفراً.",
     "You can't order your own product (\":name\").": "لا يمكنك طلب منتجك الخاص («:name»).",
     "Only :count left of \":name\".": "لم يتبق سوى :count من «:name».",
-    "Cannot change status from \":from\" to \":to\".": "لا يمكن تغيير الحالة من «:from» إلى «:to»."
+    "Cannot change status from \":from\" to \":to\".": "لا يمكن تغيير الحالة من «:from» إلى «:to».",
+    "This order is on hold. Release the hold before moving it forward.": "هذا الطلب معلّق. ارفعوا التعليق قبل متابعة معالجته.",
+    "A :status order cannot be put on hold.": "لا يمكن تعليق طلب حالته «:status».",
+    "This store manages its own orders.": "هذا المتجر يدير طلباته بنفسه.",
+    "The customer account no longer exists.": "حساب العميل لم يعد موجوداً."
 }

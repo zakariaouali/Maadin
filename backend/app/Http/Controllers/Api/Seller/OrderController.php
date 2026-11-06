@@ -3,14 +3,9 @@
 namespace App\Http\Controllers\Api\Seller;
 
 use App\Http\Controllers\Controller;
-use App\Mail\OrderStatusChangedMail;
-use App\Mail\ReviewRequestMail;
-use App\Models\Notification;
-use App\Support\NotificationMessages;
 use App\Models\Order;
+use App\Services\OrderStatusService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -47,7 +42,7 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
-    public function updateStatus(Request $request, string $id)
+    public function updateStatus(Request $request, string $id, OrderStatusService $statuses)
     {
         $seller = $request->user()->seller;
         abort_if(!$seller, 404, __('No store found for this account.'));
@@ -59,93 +54,8 @@ class OrderController extends Controller
             'tracking_number' => 'nullable|string|max:100',
         ]);
 
-        $allowedTransitions = [
-            'pending' => ['confirmed', 'cancelled'],
-            'confirmed' => ['shipped', 'cancelled'],
-            'shipped' => ['delivered'],
-            'delivered' => [],
-            'cancelled' => [],
-        ];
+        $order = $statuses->change($order, $validated['status'], $validated['tracking_number'] ?? null);
 
-        if (!in_array($validated['status'], $allowedTransitions[$order->status] ?? [])) {
-            return response()->json([
-                'message' => __('Cannot change status from ":from" to ":to".', ['from' => $order->status, 'to' => $validated['status']]),
-            ], 422);
-        }
-
-        DB::transaction(function () use ($order, $validated, $seller) {
-            $updateData = ['status' => $validated['status']];
-
-            if (isset($validated['tracking_number'])) {
-                $updateData['tracking_number'] = $validated['tracking_number'];
-            }
-            if ($validated['status'] === 'shipped') {
-                $updateData['shipped_at'] = now();
-            }
-            if ($validated['status'] === 'delivered') {
-                $updateData['delivered_at'] = now();
-                $updateData['payment_status'] = 'received';
-            }
-            if ($validated['status'] === 'cancelled') {
-                $this->reverseStockAndSales($order);
-            }
-
-            $order->update($updateData);
-
-            if ($validated['status'] === 'delivered') {
-                $seller->increment('total_orders');
-            }
-
-            // Notify the customer in their preferred language
-            $customer = $order->customer()->first();
-            $locale   = $customer?->locale ?? 'en';
-            $event    = 'order.' . $validated['status'];
-
-            $trackingSuffix = '';
-            if ($validated['status'] === 'shipped' && !empty($validated['tracking_number'])) {
-                $trackingSuffix = match ($locale) {
-                    'fr' => " Suivi : {$validated['tracking_number']}",
-                    'ar' => " رقم التتبع: {$validated['tracking_number']}",
-                    default => " Tracking: {$validated['tracking_number']}",
-                };
-            }
-
-            $events = ['order.confirmed', 'order.shipped', 'order.delivered', 'order.cancelled'];
-            if (in_array($event, $events)) {
-                [$title, $body] = NotificationMessages::get($event, $locale, [
-                    'number'   => $order->order_number,
-                    'tracking' => $trackingSuffix,
-                ]);
-                Notification::send($order->customer_id, 'order', $title, $body, '/customer/orders/' . $order->id, ['order_id' => $order->id]);
-
-                if ($customer) {
-                    Mail::to($customer->email)->send(new OrderStatusChangedMail(
-                        $order,
-                        $validated['status'],
-                        $validated['tracking_number'] ?? null,
-                        $locale,
-                    ));
-                }
-            }
-
-            if ($validated['status'] === 'delivered' && $customer) {
-                Mail::to($customer->email)->send(new ReviewRequestMail($order, $locale));
-            }
-        });
-
-        return response()->json($order->fresh()->load(['items.product:id,slug', 'items.product.primaryImage:id,product_id,image_path', 'customer:id,name,phone']));
-    }
-
-    private function reverseStockAndSales(Order $order): void
-    {
-        foreach ($order->items as $item) {
-            $product = $item->product()->lockForUpdate()->first();
-            if ($product) {
-                if (!$product->is_made_to_order) {
-                    $product->increment('stock_quantity', $item->quantity);
-                }
-                $product->decrement('total_sales', $item->quantity);
-            }
-        }
+        return response()->json($order->load(['items.product:id,slug', 'items.product.primaryImage:id,product_id,image_path', 'customer:id,name,phone']));
     }
 }

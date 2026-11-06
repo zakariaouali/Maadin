@@ -22,16 +22,24 @@ trait BuildsShop
     }
 
     /** A verified store and its owner. */
-    protected function makeSeller(string $email = 'seller@example.test', string $store = 'Test Store'): Seller
+    protected function makeSeller(string $email = 'seller@example.test', string $store = 'Test Store', string $plan = 'starter'): Seller
     {
         $user = User::create([
             'name' => 'Test Seller', 'email' => $email, 'password' => 'secret-pass-123',
-            'role' => 'seller', 'plan' => 'starter', 'status' => 'active', 'locale' => 'en',
+            'role' => 'seller', 'plan' => $plan, 'status' => 'active', 'locale' => 'en',
         ]);
 
         return Seller::create([
             'user_id' => $user->id, 'store_name' => $store, 'store_slug' => str($store)->slug()->toString(),
             'phone_number' => '0600000000', 'status' => 'verified',
+        ]);
+    }
+
+    protected function makeAdmin(string $email = 'admin@example.test'): User
+    {
+        return User::create([
+            'name' => 'Test Admin', 'email' => $email, 'password' => 'secret-pass-123',
+            'role' => 'admin', 'plan' => 'starter', 'status' => 'active', 'locale' => 'en',
         ]);
     }
 
