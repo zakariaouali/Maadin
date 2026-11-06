@@ -313,6 +313,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {navLink("/profile", tu("myProfile"))}
           {navLink("/customer/orders", t("myOrders"))}
           {navLink("/customer/wishlist", t("myWishlist"))}
+          {navLink("/customer/addresses", t("myAddresses"))}
           {navLink("/messages", t("messages"), badges.unread_messages)}
           {navLink("/support/tickets", t("support"), badges.unread_support)}
         </nav>
@@ -375,6 +376,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {navLink("/profile", tu("myProfile"))}
           {navLink("/customer/orders", t("myOrders"))}
           {navLink("/customer/wishlist", t("myWishlist"))}
+          {navLink("/customer/addresses", t("myAddresses"))}
           {navLink("/messages", t("messages"), badges.unread_messages)}
           {navLink("/support/tickets", t("support"), badges.unread_support)}
         </nav>

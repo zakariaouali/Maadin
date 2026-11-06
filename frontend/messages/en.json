@@ -40,6 +40,7 @@
     "viewAll": "View All"
   },
   "nav": {
+    "myAddresses": "My Addresses",
     "home": "Home",
     "products": "Products",
     "cart": "Cart",
@@ -144,6 +145,10 @@
     "remove": "Remove"
   },
   "checkout": {
+    "savedAddresses": "Saved addresses",
+    "useNewAddress": "Use a new address",
+    "saveThisAddress": "Save this address for next time",
+    "manageAddresses": "Manage my addresses",
     "failed": "Checkout failed. Please try again.",
     "title": "Checkout",
     "orderSummary": "Order Summary",
@@ -164,6 +169,21 @@
     "viewMyOrders": "View my orders"
   },
   "orders": {
+    "timelineTitle": "Order progress",
+    "stepPlaced": "Order placed",
+    "stepConfirmed": "Confirmed",
+    "stepShipped": "Shipped",
+    "stepDelivered": "Delivered",
+    "stepCancelled": "Cancelled",
+    "trackingNumber": "Tracking number",
+    "onHoldNote": "We are checking a detail of your order and will contact you shortly.",
+    "editReview": "Edit",
+    "deleteReview": "Delete",
+    "deleteReviewSure": "Delete your review?",
+    "deleteReviewYes": "Yes, delete",
+    "reviewUpdated": "Your review was updated.",
+    "reviewDeleted": "Your review was deleted.",
+    "printReceipt": "Print receipt",
     "title": "My Orders",
     "noOrders": "No orders yet.",
     "status": "Status",
@@ -695,6 +715,28 @@
   "wishlist": {
     "emptyTitle": "Your wishlist is empty",
     "emptyDesc": "Save products you love by clicking the heart icon on any product page."
+  },
+  "addresses": {
+    "title": "My addresses",
+    "subtitle": "Save your delivery addresses to check out faster.",
+    "empty": "You have no saved address yet.",
+    "add": "Add an address",
+    "edit": "Edit address",
+    "addressFallback": "Address",
+    "defaultBadge": "Default",
+    "makeDefault": "Use as my default address",
+    "label": "Name (optional)",
+    "labelPlaceholder": "Home, Work…",
+    "address": "Address",
+    "city": "City",
+    "postalCode": "Postal code (optional)",
+    "phone": "Phone",
+    "save": "Save",
+    "delete": "Delete",
+    "deleteYes": "Yes, delete",
+    "saved": "Address saved.",
+    "deleted": "Address deleted.",
+    "failed": "Something went wrong. Please try again."
   },
   "ui": {
     "orderNotFound": "Order not found.",

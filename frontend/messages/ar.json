@@ -40,6 +40,7 @@
     "viewAll": "عرض الكل"
   },
   "nav": {
+    "myAddresses": "عناويني",
     "home": "الرئيسية",
     "products": "المنتجات",
     "cart": "السلة",
@@ -144,6 +145,10 @@
     "remove": "إزالة"
   },
   "checkout": {
+    "savedAddresses": "العناوين المحفوظة",
+    "useNewAddress": "استخدام عنوان جديد",
+    "saveThisAddress": "حفظ هذا العنوان للمرة القادمة",
+    "manageAddresses": "إدارة عناويني",
     "failed": "تعذّر إتمام الطلب. يرجى المحاولة مرة أخرى.",
     "title": "إتمام الشراء",
     "orderSummary": "ملخص الطلب",
@@ -164,6 +169,21 @@
     "viewMyOrders": "عرض طلباتي"
   },
   "orders": {
+    "timelineTitle": "تقدّم الطلب",
+    "stepPlaced": "تم تقديم الطلب",
+    "stepConfirmed": "تم التأكيد",
+    "stepShipped": "تم الشحن",
+    "stepDelivered": "تم التسليم",
+    "stepCancelled": "تم الإلغاء",
+    "trackingNumber": "رقم التتبع",
+    "onHoldNote": "نتحقق من تفصيل في طلبكم وسنتواصل معكم قريباً.",
+    "editReview": "تعديل",
+    "deleteReview": "حذف",
+    "deleteReviewSure": "حذف تقييمكم؟",
+    "deleteReviewYes": "نعم، حذف",
+    "reviewUpdated": "تم تعديل تقييمكم.",
+    "reviewDeleted": "تم حذف تقييمكم.",
+    "printReceipt": "طباعة الإيصال",
     "title": "طلباتي",
     "noOrders": "لا توجد طلبات بعد.",
     "status": "الحالة",
@@ -695,6 +715,28 @@
   "wishlist": {
     "emptyTitle": "قائمة المفضلة فارغة",
     "emptyDesc": "احفظ المنتجات التي تعجبك بالضغط على أيقونة القلب في صفحة أي منتج."
+  },
+  "addresses": {
+    "title": "عناويني",
+    "subtitle": "احفظوا عناوين التوصيل لإتمام طلباتكم بشكل أسرع.",
+    "empty": "ليس لديكم أي عنوان محفوظ بعد.",
+    "add": "إضافة عنوان",
+    "edit": "تعديل العنوان",
+    "addressFallback": "عنوان",
+    "defaultBadge": "الافتراضي",
+    "makeDefault": "استخدامه كعنواني الافتراضي",
+    "label": "الاسم (اختياري)",
+    "labelPlaceholder": "المنزل، العمل…",
+    "address": "العنوان",
+    "city": "المدينة",
+    "postalCode": "الرمز البريدي (اختياري)",
+    "phone": "الهاتف",
+    "save": "حفظ",
+    "delete": "حذف",
+    "deleteYes": "نعم، حذف",
+    "saved": "تم حفظ العنوان.",
+    "deleted": "تم حذف العنوان.",
+    "failed": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
   },
   "ui": {
     "orderNotFound": "الطلب غير موجود.",

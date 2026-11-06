@@ -40,6 +40,7 @@
     "viewAll": "Voir tout"
   },
   "nav": {
+    "myAddresses": "Mes adresses",
     "home": "Accueil",
     "products": "Produits",
     "cart": "Panier",
@@ -144,6 +145,10 @@
     "remove": "Retirer"
   },
   "checkout": {
+    "savedAddresses": "Adresses enregistrées",
+    "useNewAddress": "Utiliser une nouvelle adresse",
+    "saveThisAddress": "Enregistrer cette adresse pour la prochaine fois",
+    "manageAddresses": "Gérer mes adresses",
     "failed": "La commande a échoué. Veuillez réessayer.",
     "title": "Paiement",
     "orderSummary": "Résumé de la commande",
@@ -164,6 +169,21 @@
     "viewMyOrders": "Voir mes commandes"
   },
   "orders": {
+    "timelineTitle": "Suivi de la commande",
+    "stepPlaced": "Commande passée",
+    "stepConfirmed": "Confirmée",
+    "stepShipped": "Expédiée",
+    "stepDelivered": "Livrée",
+    "stepCancelled": "Annulée",
+    "trackingNumber": "Numéro de suivi",
+    "onHoldNote": "Nous vérifions un détail de votre commande et vous contacterons très bientôt.",
+    "editReview": "Modifier",
+    "deleteReview": "Supprimer",
+    "deleteReviewSure": "Supprimer votre avis ?",
+    "deleteReviewYes": "Oui, supprimer",
+    "reviewUpdated": "Votre avis a été modifié.",
+    "reviewDeleted": "Votre avis a été supprimé.",
+    "printReceipt": "Imprimer le reçu",
     "title": "Mes commandes",
     "noOrders": "Aucune commande pour le moment.",
     "status": "Statut",
@@ -695,6 +715,28 @@
   "wishlist": {
     "emptyTitle": "Votre liste de favoris est vide",
     "emptyDesc": "Enregistrez les produits que vous aimez en cliquant sur le cœur sur la page d'un produit."
+  },
+  "addresses": {
+    "title": "Mes adresses",
+    "subtitle": "Enregistrez vos adresses de livraison pour commander plus vite.",
+    "empty": "Vous n'avez pas encore d'adresse enregistrée.",
+    "add": "Ajouter une adresse",
+    "edit": "Modifier l'adresse",
+    "addressFallback": "Adresse",
+    "defaultBadge": "Par défaut",
+    "makeDefault": "Utiliser comme adresse par défaut",
+    "label": "Nom (facultatif)",
+    "labelPlaceholder": "Maison, Travail…",
+    "address": "Adresse",
+    "city": "Ville",
+    "postalCode": "Code postal (facultatif)",
+    "phone": "Téléphone",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "deleteYes": "Oui, supprimer",
+    "saved": "Adresse enregistrée.",
+    "deleted": "Adresse supprimée.",
+    "failed": "Une erreur est survenue. Veuillez réessayer."
   },
   "ui": {
     "orderNotFound": "Commande introuvable.",

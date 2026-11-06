@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import api from "@/lib/api";
+import api, { apiErrorMessage } from "@/lib/api";
 import { Alert, Button, OrderStatusBadge, PageHeader, Spinner } from "@/components/ui";
+import { OrderTimeline } from "@/components/shop/OrderTimeline";
 import { getImageUrl } from "@/lib/image";
 import Image from "next/image";
 import { formatDate, formatPrice } from "@/lib/i18n-helpers";
@@ -23,15 +24,24 @@ interface Order {
   id: number;
   order_number: string;
   status: string;
+  on_hold?: boolean;
   total_price: string;
   shipping_address: string;
   shipping_city: string;
-  phone: string;
+  shipping_phone: string;
+  tracking_number?: string | null;
   notes?: string;
   created_at: string;
+  updated_at?: string;
+  confirmed_at?: string | null;
+  shipped_at?: string | null;
+  delivered_at?: string | null;
+  cancelled_at?: string | null;
   items: OrderItem[];
   seller?: { store_name: string };
 }
+
+interface MyReview { id: number; product_id: number; rating: number; content: string }
 
 function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const [hover, setHover] = useState(0);
@@ -44,6 +54,7 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
           onMouseEnter={() => setHover(star)}
           onMouseLeave={() => setHover(0)}
           onClick={() => onChange(star)}
+          aria-label={`${star} / 5`}
           className="text-2xl leading-none transition-colors"
           style={{ color: star <= (hover || value) ? "#c9a227" : "#d1c4b8" }}
         >
@@ -64,15 +75,17 @@ export default function CustomerOrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [cancelling, setCancelling] = useState(false);
-  const [cancelMsg, setCancelMsg] = useState("");
+  const [cancelMsg, setCancelMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
-  // reviews state
-  const [reviewedIds, setReviewedIds] = useState<Set<number>>(new Set());
-  const [activeReview, setActiveReview] = useState<{ productId: number; orderId: number } | null>(null);
+  // reviews: what this customer already wrote, by product
+  const [myReviews, setMyReviews] = useState<Map<number, MyReview>>(new Map());
+  const [activeReview, setActiveReview] = useState<{ productId: number; orderId: number; reviewId?: number } | null>(null);
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [reviewMsg, setReviewMsg] = useState("");
+  const [reviewNote, setReviewNote] = useState<{ ok: boolean; text: string } | null>(null);
+  const [confirmDeleteFor, setConfirmDeleteFor] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     api.get(`/customer/orders/${id}`)
@@ -80,23 +93,21 @@ export default function CustomerOrderDetailPage() {
       .catch(() => setError(tu("failedLoadOrder")))
       .finally(() => setLoading(false));
 
-    // load which products this user already reviewed
-    api.get("/customer/reviews").then((r) => {
-      const ids = new Set<number>(r.data.map((rev: any) => rev.product_id));
-      setReviewedIds(ids);
-    }).catch(() => {});
-  }, [id]);
+    api.get("/customer/reviews")
+      .then((r) => setMyReviews(new Map((r.data as MyReview[]).map((rev) => [rev.product_id, rev]))))
+      .catch(() => {});
+  }, [id, tu]);
 
   const cancelOrder = async () => {
     if (!order) return;
     setCancelling(true);
-    setCancelMsg("");
+    setCancelMsg(null);
     try {
       await api.put(`/customer/orders/${order.id}/cancel`);
-      setOrder((o) => o ? { ...o, status: "cancelled" } : o);
-      setCancelMsg(t("cancelSuccess"));
-    } catch (err: any) {
-      setCancelMsg(err.response?.data?.message ?? t("cancelFailed"));
+      setOrder((o) => o ? { ...o, status: "cancelled", cancelled_at: new Date().toISOString() } : o);
+      setCancelMsg({ ok: true, text: t("cancelSuccess") });
+    } catch (err) {
+      setCancelMsg({ ok: false, text: apiErrorMessage(err, t("cancelFailed")) });
     }
     setCancelling(false);
   };
@@ -105,27 +116,55 @@ export default function CustomerOrderDetailPage() {
     setActiveReview({ productId, orderId: order!.id });
     setRating(5);
     setContent("");
-    setReviewMsg("");
+    setReviewNote(null);
+  };
+
+  const openEdit = (review: MyReview) => {
+    setActiveReview({ productId: review.product_id, orderId: order!.id, reviewId: review.id });
+    setRating(review.rating);
+    setContent(review.content);
+    setReviewNote(null);
+    setConfirmDeleteFor(null);
   };
 
   const submitReview = async () => {
     if (!activeReview) return;
     setSubmitting(true);
-    setReviewMsg("");
+    setReviewNote(null);
     try {
-      await api.post("/customer/reviews", {
-        order_id: activeReview.orderId,
-        product_id: activeReview.productId,
-        rating,
-        content,
-      });
-      setReviewedIds((prev) => new Set([...prev, activeReview.productId]));
+      if (activeReview.reviewId) {
+        const { data } = await api.put(`/customer/reviews/${activeReview.reviewId}`, { rating, content });
+        setMyReviews((prev) => new Map(prev).set(activeReview.productId, { id: data.id, product_id: activeReview.productId, rating: data.rating, content: data.content }));
+        setReviewNote({ ok: true, text: t("reviewUpdated") });
+      } else {
+        const { data } = await api.post("/customer/reviews", {
+          order_id: activeReview.orderId,
+          product_id: activeReview.productId,
+          rating,
+          content,
+        });
+        setMyReviews((prev) => new Map(prev).set(activeReview.productId, { id: data.id, product_id: activeReview.productId, rating, content }));
+        setReviewNote({ ok: true, text: t("reviewed") });
+      }
       setActiveReview(null);
-      setReviewMsg(t("reviewed"));
-    } catch (err: any) {
-      setReviewMsg(err.response?.data?.message ?? t("reviewFailed"));
+    } catch (err) {
+      setReviewNote({ ok: false, text: apiErrorMessage(err, t("reviewFailed")) });
     }
     setSubmitting(false);
+  };
+
+  const deleteReview = async (review: MyReview) => {
+    setDeleting(true);
+    setReviewNote(null);
+    try {
+      await api.delete(`/customer/reviews/${review.id}`);
+      setMyReviews((prev) => { const next = new Map(prev); next.delete(review.product_id); return next; });
+      setConfirmDeleteFor(null);
+      setReviewNote({ ok: true, text: t("reviewDeleted") });
+    } catch (err) {
+      setReviewNote({ ok: false, text: apiErrorMessage(err, t("reviewFailed")) });
+    }
+    setDeleting(false);
   };
 
   if (loading) return <div className="flex justify-center py-24"><Spinner size="lg" /></div>;
@@ -137,18 +176,16 @@ export default function CustomerOrderDetailPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/customer/orders" className="text-stone hover:text-ink transition-colors">
+        <Link href="/customer/orders" className="text-stone hover:text-ink transition-colors no-print">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="m15 18-6-6 6-6"/>
           </svg>
         </Link>
-        <PageHeader title={`${t("orderDetail")} #${order.order_number}`} />
+        <PageHeader title={`${t("orderDetail")} \u2066#${order.order_number}\u2069`} />
       </div>
 
-      {cancelMsg && (
-        <Alert type={cancelMsg === t("cancelSuccess") ? "success" : "error"}>{cancelMsg}</Alert>
-      )}
-      {reviewMsg && <Alert type="success">{reviewMsg}</Alert>}
+      {cancelMsg && <Alert type={cancelMsg.ok ? "success" : "error"}>{cancelMsg.text}</Alert>}
+      {reviewNote && <Alert type={reviewNote.ok ? "success" : "error"}>{reviewNote.text}</Alert>}
 
       {/* Status + actions */}
       <div className="bg-white border border-stone/20 rounded-sm p-5 flex flex-wrap items-center justify-between gap-4">
@@ -161,12 +198,18 @@ export default function CustomerOrderDetailPage() {
             <p className="text-xs text-stone">{order.seller.store_name}</p>
           )}
         </div>
-        {canCancel && (
-          <Button variant="secondary" size="sm" loading={cancelling} onClick={cancelOrder}>
-            {t("cancelOrder")}
-          </Button>
-        )}
+        <div className="flex gap-2 no-print">
+          <Button variant="ghost" size="sm" onClick={() => window.print()}>{t("printReceipt")}</Button>
+          {canCancel && (
+            <Button variant="secondary" size="sm" loading={cancelling} onClick={cancelOrder}>
+              {t("cancelOrder")}
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* Progress */}
+      <OrderTimeline order={order} />
 
       {/* Items */}
       <div className="bg-white border border-stone/20 rounded-sm overflow-hidden">
@@ -176,8 +219,8 @@ export default function CustomerOrderDetailPage() {
         <ul className="divide-y divide-stone/10">
           {order.items.map((item) => {
             const img = getImageUrl(item.product?.primary_image?.image_path);
-            const alreadyReviewed = reviewedIds.has(item.product_id);
-            const isReviewing = activeReview?.productId === item.product_id;
+            const mine = myReviews.get(item.product_id);
+            const isEditing = activeReview?.productId === item.product_id;
 
             return (
               <li key={item.id} className="px-5 py-4 space-y-3">
@@ -199,27 +242,44 @@ export default function CustomerOrderDetailPage() {
                     <p className="text-sm font-medium text-ink">
                       {formatPrice(parseFloat(item.price_at_purchase) * item.quantity)}
                     </p>
-                    {isDelivered && (
-                      alreadyReviewed ? (
-                        <span className="flex items-center gap-1 text-xs text-gold-deep justify-end mt-1">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                          {t("reviewed")}
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => isReviewing ? setActiveReview(null) : openReview(item.product_id)}
-                          className="text-xs text-gold-deep hover:underline font-medium mt-1"
-                        >
-                          {isReviewing ? tCommon("cancel") : t("leaveReview")}
-                        </button>
-                      )
+                    {isDelivered && !mine && (
+                      <button
+                        onClick={() => isEditing ? setActiveReview(null) : openReview(item.product_id)}
+                        className="text-xs text-gold-deep hover:underline font-medium mt-1 no-print"
+                      >
+                        {isEditing ? tCommon("cancel") : t("leaveReview")}
+                      </button>
                     )}
                   </div>
                 </div>
 
-                {/* Inline review form */}
-                {isReviewing && (
-                  <div className="bg-sand rounded-sm border border-stone/20 p-4 space-y-3">
+                {/* My review: shown, with edit and delete */}
+                {isDelivered && mine && !isEditing && (
+                  <div className="bg-sand/60 rounded-sm border border-stone/10 px-3 py-2.5 text-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-gold-deep text-base leading-none" aria-label={`${mine.rating} / 5`}>
+                        {"★".repeat(mine.rating)}<span className="text-stone/30">{"★".repeat(5 - mine.rating)}</span>
+                      </span>
+                      <div className="flex items-center gap-3 text-xs no-print">
+                        <button onClick={() => openEdit(mine)} className="text-gold-deep hover:underline font-medium">{t("editReview")}</button>
+                        {confirmDeleteFor === mine.id ? (
+                          <span className="flex items-center gap-2">
+                            <span className="text-stone">{t("deleteReviewSure")}</span>
+                            <button disabled={deleting} onClick={() => deleteReview(mine)} className="text-henna hover:underline font-medium">{t("deleteReviewYes")}</button>
+                            <button onClick={() => setConfirmDeleteFor(null)} className="text-stone hover:underline">{tCommon("cancel")}</button>
+                          </span>
+                        ) : (
+                          <button onClick={() => setConfirmDeleteFor(mine.id)} className="text-henna hover:underline">{t("deleteReview")}</button>
+                        )}
+                      </div>
+                    </div>
+                    <p className="mt-1.5 text-ink whitespace-pre-line" dir="auto">{mine.content}</p>
+                  </div>
+                )}
+
+                {/* Inline review form (new or edit) */}
+                {isEditing && (
+                  <div className="bg-sand rounded-sm border border-stone/20 p-4 space-y-3 no-print">
                     <p className="text-xs font-semibold text-ink">{t("yourReview")}</p>
                     <StarPicker value={rating} onChange={setRating} />
                     <textarea
@@ -250,8 +310,8 @@ export default function CustomerOrderDetailPage() {
       </div>
 
       {/* Delivered CTA */}
-      {isDelivered && order.items.some((item) => !reviewedIds.has(item.product_id)) && (
-        <div className="bg-gold/10 border border-gold/30 rounded-sm px-5 py-4 flex items-center gap-3">
+      {isDelivered && order.items.some((item) => !myReviews.has(item.product_id)) && (
+        <div className="bg-gold/10 border border-gold/30 rounded-sm px-5 py-4 flex items-center gap-3 no-print">
           <span className="text-xl">⭐</span>
           <p className="text-sm text-ink">{t("leaveReview")} — {tu("shareExperience")}</p>
         </div>
@@ -262,15 +322,15 @@ export default function CustomerOrderDetailPage() {
         <h2 className="text-sm font-semibold text-ink">{t("orderInfo")}</h2>
         <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
           <span className="text-stone">{tu("address")}</span>
-          <span className="text-ink">{order.shipping_address}</span>
+          <span className="text-ink" dir="auto">{order.shipping_address}</span>
           <span className="text-stone">{tu("city")}</span>
-          <span className="text-ink">{order.shipping_city}</span>
+          <span className="text-ink" dir="auto">{order.shipping_city}</span>
           <span className="text-stone">{tu("phone")}</span>
-          <span className="text-ink">{order.phone}</span>
+          <span className="text-ink" dir="ltr">{order.shipping_phone}</span>
           {order.notes && (
             <>
               <span className="text-stone">{tu("notes")}</span>
-              <span className="text-ink">{order.notes}</span>
+              <span className="text-ink whitespace-pre-line" dir="auto">{order.notes}</span>
             </>
           )}
         </div>

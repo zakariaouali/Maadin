@@ -77,3 +77,10 @@ html {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-stone); border-radius: 3px; opacity: 0.4; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-gold-deep); }
+
+/* Printing a page (the customer's order receipt): only the content, no site chrome */
+@media print {
+  header, footer, aside, nav, .no-print, [role="dialog"] { display: none !important; }
+  body { background: #fff !important; }
+  main { padding: 0 !important; }
+}

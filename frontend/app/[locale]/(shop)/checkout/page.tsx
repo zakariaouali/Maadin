@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter, Link } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth-context";
@@ -12,6 +12,8 @@ import Image from "next/image";
 import { getImageUrl } from "@/lib/image";
 import { Button, Input, Alert, PageHeader } from "@/components/ui";
 import { formatPrice } from "@/lib/i18n-helpers";
+
+interface SavedAddress { id: number; label: string | null; address: string; city: string; phone: string; is_default: boolean }
 
 export default function CheckoutPage() {
   const tu = useTranslations("ui");
@@ -34,6 +36,34 @@ export default function CheckoutPage() {
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [saved, setSaved] = useState<SavedAddress[]>([]);
+  const [selectedId, setSelectedId] = useState<number | "new">("new");
+  const [saveThis, setSaveThis] = useState(true);
+
+  // Saved addresses: preselect the default one. If they cannot be loaded, the form still works.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let alive = true;
+    api.get("/customer/addresses")
+      .then(({ data }: { data: SavedAddress[] }) => {
+        if (!alive || data.length === 0) return;
+        const pick = data.find((a) => a.is_default) ?? data[0];
+        setSaved(data);
+        setSelectedId(pick.id);
+        setAddress(pick.address); setCity(pick.city); setPhone(pick.phone);
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [isAuthenticated]);
+
+  const chooseSaved = (a: SavedAddress) => {
+    setSelectedId(a.id);
+    setAddress(a.address); setCity(a.city); setPhone(a.phone);
+  };
+  const chooseNew = () => {
+    setSelectedId("new");
+    setAddress(""); setCity(""); setPhone(user?.phone ?? "");
+  };
 
   if (isLoading) {
     return (
@@ -80,6 +110,12 @@ export default function CheckoutPage() {
         notes,
       });
 
+      // Keep a new address for next time (never blocks or fails the order)
+      const alreadySaved = saved.some((a) => a.address === address && a.city === city && a.phone === phone);
+      if (saveThis && selectedId === "new" && !alreadySaved) {
+        await api.post("/customer/addresses", { address, city, phone }).catch(() => {});
+      }
+
       clearCart();
       const firstOrder = Array.isArray(data) ? data[0] : data;
       const orderNum = firstOrder?.order_number ?? "";
@@ -115,31 +151,60 @@ export default function CheckoutPage() {
             <h2 className="font-display text-lg text-ink mb-5">{t("shippingInfo")}</h2>
 
             <div className="flex flex-col gap-4">
-              <Input
-                label={t("address")}
-                id="address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                required
-                placeholder="123 Rue Mohammed V"
-              />
-              <Input
-                label={t("city")}
-                id="city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                required
-                placeholder="Marrakech"
-              />
-              <Input
-                label={t("phone")}
-                id="phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-                placeholder="06XXXXXXXX"
-              />
+              {saved.length > 0 && (
+                <div className="flex flex-col gap-2" role="radiogroup" aria-label={t("savedAddresses")}>
+                  {saved.map((a) => (
+                    <label key={a.id} className={`flex cursor-pointer items-start gap-3 rounded-sm border p-3 text-sm ${selectedId === a.id ? "border-gold-deep bg-gold/5" : "border-stone/20"}`}>
+                      <input type="radio" name="addr" checked={selectedId === a.id} onChange={() => chooseSaved(a)} className="mt-1 accent-gold-deep" />
+                      <span className="min-w-0">
+                        <span className="block font-medium text-ink">{a.label || t("address")}</span>
+                        <span className="block text-stone" dir="auto">{a.address}, {a.city}</span>
+                        <span className="block text-stone" dir="ltr">{a.phone}</span>
+                      </span>
+                    </label>
+                  ))}
+                  <label className={`flex cursor-pointer items-center gap-3 rounded-sm border p-3 text-sm ${selectedId === "new" ? "border-gold-deep bg-gold/5" : "border-stone/20"}`}>
+                    <input type="radio" name="addr" checked={selectedId === "new"} onChange={chooseNew} className="accent-gold-deep" />
+                    <span className="text-ink">{t("useNewAddress")}</span>
+                  </label>
+                  <Link href="/customer/addresses" className="text-xs text-gold-deep hover:underline w-fit">{t("manageAddresses")}</Link>
+                </div>
+              )}
+
+              {selectedId === "new" && (
+                <>
+                <Input
+                  label={t("address")}
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  required
+                  placeholder="123 Rue Mohammed V"
+                />
+                <Input
+                  label={t("city")}
+                  id="city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                  placeholder="Marrakech"
+                />
+                <Input
+                  label={t("phone")}
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  placeholder="06XXXXXXXX"
+                />
+
+                  <label className="flex items-center gap-2 text-sm text-ink cursor-pointer">
+                    <input type="checkbox" checked={saveThis} onChange={(e) => setSaveThis(e.target.checked)} className="accent-gold-deep" />
+                    {t("saveThisAddress")}
+                  </label>
+                </>
+              )}
 
               <div className="flex flex-col gap-1">
                 <label htmlFor="notes" className="text-sm text-stone">{t("notes")}</label>
