@@ -772,6 +772,14 @@
     "failed": "Something went wrong. Please try again."
   },
   "auditActions": {
+    "edit_product": "Edited a product",
+    "key_price": "Price",
+    "key_category_id": "Category",
+    "key_description": "Description",
+    "key_short_description": "Short description",
+    "key_stock_quantity": "Stock",
+    "key_sku": "SKU",
+    "key_is_made_to_order": "Made to order",
     "key_status": "Status",
     "key_from": "From",
     "key_to": "To",

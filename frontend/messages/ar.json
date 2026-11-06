@@ -772,6 +772,14 @@
     "failed": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
   },
   "auditActions": {
+    "edit_product": "تعديل منتج",
+    "key_price": "السعر",
+    "key_category_id": "الفئة",
+    "key_description": "الوصف",
+    "key_short_description": "وصف قصير",
+    "key_stock_quantity": "الكمية",
+    "key_sku": "الرمز",
+    "key_is_made_to_order": "حسب الطلب",
     "key_status": "الحالة",
     "key_from": "من",
     "key_to": "إلى",
